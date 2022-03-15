@@ -23,13 +23,13 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 setup(
-    name="mylib",
+    name="FinancialApplications",
     version="0.0.1",
-    author="XXX",
+    author="Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas",
     license="European Union Public License 1.2",
 
     packages=find_packages(),
-    install_requires=["numpy"],
+    install_requires=["numpy, pandas, myqlm, matplotlib"],
     # Don't change these two lines
     tests_require=["pytest"],
     cmdclass={'test': PyTest},
