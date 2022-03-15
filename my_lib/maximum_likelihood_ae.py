@@ -25,9 +25,9 @@ import pandas as pd
 import scipy.optimize as so
 from qat.core import Batch
 
-from utils import run_job, postprocess_results
-from data_extracting import create_qprogram, create_circuit, create_job
-from amplitude_amplification import load_q_gate, load_qn_gate
+from my_lib.utils import run_job, postprocess_results
+from my_lib.data_extracting import create_qprogram, create_circuit, create_job
+from my_lib.amplitude_amplification import load_q_gate, load_qn_gate
 
 def get_qpu(qlmass=True):
     """

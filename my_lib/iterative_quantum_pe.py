@@ -22,9 +22,9 @@ import numpy as np
 import pandas as pd
 import qat.lang.AQASM as qlm
 from qat.comm.datamodel.ttypes import OpType
-from utils import run_job, postprocess_results
-from data_extracting import create_qprogram, create_circuit, create_job
-from amplitude_amplification import load_qn_gate, load_q_gate
+from my_lib.utils import run_job, postprocess_results
+from my_lib.data_extracting import create_qprogram, create_circuit, create_job
+from my_lib.amplitude_amplification import load_qn_gate, load_q_gate
 
 def get_qpu(qlmass=True):
     """

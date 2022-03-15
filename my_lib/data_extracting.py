@@ -14,7 +14,7 @@ import numpy as np
 import qat.lang.AQASM as qlm
 from qat.core import Result
 from copy import deepcopy
-from utils import run_job, postprocess_results
+from my_lib.utils import run_job, postprocess_results
 
 def create_qprogram(quantum_gate):
     """
