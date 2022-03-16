@@ -17,18 +17,18 @@ Feel free to modify it if you have exotic build recipes.
 The my\_lib/ folder is where the modules (python scripts) of present library were stored. 
 
 The main modules of the library are: 
-* data\_loading: This modules contains functions for loading data into a quantum circuit. Two different implementations of loading data in the amplitudes of the quantum state were implemented:
+* **data\_loading**: This modules contains functions for loading data into a quantum circuit. Two different implementations of loading data in the amplitudes of the quantum state were implemented:
     * brute force mode: the data is loaded using multi-controlled rotations directly.
     * quantum multiplexors: the data is loaded using quantum multiplexors that is a much efficient way than the first method.
-* amplitude\_amplification: This module implements all mandatory operators (that are implemented as QLM AbstractGate) for creating Grover-like operators based on loading data routines. 
-* maximum\_likelihood\_ae: This module implements the Maximum Likelihood Amplitude Estimation (MLAE) algorithm. The algorithm was implemented as a python class that given an input oracle operator (a QLM AbstractgGate or QRoutine), creates its correspondent Grover-like operator and implements the MLAE algorithm providing the typical results.
-* iterative\_quantum\_pe: This module implements the Iterative Quantum Phase Estimation (IQPE) algorithm for phase estimation. The algorithm was implemented as python class. Two different ways of use can be done:
+* **amplitude\_amplification**: This module implements all mandatory operators (that are implemented as QLM AbstractGate) for creating Grover-like operators based on loading data routines. 
+* **maximum\_likelihood\_ae**: This module implements the Maximum Likelihood Amplitude Estimation (MLAE) algorithm. The algorithm was implemented as a python class that given an input oracle operator (a QLM AbstractgGate or QRoutine), creates its correspondent Grover-like operator and implements the MLAE algorithm providing the typical results.
+* **iterative\_quantum\_pe**: This module implements the Iterative Quantum Phase Estimation (IQPE) algorithm for phase estimation. The algorithm was implemented as python class. Two different ways of use can be done:
     * Providing an Oracle and the class creates the correspondents *initial_state* and *grover* like operators and executes the IQPE algorithm providing the wanted phase.
     * Providing an *initial\_state* and *grover* operator, executing the IQPE algorithm and obtaining the wanted phase.
 
 Additionally several auxiliary modules were developed:
-* data\_extracting: this module contains functions to execute circuits and post-process results of QLM solver in proper way presentation.
-* utils: this module contains several auxiliary functions that are used for all the other modules of the library.
+* *data\_extracting*: this module contains functions to execute circuits and post-process results of QLM solver in proper way presentation.
+* *utils*: this module contains several auxiliary functions that are used for all the other modules of the library.
 
 ## Jupyter Notebooks
 
