@@ -41,8 +41,7 @@ The misc/notebooks folder contains examples demonstrating how the different modu
 * **05\_Iterative\_QPE\_Class**: explains the use of the IterativeQuantumPE class in the iterative\_quantum\_pe module for using the IQPE algorithm. 
 ## Acknowledgements
 
-This work has received funding from the European Union’s Horizon 2020 research and innovation programme under Grant Agreement No. 951821
-https://www.neasqc.eu/
+This work is supported by the [NEASQC](https://cordis.europa.eu/project/id/951821) project, funded by the European Union's Horizon 2020 programme, Grant Agreement No. 951821.
 
 ## Documentation
 Customize the GitHub Workflow YAML file: *repo_name*/.github/workflow/sphinx\_doc.yml
