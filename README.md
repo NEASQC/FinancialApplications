@@ -1,6 +1,6 @@
-# NEASQC lib template
+# Financial Applications
 
-This repository is a template for NEASQC libraries.
+This repository contains several modules for implementing Quantum  Estimation and Amplification algorithms using QLM for future implementation of a financial toolkit. 
 
 ## Licence
 
@@ -12,55 +12,37 @@ For simplicity, an example of `setup.py` file is provided in this template.
 Feel free to modify it if you have exotic build recipes.
 
 
-## Coding conventions
+## Modules 
 
-In order to simplify the coding conventions, we provide a pylint.rc file in `misc/pylint.rc`.
-This will allow you to easily check your naming conventions and various other aspects.
-This is not a strict guidline, as pylint can be quite pedantic sometimes (but also very helpful).
+The my\_lib/ folder is where the modules (python scripts) of present library were stored. 
 
-A few remarks:
-- pylint can be integrated in most editors (and we strongly advise you to)
-- running pylint on several source files in one go can find errors such as circular imports or code duplication:
+The main modules of the library are: 
+* data\_loading: This modules contains functions for loading data into a quantum circuit. Two different implementations of loading data in the amplitudes of the quantum state were implemented:
+    * brute force mode: the data is loaded using multi-controlled rotations directly.
+    * quantum multiplexors: the data is loaded using quantum multiplexors that is a much efficient way than the first method.
+* amplitude\_amplification: This module implements all mandatory operators (that are implemented as QLM AbstractGate) for creating Grover-like operators based on loading data routines. 
+* maximum\_likelihood\_ae: This module implements the Maximum Likelihood Amplitude Estimation (MLAE) algorithm. The algorithm was implemented as a python class that given an input oracle operator (a QLM AbstractgGate or QRoutine), creates its correspondent Grover-like operator and implements the MLAE algorithm providing the typical results.
+* iterative\_quantum\_pe: This module implements the Iterative Quantum Phase Estimation (IQPE) algorithm for phase estimation. The algorithm was implemented as python class. Two different ways of use can be done:
+    * Providing an Oracle and the class creates the correspondents *initial_state* and *grover* like operators and executes the IQPE algorithm providing the wanted phase.
+    * Providing an *initial\_state* and *grover* operator, executing the IQPE algorithm and obtaining the wanted phase.
 
-```bash
-python -m pylint --rcfile=./misc/pylint.rc <my_source_dir>
-```
-or
+Additionally several auxiliary modules were developed:
+* data\_extracting: this module contains functions to execute circuits and post-process results of QLM solver in proper way presentation.
+* utils: this module contains several auxiliary functions that are used for all the other modules of the library.
 
-```bash
-pylint --rcfile=./misc/pylint.rc <my_source_dir>
-```
+## Jupyter Notebooks
 
-depending on how you installed pylint.
+The misc/notebooks folder contains examples demonstrating how the different modules of the library can be used. In general each notebook shows how to use each of the main modules:
 
-## Testing and continuous integration
+* 01\_DataLoading\_Module\_Use: contains different examples for using the functions of the data\_loading module. 
+* 02\_AmplitudeAmplification\_Operators: explains the theory behind the Grover-like operator for amplitude amplification using the functions of the module amplitude\_amplification. 
+* 03\_AmplitudeAmplification\_Procedure: shows how implement amplitude amplification procedure for calculating expected value of function when x follows a probability distribution ($E_{x\\sim p}(f)$) using the Grover-like operators programming in amplitude\_amplification module.
+* 04\_MaximumLikelihood\_Class: explains the MLAE algorithm and the use of the MLAE class programmed in the maximum\_likelihood\_ae module. 
+* 05\_Iterative\_QPE\_Class: explains the use of the IterativeQuantumPE class in the iterative\_quantum\_pe module for using the IQPE algorithm. 
+## Acknowledgements
 
-In order to uniformise the continuous integration process across libraries, we will assume that:
-- all the tests related to your library are compatible with pytest
-- there exists a 'test' recipe in the `setup.py` file
-
-The default test recipe (in this template) simply calls pytest on the full repository.
-Pytest detects:
-- any file that starts with test\_ (e.g test\_my\_class.py)
-- inside these files, any function that starts test\_
-- any class that starts with Test
-
-You can run it with:
-
-```bash
-python setup.py test
-```
-
-This way, you can write tests either right next to the corresponding code (convenient) or in a `tests` folder at the root of the repository.
-
-If you are not familiar with unit testing and you feel that it's too much for your project, that's fine.
-The bare minimum would be to include some run examples wrapped in test functions (functional tests).
-
-Remark that in this template, the same tests are in my\_lib/test\_my\_lib.py and tests/test\_my\_lib.py.
-
-## GitHub CI
-This repository contains a GitHub Workflow file that will automatically run pytest when changes are pushed.  
-Details on disabling and enabling this feature can be found [here](https://docs.github.com/en/enterprise-server@3.0/actions/managing-workflow-runs/disabling-and-enabling-a-workflow).
+This work has received funding from the European Union’s Horizon 2020 research and innovation programme under Grant Agreement No. 951821
+https://www.neasqc.eu/
 
 ## Documentation
 Customize the GitHub Workflow YAML file: *repo_name*/.github/workflow/sphinx\_doc.yml
