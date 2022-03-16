@@ -4,15 +4,15 @@ Tests For data_loading functions
 import sys
 import numpy as np
 import qat.lang.AQASM as qlm
-sys.path.append("../")
+from qat.qpus import PyLinalg
+linalg_qpu = PyLinalg()
+
 from my_lib.utils import get_histogram
 from my_lib.data_loading import load_probability, load_array, load_pf
 from my_lib.data_extracting import get_results
 from my_lib.amplitude_amplification import uphi0_gate, d0_gate, load_uphi_gate,\
 load_q_gate
 
-from qat.qpus import PyLinalg
-linalg_qpu = PyLinalg()
 
 #Prepare Data for loading
 def launch_data(n_qbits):

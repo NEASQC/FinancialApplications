@@ -26,7 +26,7 @@ Authors: Alberto Pedro Manzano Herrero
 
 import numpy as np
 import qat.lang.AQASM as qlm
-from my_lib.utils import mask, fwht, test_bins, left_conditional_probability
+from my_lib.utils import mask, fwht, left_conditional_probability
 
 # Loading uniform distribution
 @qlm.build_gate("UD", [int], arity=lambda x: x)
@@ -58,7 +58,7 @@ def load_angle(number_qubits: int, index: int, angle: float):
     angle : float
         Angle that we load.
     """
-    
+
     routine = qlm.QRoutine()
     quantum_register = routine.new_wires(number_qubits)
 
@@ -154,12 +154,13 @@ def load_angles(angles: np.array, method: str = "multiplexor"):
         Method used in the loading. Default method.
     """
     number_qubits = int(np.log2(angles.size))+1
-    if (np.max(angles) > np.pi):
-        print("ERROR: function f not properly normalised")
-        return
-    if (angles.size != 2**(number_qubits-1)):
+    if np.max(angles) > np.pi:
+        #print("ERROR: function f not properly normalised")
+        #return
+        raise ValueError("ERROR: function f not properly normalised")
+    if angles.size != 2**(number_qubits-1):
         print("ERROR: size of function f is not a factor of 2")
-    if (method == "brute_force"):
+    if method == "brute_force":
         routine = load_angles_brute_force(angles)
     else:
         routine = multiplexor_RY(angles)
@@ -198,7 +199,6 @@ id_name: str = '1'):
         routine.apply(load_angles(angles, method=method), register)
         return routine
     return load_array_gate()
-
 
 def load_probability(probability_array: np.array):
     """

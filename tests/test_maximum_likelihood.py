@@ -4,13 +4,11 @@ Tests For maximum likelihood
 import sys
 import numpy as np
 import qat.lang.AQASM as qlm
-sys.path.append("../")
+
 from my_lib.utils import get_histogram
 from my_lib.data_loading import load_probability, load_array, load_pf
 from my_lib.maximum_likelihood_ae import MLAE 
 
-from qat.qpus import PyLinalg
-linalg_qpu = PyLinalg()
 
 #Prepare Data for loading
 def launch_data(n_qbits):
@@ -39,7 +37,6 @@ def test_maximum_likelihood():
     arg_dictionary = {
         'oracle': pf_gate,
         'list_of_mks': 6,
-        'qpu': linalg_qpu,
         'delta': 1e-3,
         'default_nbshots' : 100,
         'iterations' : 100,

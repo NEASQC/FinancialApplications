@@ -24,14 +24,23 @@ import numpy as np
 import pandas as pd
 import scipy.optimize as so
 from qat.core import Batch
+from qat.qpus import PyLinalg
 
 from my_lib.utils import run_job, postprocess_results
 from my_lib.data_extracting import create_qprogram, create_circuit, create_job
 from my_lib.amplitude_amplification import load_q_gate, load_qn_gate
 
-def get_qpu(qlmass=True):
+global_qlmaas = True
+try:
+    from qlmaas.qpus import LinAlg
+except (ImportError, OSError) as exception:
+    global_qlmaas = False
+
+def get_qpu(qlmass=False):
     """
-    Create the lineal solver for quantum jobs
+    Function for selecting solver. User can chose between:
+    * LinAlg: for submitting jobs to a QLM server
+    * PyLinalg: for simulating jobs using myqlm lineal algebra.
 
     Parameters
     ----------
@@ -42,24 +51,21 @@ def get_qpu(qlmass=True):
 
     Returns
     ----------
-    
-    linalg_qpu : solver for quantum jobs
+
+    lineal_qpu : solver for quantum jobs
     """
     if qlmass:
-        try:
-            from qat.qlmaas import QLMaaSConnection
-            connection = QLMaaSConnection()
-            LinAlg = connection.get_qpu("qat.qpus:LinAlg")
+        if global_qlmaas:
+            print('Using: LinAlg')
             linalg_qpu = LinAlg()
-        except (ImportError, OSError) as e:
-            print('Problem: usin PyLinalg')
-            from qat.qpus import PyLinalg
-            linalg_qpu = PyLinalg()
+        else:
+            raise ImportError("""Problem Using QLMaaS.
+            Please create config file or use mylm solver""")
     else:
-        print('User Forces: PyLinalg')
-        from qat.qpus import PyLinalg
+        print('Using PyLinalg')
         linalg_qpu = PyLinalg()
     return linalg_qpu
+
 
 def apply_gate(q_prog, q_gate, m_k, nbshots=0):
     """
@@ -100,7 +106,7 @@ def apply_gate(q_prog, q_gate, m_k, nbshots=0):
     return circuit, job
 
 
-def get_probabilities(InputPDF):
+def get_probabilities(input_pdf):
     """
     Auxiliar function for changing the presentation of the results for an
     input pandas DataFrame
@@ -108,7 +114,7 @@ def get_probabilities(InputPDF):
     Parameters
     ----------
 
-    InputPDF : pandas DataFrame.
+    input_pdf : pandas DataFrame.
         DataFrame with the info of the measurments. Should have following
         columns:
         States : states for the qbit measurement
@@ -122,7 +128,7 @@ def get_probabilities(InputPDF):
         Columns are now the  probability of the different states.
     """
 
-    pdf = InputPDF.copy(deep=True)
+    pdf = input_pdf.copy(deep=True)
     columns = ['Probability_{}'.format(i) for i in pdf['States']]
     output_pdf = pd.DataFrame(
         pdf['Probability'].values.reshape(1, len(pdf)),
@@ -180,10 +186,10 @@ class MLAE:
         """
 
         Method for initializing the class
-    
+
         Parameters
         ----------
-        
+
         kwars : dictionary
             dictionary that allows the configuration of the ML-QPE algorithm:
             Implemented keys:
@@ -215,6 +221,7 @@ class MLAE:
                 Grover-like operator which autovalues want to be calculated
                 Only used if oracle is None
         """
+
         #Setting attributes
         self.oracle = kwargs.get('oracle', None)
         if self.oracle is not None:
@@ -231,11 +238,9 @@ class MLAE:
                 text = """If oracle was not provided initial_state and grover
                 keys should be provided"""
                 raise KeyError(text)
-
         #A complete list of m_k
         self.list_of_mks_ = kwargs.get('list_of_mks', 10)
         self.list_of_mks = self.list_of_mks_
-
         #If 0 we compute the exact probabilities
         self.nbshots = kwargs.get('nbshots', 0)
         #Set the QPU to use
@@ -251,10 +256,17 @@ class MLAE:
         self.iterations = kwargs.get('iterations', 100)
         #For displaying extra info for optimization proccess
         self.disp = kwargs.get('disp', True)
-        #Setting attributes
-        self.restart()
+
+        #Attributes not given as input
+        self.pdf_mks = None
+        self.list_of_circuits = []
+        self.list_of_jobs = []
+        self.theta = None
 
     def restart(self):
+        """
+        Reinitialize several properties for restart purpouses
+        """
         self.pdf_mks = None
         self.list_of_circuits = []
         self.list_of_jobs = []
@@ -316,7 +328,7 @@ class MLAE:
         mk : int
             number of times Grover-like operator was applied for the
             input result
-        
+
         Returns
         ----------
 
@@ -351,7 +363,7 @@ class MLAE:
 
         Parameters
         ----------
-        
+
         list_of_jobs : list
             list of jobs for executing
         list_of_mks : list
@@ -376,9 +388,8 @@ class MLAE:
 
         pdf_mks = pd.concat(pdf_list)
         pdf_mks.reset_index(drop=True, inplace=True)
-            
         return pdf_mks
-    
+
     def run_step(self, m_k):
         """
         This method applies the Grover-like operator self.q_gate to the
@@ -411,10 +422,10 @@ class MLAE:
         This method is the core of the Maximum Likelihood Amplitude
         Estimation. It runs several quantum circuits each one increasing
         the number of self.q_gate applied to the the initial self.q_prog
-    
+
         Parameters
         ----------
-        
+
         list_of_mks : list (corresponding property will be overwrite)
             python list with the different m_ks for executing the algortihm
         nbshots : int (corresponding property will be overwrite)
@@ -439,7 +450,7 @@ class MLAE:
         self.theta = self.launch_optimizer(self.pdf_mks)
 
 
-    def launch_likelihood(self, pdf_input, N=100):
+    def launch_likelihood(self, pdf_input, n_theta=100):
         """
         This method calculates the Likelihood for theta between [0, pi/2]
         for an input pandas DataFrame.
@@ -453,7 +464,7 @@ class MLAE:
             h_k: number of times the state |1> was measured
             n_k: number of total measuremnts
 
-        N : int
+        n_theta : int
             number of division for the theta interval
 
         Returns
@@ -474,7 +485,7 @@ class MLAE:
                 Please provide a valida DataFrame.
                 """)
             return None
-        theta = np.linspace(0+self.delta, 0.5*np.pi-self.delta, N)
+        theta = np.linspace(0+self.delta, 0.5*np.pi-self.delta, n_theta)
         m_k = pdf['m_k']
         h_k = pdf['h_k']
         n_k = pdf['n_k']
@@ -515,4 +526,3 @@ class MLAE:
         )
         optimum_theta = optimizer[0]
         return optimum_theta
-

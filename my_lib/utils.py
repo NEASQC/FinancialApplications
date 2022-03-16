@@ -14,8 +14,19 @@ import qat.lang.AQASM as qlm
 import numpy as np
 import pandas as pd
 
-# Convierte un entero n en un array de bits de longitud size
 def bitfield(n, size):
+    """
+    Converts an int in an array of bits of length size
+
+    Parameters
+    ----------
+
+    n : int
+        Integer to be transformed
+    size : int
+        Size of the array of bits for transform the input int
+
+    """
     aux = [1 if digit == '1' else 0 for digit in bin(n)[2:]]
     right = np.array(aux)
     left = np.zeros(max(size-right.size, 0))
@@ -24,6 +35,9 @@ def bitfield(n, size):
 
 @qlm.build_gate("Mask", [int, int], arity=lambda x, y: x)
 def mask(number_qubits, index):
+    """
+    Generates a QLM routine for masking qbits
+    """
     routine = qlm.QRoutine()
     quantum_register = routine.new_wires(number_qubits)
     bits = bitfield(index, number_qubits)
@@ -34,8 +48,10 @@ def mask(number_qubits, index):
     return routine
 
 def fwht_natural(array: np.array):
-    """Fast Walsh-Hadamard Transform of array x in natural ordering
-    The result is not normalised"""
+    """
+    Fast Walsh-Hadamard Transform of array x in natural ordering
+    The result is not normalised
+    """
     a = array.copy()
     h = 1
     while h < len(a):
@@ -49,7 +65,8 @@ def fwht_natural(array: np.array):
     return a
 
 def fwht_sequency(x: np.array):
-    """ Fast Walsh-Hadamard Transform of array x in sequency ordering
+    """
+    Fast Walsh-Hadamard Transform of array x in sequency ordering
     The result is not normalised
     Based on mex function written by Chengbo Li@Rice Uni for his TVAL3
     algorithm.
@@ -79,7 +96,8 @@ def fwht_sequency(x: np.array):
     return x
 
 def fwht_dyadic(x: np.array):
-    """ Fast Walsh-Hadamard Transform of array x in dyadic ordering
+    """
+    Fast Walsh-Hadamard Transform of array x in dyadic ordering
     The result is not normalised
     Based on mex function written by Chengbo Li@Rice Uni for his TVAL3
     algorithm.
@@ -116,17 +134,6 @@ def fwht(x: np.array, ordering: str = "sequency"):
     else:
         y = fwht_sequency(x)
     return y
-
-#Lo de Zalo
-"""
-Auxiliary functions
-Author: Gonzalo Ferro Costas
-Version: Initial version
-
-MyQLM version:
-
-"""
-
 
 def test_bins(array, text='probability'):
     """
@@ -238,6 +245,7 @@ def get_histogram(p, a, b, nbin):
         in the interval
     nbin : int
         number of bins in the interval
+
     Returns
     ----------
 
@@ -266,7 +274,8 @@ def postprocess_results(results):
     ----------
 
     results : result object from a simulation of a quantum circuit
-    Parameters
+
+    Returns
     ----------
 
     pdf : pandas datasframe
@@ -291,10 +300,20 @@ def postprocess_results(results):
     return pdf
 
 def run_job(result):
+    """
+    This functions receives QLM result object and try to execute
+    join method. If fails return input QLM result object
+
+    Parameters
+    ----------
+    result : QLM result object
+
+    Returns
+    ----------
+    result : QLM result with join method executed if necesary
+    """
+
     try:
         return result.join()
-        #State = PostProcessresults(result.join())
     except AttributeError:
         return result
-        #State = PostProcessresults(result)
-

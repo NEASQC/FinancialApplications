@@ -10,10 +10,8 @@ qpu executions
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
 """
 
-import numpy as np
-import qat.lang.AQASM as qlm
-from qat.core import Result
 from copy import deepcopy
+import qat.lang.AQASM as qlm
 from my_lib.utils import run_job, postprocess_results
 
 def create_qprogram(quantum_gate):
@@ -105,11 +103,4 @@ def get_results(quantum_object, linalg_qpu, shots=0, qubits=None):
     pdf_ = postprocess_results(result)
     #pdf_.sort_values('Int_lsb', inplace=True)
     return pdf_, circuit, q_prog, job
-
-
-
-
-
-
-
 

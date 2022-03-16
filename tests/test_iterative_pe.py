@@ -4,14 +4,11 @@ Tests For maximum likelihood
 import sys
 import numpy as np
 import qat.lang.AQASM as qlm
-sys.path.append("../")
+
 from my_lib.utils import get_histogram
 from my_lib.data_loading import load_probability, load_array, load_pf
 from my_lib.iterative_quantum_pe import IterativeQuantumPE
-import qat.lang.AQASM as qlm
 
-from qat.qpus import PyLinalg
-linalg_qpu = PyLinalg()
 
 #Prepare Data for loading
 def launch_data(n_qbits):
@@ -41,7 +38,6 @@ def __test_iterative_pe():
     #We can do several circuit executions configuring input dictionary properly
     iqpe_dict = {
         'oracle': pf_gate,
-        'qpu' : linalg_qpu,
         'cbits_number' : n_cbits,
         'easy': False,
         'shots': 100
@@ -68,7 +64,6 @@ def test_iterative_pe():
     iqpe_dict = {
         'initial_state': initial_state,
         'grover': grover,
-        'qpu' : linalg_qpu,
         'cbits_number' : n_cbits,
         'shots': 0,
         #'easy': True

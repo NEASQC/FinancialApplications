@@ -4,15 +4,12 @@ Tests For data_loading functions
 import sys
 import numpy as np
 import qat.lang.AQASM as qlm
-sys.path.append("../../")
+from qat.qpus import PyLinalg
+linalg_qpu = PyLinalg()
 
 from my_lib.data_loading import load_probability, uniform_distribution,\
 load_array
 from my_lib.data_extracting import get_results
-
-
-from qat.qpus import PyLinalg
-linalg_qpu = PyLinalg()
 
 def test_load_probability():
     """

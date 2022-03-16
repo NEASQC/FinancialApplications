@@ -158,20 +158,20 @@ def load_q_gate(pr_gate):
         return q_rout
     return q_gate()
 
-def load_qn_gate(qlm_gate, n):
+def load_qn_gate(qlm_gate, n_times):
     """
     Create an AbstractGate by applying an input gate n times
 
     Parameters
     ----------
-    
+
     qlm_gate : QLM gate
         QLM gate that will be applied n times
-    n : int
+    n_times : int
         number of times the qlm_gate will be applied
 
     """
-    @qlm.build_gate("Q^{}".format(n), [], arity=qlm_gate.arity)
+    @qlm.build_gate("Q^{}".format(n_times), [], arity=qlm_gate.arity)
     def q_n_gate():
         """
         Function generator for creating an AbstractGate for apply
@@ -183,7 +183,7 @@ def load_qn_gate(qlm_gate, n):
         """
         q_rout = qlm.QRoutine()
         q_bits = q_rout.new_wires(qlm_gate.arity)
-        for _ in range(n):
+        for _ in range(n_times):
             q_rout.apply(qlm_gate, q_bits)
         return q_rout
     return q_n_gate()

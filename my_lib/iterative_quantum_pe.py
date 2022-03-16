@@ -8,10 +8,10 @@ Iterative Quantum Phase Estimation (IQPE). The implementation is based on
 following paper:
 
     Dobšíček, Miroslav and Johansson, Göran and Shumeiko, Vitaly and
-    Wendin, Göran*. 
+    Wendin, Göran*.
     Arbitrary accuracy iterative quantum phase estimation algorithm
     using a single ancillary qubit: A two-qubit benchmark.
-    Physical Review A 3(76), 2007. 
+    Physical Review A 3(76), 2007.
     https://arxiv.org/abs/quant-ph/0610214
 
 Author:Gonzalo Ferro Costas
@@ -22,43 +22,48 @@ import numpy as np
 import pandas as pd
 import qat.lang.AQASM as qlm
 from qat.comm.datamodel.ttypes import OpType
-from my_lib.utils import run_job, postprocess_results
+from qat.qpus import PyLinalg
+
+from my_lib.utils import run_job
 from my_lib.data_extracting import create_qprogram, create_circuit, create_job
 from my_lib.amplitude_amplification import load_qn_gate, load_q_gate
 
-def get_qpu(qlmass=True):
+global_qlmaas = True
+try:
+    from qlmaas.qpus import LinAlg
+except (ImportError, OSError) as exception:
+    global_qlmaas = False
+
+def get_qpu(qlmass=False):
     """
-    Function for selecting solver. User can choose between QLM QPU in CESGA
-    or using QLM simulator PyLinalg
+    Function for selecting solver. User can chose between:
+    * LinAlg: for submitting jobs to a QLM server
+    * PyLinalg: for simulating jobs using myqlm lineal algebra.
 
     Parameters
     ----------
-    
-    qlmass : Bool
-        If True function will try to use QLM as a Service.
-        If False fucntion will invoque PyLinalg QLM simulator
-        
+
+    qlmass : bool
+        If True  try to use QLM as a Service connection to CESGA QLM
+        If False PyLinalg simulator will be used
 
     Returns
     ----------
-    linalg_qpu : simulator used for solvinf QLM circuits
 
+    lineal_qpu : solver for quantum jobs
     """
     if qlmass:
-        try:
-            from qat.qlmaas import QLMaaSConnection
-            connection = QLMaaSConnection()
-            LinAlg = connection.get_qpu("qat.qpus:LinAlg")
+        if global_qlmaas:
+            print('Using: LinAlg')
             linalg_qpu = LinAlg()
-        except (ImportError, OSError) as e:
-            print('Problem: usin PyLinalg')
-            from qat.qpus import PyLinalg
-            linalg_qpu = PyLinalg()
+        else:
+            raise ImportError("""Problem Using QLMaaS.
+            Please create config file or use mylm solver""")
     else:
-        print('User Forces: PyLinalg')
-        from qat.qpus import PyLinalg
+        print('Using PyLinalg')
         linalg_qpu = PyLinalg()
     return linalg_qpu
+
 
 def im_postprocess(result):
     """
@@ -268,10 +273,10 @@ class IterativeQuantumPE:
         """
 
         Method for initializing the class
-    
+
         Parameters
         ----------
-        
+
         kwars : dictionary
             dictionary that allows the configuration of the ML-QPE algorithm:
             Implemented keys:
@@ -321,8 +326,17 @@ class IterativeQuantumPE:
         #Set the QPU to use
         self.linalg_qpu = kwargs.get('qpu', get_qpu())
         self.shots = kwargs.get('shots', 0)
-        self.restart()
         self.easy = kwargs.get('easy', False)
+        #Attributes not given as input
+        self.q_prog = None
+        self.q_aux = None
+        self.c_bits = None
+        self.circuit = None
+        self.meas_gates = None
+        self.job = None
+        self.job_result = None
+        self.results = None
+        self.final_results = None
 
 
     def restart(self):
@@ -401,12 +415,12 @@ class IterativeQuantumPE:
         if qpu is not None:
             self.linalg_qpu = qpu
         self.job_result = run_job(self.linalg_qpu.submit(self.job))
-    
+
     def iqpe(self, number_of_cbits=None, shots=None):
         """
         This method apply a workflow for executing a complete IQPE
         algorithm
-    
+
         Parameters
         ----------
 
@@ -414,7 +428,6 @@ class IterativeQuantumPE:
             Number of classical bits for storing the phase estimation
         shots : int (overwrite correspondient property)
             Number of shots for executing the QLM job
-    
         """
 
         if number_of_cbits is not None:
@@ -460,5 +473,4 @@ class IterativeQuantumPE:
         #Expected value of the function f(x) when x follows a p(x)
         #distribution probability
         self.final_results['E_p(f)'] = np.cos(self.final_results['Theta'])**2
-
 
