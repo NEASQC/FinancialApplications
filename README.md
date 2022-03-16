@@ -34,11 +34,11 @@ Additionally several auxiliary modules were developed:
 
 The misc/notebooks folder contains examples demonstrating how the different modules of the library can be used. In general each notebook shows how to use each of the main modules:
 
-* 01\_DataLoading\_Module\_Use: contains different examples for using the functions of the data\_loading module. 
-* 02\_AmplitudeAmplification\_Operators: explains the theory behind the Grover-like operator for amplitude amplification using the functions of the module amplitude\_amplification. 
-* 03\_AmplitudeAmplification\_Procedure: shows how implement amplitude amplification procedure for calculating expected value of function when x follows a probability distribution ($E_{x\\sim p}(f)$) using the Grover-like operators programming in amplitude\_amplification module.
-* 04\_MaximumLikelihood\_Class: explains the MLAE algorithm and the use of the MLAE class programmed in the maximum\_likelihood\_ae module. 
-* 05\_Iterative\_QPE\_Class: explains the use of the IterativeQuantumPE class in the iterative\_quantum\_pe module for using the IQPE algorithm. 
+* **01\_DataLoading\_Module\_Use**: contains different examples for using the functions of the data\_loading module. 
+* **02\_AmplitudeAmplification\_Operators**: explains the theory behind the Grover-like operator for amplitude amplification using the functions of the module amplitude\_amplification. 
+* **03\_AmplitudeAmplification\_Procedure**: shows how implement amplitude amplification procedure for calculating expected value of function when x follows a probability distribution ($E_{x\\sim p}(f)$) using the Grover-like operators programming in amplitude\_amplification module.
+* **04\_MaximumLikelihood\_Class**: explains the MLAE algorithm and the use of the MLAE class programmed in the maximum\_likelihood\_ae module. 
+* **05\_Iterative\_QPE\_Class**: explains the use of the IterativeQuantumPE class in the iterative\_quantum\_pe module for using the IQPE algorithm. 
 ## Acknowledgements
 
 This work has received funding from the European Union’s Horizon 2020 research and innovation programme under Grant Agreement No. 951821
