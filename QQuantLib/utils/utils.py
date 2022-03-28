@@ -10,9 +10,8 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
 
 """
 
-from copy import deepcopy
+import time
 import numpy as np
-import pandas as pd
 import qat.lang.AQASM as qlm
 
 # Convierte un entero n en un array de bits de longitud size
@@ -25,8 +24,8 @@ def bitfield(n: int, size: int):
         integer from which we want to obtain the bitfield
     size : int
         size of the bitfield
-    
-    Returns    
+
+    Returns
     ----------
     full : list of ints
         bitfield representation of n with size size
@@ -44,8 +43,8 @@ def bitfield_to_int(lista):
     ----------
     lista : ist of ints
         bitfield
-    
-    Returns    
+
+    Returns
     ----------
     integer : int
         integer obtained from it's binay representation.
@@ -57,14 +56,14 @@ def bitfield_to_int(lista):
     return int(integer)
 
 def check_list_type(x, tipo):
-    """ Check if a list x is of type tipo 
+    """ Check if a list x is of type tipo
     Parameters
     ----------
     x : list
     tipo : data type
         it has to be understandable by numpy
-    
-    Returns    
+
+    Returns
     ----------
     y : np.array
         numpy array of type tipo.
@@ -85,8 +84,8 @@ def mask(number_qubits, index):
     ----------
     number_qubits : int
     index : int
-    
-    Returns    
+
+    Returns
     ----------
     mask : Qlm abstract gate
         the gate that we have to apply in order to transform
@@ -107,12 +106,12 @@ def fwht_natural(array: np.array):
     Parameters
     ----------
     array : numpy array
-    
-    Returns    
+
+    Returns
     ----------
     a : numpy array
         Fast Walsh Hadamard transform of array x.
-        
+
     """
     a = array.copy()
     h = 1
@@ -136,12 +135,12 @@ def fwht_sequency(x: np.array):
     Parameters
     ----------
     x : numpy array
-    
-    Returns    
+
+    Returns
     ----------
     x : numpy array
         Fast Walsh Hadamard transform of array x.
-        
+
     """
     N = x.size
     G = int(N/2) # Number of Groups
@@ -175,12 +174,12 @@ def fwht_dyadic(x: np.array):
     Parameters
     ----------
     array : numpy array
-    
-    Returns    
+
+    Returns
     ----------
     x : numpy array
         Fast Walsh Hadamard transform of array x.
-        
+
     """
     N = x.size
     G = int(N/2) # Number of Groups
@@ -214,14 +213,14 @@ def fwht(x: np.array, ordering: str = "sequency"):
     x : numpy array
     ordering: string
         desired ordering of the transform
-    
-    Returns    
+
+    Returns
     ----------
     y : numpy array
         Fast Walsh Hadamard transform of array x
         in the corresponding ordering
     """
-        
+
     if ordering == "natural":
         y = fwht_natural(x)
     elif ordering == "dyadic":
@@ -360,139 +359,6 @@ def get_histogram(p, a, b, nbin):
         normalized properly'
     return centers, probs
 
-def create_qprogram(quantum_gate):
-    """
-    Creates a Quantum Program from an input qlm gate or routine
-
-    Parameters
-    ----------
-
-    quantum_gate : QLM gate or QLM routine
-
-    Returns
-    ----------
-    q_prog: QLM Program.
-        Quantum Program from input QLM gate or routine
-    """
-    q_prog = qlm.Program()
-    qbits = q_prog.qalloc(quantum_gate.arity)
-    q_prog.apply(quantum_gate, qbits)
-    return q_prog
-
-def create_circuit(prog_q):
-    """
-    Given a QLM program creates a QLM circuit
-    """
-    q_prog = deepcopy(prog_q)
-    circuit = q_prog.to_circ(submatrices_only=True)
-    return circuit
-
-def create_job(circuit, shots=0, qubits=None):
-    """
-    Given a QLM circuit creates a QLM job
-    """
-    dict_job = {
-        'amp_threshold': 0.0
-    }
-    if qubits is None:
-        job = circuit.to_job(nbshots=shots, **dict_job)
-    else:
-        if isinstance(qubits, (list)):
-            job = circuit.to_job(nbshots=shots, qubits=qubits, **dict_job)
-        else:
-            raise ValueError('qbits: sould be a list!!!')
-    return job
-
-def get_results(quantum_object, linalg_qpu, shots=0, qubits=None):
-    """
-    Function for testing an input gate. This fucntion creates the
-    quantum program for an input gate, the correspondent circuit
-    and job. Execute the job and gets the results
-
-    Parameters
-    ----------
-    quantum_object : QLM Gate, Routine or Program
-    linalg_qpu : QLM solver
-    shots : int
-        number of shots for the generated job.
-        if 0 True probabilities will be computed
-    qubits : list
-        list with the qbits for doing the measurement when simulating
-        if None measuremnt over all allocated qbits will be provided
-
-    Returns
-    ----------
-    pdf_ : pandas DataFrame
-        DataFrame with the results of the simulation
-    circuit : QLM circuit
-    q_prog : QLM Program.
-    job : QLM job
-
-    """
-    if type(quantum_object) == qlm.Program:
-        q_prog = deepcopy(quantum_object)
-    else:
-        q_prog = qlm.Program()
-        qbits = q_prog.qalloc(quantum_object.arity)
-        q_prog.apply(quantum_object, qbits)
-    circuit = create_circuit(q_prog)
-    job = create_job(circuit, shots=shots, qubits=qubits)
-    result = run_job(linalg_qpu.submit(job))
-    pdf_ = postprocess_results(result)
-    #pdf_.sort_values('Int_lsb', inplace=True)
-    return pdf_, circuit, q_prog, job
-
-def postprocess_results(results):
-    """
-    Post-processing the results of simulation of a quantum circuit
-    Parameters
-    ----------
-
-    results : result object from a simulation of a quantum circuit
-
-    Returns
-    ----------
-
-    pdf : pandas datasframe
-        results of the simulation. There are 3 different columns:
-        States: posible quantum basis states
-        Probability: probabilities of the different states
-        Amplitude: amplitude of the different states
-    """
-
-    list_of_pdfs = []
-    for sample in results:
-        step_pdf = pd.DataFrame({
-            'Probability': [sample.probability],
-            'States': [sample.state],
-            'Amplitude': [sample.amplitude],
-            'Int': [sample.state.int],
-            'Int_lsb': [sample.state.lsb_int]
-        })
-        list_of_pdfs.append(step_pdf)
-    pdf = pd.concat(list_of_pdfs)
-    pdf.reset_index(drop=True, inplace=True)
-    return pdf
-
-def run_job(result):
-    """
-    This functions receives QLM result object and try to execute
-    join method. If fails return input QLM result object
-
-    Parameters
-    ----------
-    result : QLM result object
-
-    Returns
-    ----------
-    result : QLM result with join method executed if necesary
-    """
-
-    try:
-        return result.join()
-    except AttributeError:
-        return result
-
 def load_qn_gate(qlm_gate, n_times):
     """
     Create an AbstractGate by applying an input gate n times
@@ -506,7 +372,8 @@ def load_qn_gate(qlm_gate, n_times):
         number of times the qlm_gate will be applied
 
     """
-    @qlm.build_gate("Q^{}".format(n_times), [], arity=qlm_gate.arity)
+    @qlm.build_gate("Q^{}_{}".format(n_times, time.time_ns()), [],\
+    arity=qlm_gate.arity)
     def q_n_gate():
         """
         Function generator for creating an AbstractGate for apply

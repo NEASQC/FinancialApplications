@@ -53,19 +53,98 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
     else:
         qubits = check_list_type(qubits, int)
 
-    if type(quantum_object) == qlm.Program:
+    #if type(quantum_object) == qlm.Program:
+    if isinstance(quantum_object, qlm.Program):
         q_prog = deepcopy(quantum_object)
     else:
-        q_prog = qlm.Program()
-        qbits = q_prog.qalloc(arity)
-        q_prog.apply(quantum_object, qbits)
+        q_prog = create_qprogram(quantum_object)
+        #q_prog = qlm.Program()
+        #qbits = q_prog.qalloc(arity)
+        #q_prog.apply(quantum_object, qbits)
 
-    circuit = q_prog.to_circ(submatrices_only=True)
-    job = circuit.to_job(nbshots=shots, qubits=qubits)
+    #circuit = q_prog.to_circ(submatrices_only=True)
+    circuit = create_qcircuit(q_prog)
+    #job = circuit.to_job(nbshots=shots, qubits=qubits)
+    job = create_qjob(circuit, shots=shots, qubits=qubits)
 
     result = linalg_qpu.submit(job)
     if not isinstance(result, Result):
         result = result.join()
+    # Process the results
+    pdf = proccess_qresults(result, qubits)
+
+    #states = []
+    #list_int = []
+    #list_int_lsb = []
+    #for i in range(2**qubits.size):
+    #    reversed_i = int('{:0{width}b}'.format(i, width=qubits.size)[::-1], 2)
+    #    list_int.append(reversed_i)
+    #    list_int_lsb.append(i)
+    #    states.append("|"+ bin(i)[2:].zfill(qubits.size)+">")
+
+    #probability = np.zeros(2**qubits.size)
+    #amplitude = np.zeros(2**qubits.size, dtype=np.complex_)
+    #for samples in result:
+    #    probability[samples.state.lsb_int] = samples.probability
+    #    amplitude[samples.state.lsb_int] = samples.amplitude
+
+    #pdf = pd.DataFrame({
+    #    'States': states,
+    #    'Int_lsb': list_int_lsb,
+    #    'Probability': probability,
+    #    'Amplitude': amplitude,
+    #    'Int': list_int
+    #})
+
+    return pdf, circuit, q_prog, job
+
+def create_qprogram(quantum_gate):
+    """
+    Creates a Quantum Program from an input qlm gate or routine
+
+    Parameters
+    ----------
+
+    quantum_gate : QLM gate or QLM routine
+
+    Returns
+    ----------
+    q_prog: QLM Program.
+        Quantum Program from input QLM gate or routine
+    """
+    q_prog = qlm.Program()
+    qbits = q_prog.qalloc(quantum_gate.arity)
+    q_prog.apply(quantum_gate, qbits)
+    return q_prog
+
+def create_qcircuit(prog_q):
+    """
+    Given a QLM program creates a QLM circuit
+    """
+    q_prog = deepcopy(prog_q)
+    circuit = q_prog.to_circ(submatrices_only=True)
+    return circuit
+
+def create_qjob(circuit, shots=0, qubits=None):
+    """
+    Given a QLM circuit creates a QLM job
+    """
+    dict_job = {
+        'amp_threshold': 0.0
+    }
+    if qubits is None:
+        job = circuit.to_job(nbshots=shots, **dict_job)
+    else:
+        if isinstance(qubits, np.ndarray):
+            job = circuit.to_job(nbshots=shots, qubits=qubits, **dict_job)
+        else:
+            raise ValueError('qbits: sould be a list!!!')
+    return job
+
+def proccess_qresults(result, qubits):
+    """
+    PostProcces a QLM results for creating a pandas DataFrame
+    """
 
     # Process the results
     states = []
@@ -90,6 +169,4 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
         'Amplitude': amplitude,
         'Int': list_int
     })
-
-    return pdf, circuit, q_prog, job
-
+    return pdf
