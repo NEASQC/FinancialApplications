@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import qat.lang.AQASM as qlm
 from qat.core import Result
-from libraries.utils.utils import check_list_type
+from QQuantLib.utils.utils import check_list_type
 
 pd.options.display.float_format = '{:.6f}'.format
 np.set_printoptions(suppress=True)
