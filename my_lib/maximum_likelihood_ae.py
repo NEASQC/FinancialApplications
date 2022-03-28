@@ -171,8 +171,9 @@ def likelihood(theta, m_k, h_k, n_k):
 
     """
     theta_ = (2*m_k+1)*theta
-    first_term = 2*h_k*np.log(np.abs(np.sin(theta_)))
-    second_term = 2*(n_k-h_k)*np.log(np.abs(np.cos(theta_)))
+    #first_term = 2*h_k*np.log(np.abs(np.sin(theta_)))
+    first_term = h_k*(np.sin(theta_))**2
+    second_term = (n_k-h_k)*(np.cos(theta_))**2
     l_k = first_term + second_term
     return -np.sum(l_k)
 

@@ -7,7 +7,7 @@
 
 .. only:: html
 
-    Welcome to the <PROJECT> documentation
+    Welcome to the FinancialApplications documentation
     ======================================
 
     .. image:: logo-neasqc.svg
