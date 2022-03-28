@@ -8,7 +8,7 @@
 .. only:: html
 
     Welcome to the <FinancialApplications> documentation
-    ======================================
+    ====================================================
 
     .. image:: logo-neasqc.svg
         :scale: 50%
