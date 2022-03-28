@@ -25,9 +25,9 @@ import numpy as np
 import scipy.optimize as so
 import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
-from libraries.AA.amplitude_amplification import grover
-from libraries.utils.data_extracting import get_results
-from libraries.utils.utils import bitfield_to_int, check_list_type
+from QQuantLib.AA.amplitude_amplification import grover
+from QQuantLib.utils.data_extracting import get_results
+from QQuantLib.utils.utils import bitfield_to_int, check_list_type, load_qn_gate
 
 
 
@@ -85,7 +85,7 @@ class MLAE:
         self.h_k = None
         schedule = kwargs.get('schedule', None)
         if schedule is None:
-            self.set_linear_schedule(5, 50)
+            self.set_linear_schedule(5, 100)
         else:
             self.schedule = schedule
 
@@ -130,23 +130,23 @@ class MLAE:
 
     @schedule.setter
     def schedule(self, value):
-        x = check_list_type(value, int)
-        if x.shape[0] != 2:
+        x_ = check_list_type(value, int)
+        if x_.shape[0] != 2:
             raise Exception("The shape of the schedule must be (2,n)")
-        self._schedule = x
+        self._schedule = x_
         self.m_k = self.schedule[0]
         self.n_k = self.schedule[1]
     #####################################################################
 
     def set_linear_schedule(self, n: int, n_k: int):
-        x = np.arange(n)
-        y = [n_k]*n
-        self.schedule = [x, y]
+        x_ = np.arange(n)
+        y_ = [n_k]*n
+        self.schedule = [x_, y_]
 
     def set_exponential_schedule(self, n: int, n_k: int):
-        x = 2**np.arange(n)
-        y = [n_k]*n
-        self.schedule = [x, y]
+        x_ = 2**np.arange(n)
+        y_ = [n_k]*n
+        self.schedule = [x_, y_]
 
     def run_step(self, m_k: int, n_k: int) -> int:
         """
@@ -167,8 +167,9 @@ class MLAE:
         routine = qlm.QRoutine()
         register = routine.new_wires(self.oracle.arity)
         routine.apply(self.oracle, register)
-        for i in range(m_k):
-            routine.apply(self._grover_oracle, register)
+        routine.apply(load_qn_gate(self._grover_oracle, m_k), register)
+        #for i in range(m_k):
+        #    routine.apply(self._grover_oracle, register)
         result, circuit, _, job = get_results(
             routine,
             linalg_qpu=self.linalg_qpu,
@@ -177,7 +178,7 @@ class MLAE:
         )
         h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)]*n_k)
 
-        return h_k
+        return h_k, circuit
 
 
     @staticmethod
@@ -292,6 +293,6 @@ class MLAE:
         """
         self.h_k = np.zeros(len(self.m_k), dtype=int)
         for i in range(len(self.m_k)):
-            self.h_k[i] = self.run_step(self.m_k[i], self.n_k[i])
+            self.h_k[i], _ = self.run_step(self.m_k[i], self.n_k[i])
         result = self.optimizer(self.cost_function)
         return result
