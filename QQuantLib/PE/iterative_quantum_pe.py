@@ -23,9 +23,10 @@ import numpy as np
 import pandas as pd
 import qat.lang.AQASM as qlm
 from qat.core import Result
-from libraries.utils.utils import create_qprogram, create_job, load_qn_gate,\
-create_circuit
-from libraries.utils.qlm_solver import get_qpu
+from QQuantLib.utils.data_extracting import create_qprogram, create_qjob,\
+create_qcircuit
+from QQuantLib.utils.qlm_solver import get_qpu
+from QQuantLib.utils.utils import load_qn_gate
 
 
 class IterativeQuantumPE:
@@ -289,8 +290,8 @@ class IterativeQuantumPE:
 
     @staticmethod
     def run(q_prog, q_aux, shots, linalg_qpu):
-        circuit = create_circuit(q_prog)
-        job = create_job(
+        circuit = create_qcircuit(q_prog)
+        job = create_qjob(
             circuit,
             shots=shots,
             qubits=[q_aux]

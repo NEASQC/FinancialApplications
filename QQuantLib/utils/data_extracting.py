@@ -135,7 +135,7 @@ def create_qjob(circuit, shots=0, qubits=None):
     if qubits is None:
         job = circuit.to_job(nbshots=shots, **dict_job)
     else:
-        if isinstance(qubits, np.ndarray):
+        if isinstance(qubits, (np.ndarray, list)):
             job = circuit.to_job(nbshots=shots, qubits=qubits, **dict_job)
         else:
             raise ValueError('qbits: sould be a list!!!')
