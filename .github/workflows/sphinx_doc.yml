@@ -47,9 +47,9 @@ jobs:
           
       - name: Create local changes
         run: |
-          mkdir -p neasqc/test #Replace test with repo name
-          rm -rf neasqc/test/* #Replace test with repo name
-          cp -r doc/_build/* neasqc/test #Replace test with repo name
+          mkdir -p neasqc/FinancialApplications #Replace test with repo name
+          rm -rf neasqc/FinancialApplications/* #Replace test with repo name
+          cp -r doc/_build/* neasqc/FinancialApplications #Replace test with repo name
           cd neasqc
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
