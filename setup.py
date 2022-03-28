@@ -31,6 +31,6 @@ setup(
     packages=find_packages(),
     install_requires=["numpy", "pandas", "myqlm", "matplotlib", "scipy"],
     # Don't change these two lines
-    tests_require=["pytest", "numpy"],
+    tests_require=["pytest"],
     cmdclass={'test': PyTest},
 )
