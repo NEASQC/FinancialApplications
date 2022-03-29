@@ -49,7 +49,7 @@ Customize the GitHub Workflow YAML file: *repo_name*/.github/workflow/sphinx\_do
 There is a basic index.rst template under 'doc'. Modify it as you want.
 
 Any modification under the folder 'doc' pushed to GitHub will trigger a rebuild of the documentation (using GitHub CI).
-If the build is successful, then the resulting html documentation can be access at: https://neasqc.github.io/repo_name
+If the build is successful, then the resulting html documentation can be access at: https://neasqc.github.io/FinancialApplications
 
 Notes: 
   - You can follow the build process on the 'Actions' tab below the name of the repository.
