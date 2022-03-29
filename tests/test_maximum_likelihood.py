@@ -1,13 +1,12 @@
 """
 Tests For maximum likelihood
 """
-import sys
 import numpy as np
 import qat.lang.AQASM as qlm
 
-from my_lib.utils import get_histogram
-from my_lib.data_loading import load_probability, load_array, load_pf
-from my_lib.maximum_likelihood_ae import MLAE 
+from QQuantLib.utils.utils import get_histogram
+from QQuantLib.DL.data_loading import load_probability, load_array, load_pf
+from QQuantLib.AE.maximum_likelihood_ae import MLAE 
 
 
 #Prepare Data for loading
@@ -34,22 +33,27 @@ def test_maximum_likelihood():
 
     x, f_x, p_x = launch_data(5)
     p_gate, f_gate, pf_gate = load_gates(p_x, f_x)
-    arg_dictionary = {
-        'oracle': pf_gate,
-        'list_of_mks': 6,
-        'delta': 1e-3,
-        'default_nbshots' : 100,
-        'iterations' : 100,
-        'display' :  False,
-        'nbshots' : 0
-    }
-    ml_qae = MLAE(**arg_dictionary)
-    ml_qae.run_mlae()
 
-    calculated_integral = np.cos(ml_qae.theta)**2
-    theoric_integral = np.sum(p_x*f_x)
-    #print('calculated_integral: {}'.format(calculated_integral))
-    #print('theoric_integral: {}'.format(theoric_integral))
+    m_k = list(range(7)) 
+    n_k = [200]*len(m_k)
+    schedule = [m_k, n_k]
+
+    mlae_ = MLAE(
+        pf_gate,
+        target=[0],
+        index=[pf_gate.arity-1],
+        schedule=schedule
+    )
+    angle = mlae_.optimize()
+    calculated_integral = np.sin(angle)[0]**2
+    theoric_integral = np.sum(f_x*p_x)
+    print(calculated_integral)
+    print(theoric_integral)
 
     Delta = np.abs(calculated_integral-theoric_integral)
-    assert Delta > 0.0001
+    print('##########')
+    print(Delta)
+    print('##########')
+    assert Delta < 0.01
+
+

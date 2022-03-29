@@ -7,9 +7,9 @@ import qat.lang.AQASM as qlm
 from qat.qpus import PyLinalg
 linalg_qpu = PyLinalg()
 
-from my_lib.data_loading import load_probability, uniform_distribution,\
+from QQuantLib.DL.data_loading import load_probability, uniform_distribution,\
 load_array
-from my_lib.data_extracting import get_results
+from QQuantLib.utils.data_extracting import get_results
 
 def test_load_probability():
     """

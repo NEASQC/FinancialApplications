@@ -1,13 +1,13 @@
 """
 Tests For maximum likelihood
 """
-import sys
 import numpy as np
 import qat.lang.AQASM as qlm
 
-from my_lib.utils import get_histogram
-from my_lib.data_loading import load_probability, load_array, load_pf
-from my_lib.iterative_quantum_pe import IterativeQuantumPE
+from QQuantLib.utils.utils import get_histogram
+from QQuantLib.DL.data_loading import load_probability, load_array, load_pf
+from QQuantLib.AA.amplitude_amplification import grover
+from QQuantLib.PE.iterative_quantum_pe import IterativeQuantumPE
 
 
 #Prepare Data for loading
@@ -31,23 +31,30 @@ def load_gates(p_x, f_x):
     return p_gate, f_gate, pf_gate
 
 def __test_iterative_pe():
+    """
+    long time test
+    """
 
     x, f_x, p_x = launch_data(3)
-    n_cbits = 6
+    n_cbits = 7
     p_gate, f_gate, pf_gate = load_gates(p_x, f_x)
+    q_gate = grover(pf_gate, [0], [pf_gate.arity-1])
     #We can do several circuit executions configuring input dictionary properly
     iqpe_dict = {
-        'oracle': pf_gate,
+        'initial_state': pf_gate,
+        'unitary_operator':q_gate, 
         'cbits_number' : n_cbits,
-        'easy': False,
         'shots': 100
     }
     iqpe_ = IterativeQuantumPE(**iqpe_dict)
     iqpe_.iqpe()
-    calculated_integral = np.mean(iqpe_.final_results['E_p(f)'])
+    calculated_integral = np.cos(iqpe_.sumary.iloc[0]['theta_90'])**2
     print('calculated_integral: {}'.format(calculated_integral))
     theoric_integral = np.sum(p_x*f_x)
     print('theoric_integral: {}'.format(theoric_integral))
+    delta = np.abs(calculated_integral-theoric_integral)
+    print(delta)
+    assert delta < 0.001
 
 def test_iterative_pe():
     #Number Of Qbits
@@ -55,21 +62,20 @@ def test_iterative_pe():
     #Number Of Classical Bits
     n_cbits = 2
     #Basic Initial circuit and unitary operator whose autovalue we want to compute
-    initial_state = qlm.Program()
-    q_bits = initial_state.qalloc(n_qbits)
+    initial_state = qlm.QRoutine()
+    q_bits = initial_state.new_wires(n_qbits)
     for i in range(n_qbits):
         initial_state.apply(qlm.X, q_bits[i])
-    grover = qlm.PH(np.pi/2.0)
+    unitary_operator = qlm.PH(np.pi/2.0)
 
     iqpe_dict = {
         'initial_state': initial_state,
-        'grover': grover,
+        'unitary_operator':unitary_operator, 
         'cbits_number' : n_cbits,
-        'shots': 0,
-        #'easy': True
-        'easy': False
+        'shots': 100
     }
     iqpe = IterativeQuantumPE(**iqpe_dict)
     iqpe.iqpe()
-    assert iqpe.results['Phi'].iloc[0] == 0.25
-
+    pdf = iqpe.sumarize(iqpe.final_results, ['Phi'])
+    print(np.isclose(pdf.iloc[0]['Phi'], 0.25))
+    assert np.isclose(pdf.iloc[0]['Phi'], 0.25)

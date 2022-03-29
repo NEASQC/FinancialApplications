@@ -7,11 +7,10 @@ import qat.lang.AQASM as qlm
 from qat.qpus import PyLinalg
 linalg_qpu = PyLinalg()
 
-from my_lib.utils import get_histogram
-from my_lib.data_loading import load_probability, load_array, load_pf
-from my_lib.data_extracting import get_results
-from my_lib.amplitude_amplification import uphi0_gate, d0_gate, load_uphi_gate,\
-load_q_gate
+from QQuantLib.utils.utils import get_histogram
+from QQuantLib.DL.data_loading import load_probability, load_array, load_pf
+from QQuantLib.utils.data_extracting import get_results
+from QQuantLib.AA.amplitude_amplification import U0, reflection, U, grover
 
 
 #Prepare Data for loading
@@ -58,45 +57,47 @@ def get_initial_state(pf_gate):
     )
     return phi_state, initial_state, q_prog
 
-def test_Uphi0():
+def test_U0():
     """
     For Testing uphi0_gate from amplitude_amplification
     """
     p_gate, f_gate, pf_gate = load_gates(5)
     phi_state, initial_state, q_prog = get_initial_state(pf_gate)
-    u_phi0_gate = uphi0_gate(pf_gate.arity)
-    registers = q_prog.registers
-    q_prog.apply(u_phi0_gate, registers)
-    u_phi0_state, circuit, _, _ = get_results(
-        q_prog,
+    u_phi0_gate = U0(pf_gate, [0], [pf_gate.arity-1])
+    routine_U0 = qlm.QRoutine()
+    register_U0 = routine_U0.new_wires(pf_gate.arity)
+    routine_U0.apply(pf_gate, register_U0)
+    routine_U0.apply(u_phi0_gate, register_U0)
+    u0_phi_state, circuit, _, _ = get_results(
+        routine_U0,
         linalg_qpu=linalg_qpu,
         shots=0
     )
-    
-    phi0_state_0 = np.array(
+    state_0 = np.array(
         [p for s, p in zip(phi_state['States'], phi_state['Amplitude']) \
-        if s.bitstring[-1] == '0']
+        if s[1] == '0']
     )
-    u_phi0_state_0 = np.array(
-        [p for s, p in zip(u_phi0_state['States'], u_phi0_state['Amplitude']) \
-        if s.bitstring[-1] == '0']
+    print(u0_phi_state)
+    u0_state_0 = np.array(
+        [p for s, p in zip(u0_phi_state['States'], u0_phi_state['Amplitude']) \
+        if s[1] == '0']
     )
 
     #Testing Final qbit |0> should be of different sign
-    last_qbit_0 = np.isclose(phi0_state_0, -u_phi0_state_0).all()
+    last_qbit_0 = np.isclose(state_0, -u0_state_0).all()
 
     assert last_qbit_0 == True
 
-    phi0_state_1 = np.array(
+    state_1 = np.array(
         [p for s, p in zip(phi_state['States'], phi_state['Amplitude']) \
-        if s.bitstring[-1] == '1']
+        if s[1] == '1']
     )
-    u_phi0_state_1 = np.array(
-        [p for s, p in zip(u_phi0_state['States'], u_phi0_state['Amplitude']) \
-        if s.bitstring[-1] == '1']
+    u_0_state_1 = np.array(
+        [p for s, p in zip(u0_phi_state['States'], u0_phi_state['Amplitude']) \
+        if s[1] == '1']
     )
     #Testing Final qbit |1> should be of same sign
-    last_qbit_1 = np.isclose(phi0_state_1, u_phi0_state_1).all()
+    last_qbit_1 = np.isclose(state_1, u_0_state_1).all()
     assert last_qbit_1 == True
 
     assert (last_qbit_0 and last_qbit_1) == True
@@ -107,10 +108,13 @@ def test_D0():
     """
     p_gate, f_gate, pf_gate = load_gates(5)
     phi_state, initial_state, q_prog = get_initial_state(pf_gate)
-    registers = q_prog.registers
-    q_prog.apply(d0_gate(pf_gate.arity), registers)
+    routine_D0 = qlm.QRoutine()
+    register_D0 = routine_D0.new_wires(pf_gate.arity)
+    routine_D0.apply(pf_gate, register_D0)
+    d0_gate = reflection([0 for i in range(pf_gate.arity)]) 
+    routine_D0.apply(d0_gate, register_D0)
     u_d0_state, circuit, _, _ = get_results(
-        q_prog,
+        routine_D0,
         linalg_qpu=linalg_qpu,
         shots=0
     )
@@ -135,12 +139,16 @@ def test_difusor():
     For Testing load_uphi_gate from amplitude_amplification
     """
     p_gate, f_gate, pf_gate = load_gates(5)
-    diffusor_gate = load_uphi_gate(pf_gate)
     phi_state, initial_state, q_prog = get_initial_state(pf_gate)
-    registers = q_prog.registers
-    q_prog.apply(diffusor_gate, registers)
+
+    routine_U = qlm.QRoutine()
+    register_U = routine_U.new_wires(pf_gate.arity)
+    routine_U.apply(pf_gate, register_U)
+    diffusor_gate = U(pf_gate)
+    routine_U.apply(diffusor_gate, register_U)
+
     diffusor_state, circuit, _, _ = get_results(
-        q_prog,
+        routine_U,
         linalg_qpu=linalg_qpu,
         shots=0
     )
@@ -157,15 +165,18 @@ def test_grover():
     For Testing load_q_gate from amplitude_amplification
     """
     p_gate, f_gate, pf_gate = load_gates(5)
-    q_gate = load_q_gate(pf_gate)
     phi_state, initial_state, q_prog = get_initial_state(pf_gate)
-    registers = q_prog.registers
-    q_prog.apply(q_gate, registers)
+    routine_grover = qlm.QRoutine()
+    register_grover = routine_grover.new_wires(pf_gate.arity)
+    routine_grover.apply(pf_gate, register_grover)
+    grover_gate = grover(pf_gate, [0], [pf_gate.arity-1])
+    routine_grover.apply(grover_gate, register_grover)
+
     grover_state, circuit, _, _ = get_results(
-        q_prog,
+        routine_grover,
         linalg_qpu=linalg_qpu,
         shots=0,
-        qubits=[q_gate.arity-1]
+        qubits=[grover_gate.arity-1]
     )
 
     #First get the Amplitudes for Phi state
@@ -180,7 +191,7 @@ def test_grover():
     #Rotation matrix
     rotation = np.array(((c, -s), (s, c)))
     #Apply Ry(2*theta) to quantum state |Psi>
-    rotated_state = np.dot(rotation, psi_state)    
+    rotated_state = np.dot(rotation, psi_state)
 
     is_equal = np.isclose(
         rotated_state**2,
@@ -188,8 +199,6 @@ def test_grover():
     )
 
     assert is_equal.all() == True
-
-    
 
 
 
