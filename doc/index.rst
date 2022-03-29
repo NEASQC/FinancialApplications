@@ -16,19 +16,36 @@
         :alt: NEASQC Project
 
 
+QQuantLib.DL
+============
+.. automodule:: QQuantLib.DL.data_loading
+   :members:
+QQuantLib.AA
+============
+.. automodule:: QQuantLib.AA.amplitude_amplification
+   :members:
+QQuantLib.AE
+============
+.. automodule:: QQuantLib.AE.maximum_likelihood_ae
+   :members:
+QQuantLib.PE
+============
+.. automodule:: QQuantLib.PE.iterative_quantum_pe
+   :members:
+QQuantLib.utils.data_extracting
+===============
+.. automodule:: QQuantLib.utils.data_extracting
+    :members:
+QQuantLib.utils.utils
+===============
+.. automodule:: QQuantLib.utils.utils
+    :members:
+QQuantLib.utils.qlm_solver
+===============
+.. automodule:: QQuantLib.utils.qlm_solver
+    :members:
 
-.. toctree-filt::
-    :maxdepth: 1
-    :caption: Basic usage
+.. toctree::
+    :maxdepth: 4
+    :caption: Contents:
 
-.. toctree-filt::
-    :maxdepth: 1
-    :caption: Advanced usage
-
-.. toctree-filt::
-    :maxdepth: 2
-    :caption: Source code documentation
-
-.. toctree-filt::
-    :maxdepth: 1
-    :caption: Additional information

@@ -16,8 +16,6 @@ Maximum Likelihood Amplitude Estimation based on the paper:
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
-MyQLM version:
-
 """
 
 from copy import deepcopy

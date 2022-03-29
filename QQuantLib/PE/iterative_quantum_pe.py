@@ -14,7 +14,7 @@ following paper:
     Physical Review A 3(76), 2007.
     https://arxiv.org/abs/quant-ph/0610214
 
-Author:Gonzalo Ferro Costas
+Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
 """
 
@@ -310,20 +310,19 @@ class IterativeQuantumPE:
         Parameters
         ----------
 
-        result : list
-            list with qlm results
+        result : list list with qlm results
 
         Returns
         ----------
+
         pdf : pandas DataFrame
-            contains extracted information from intermediate_measurements
-            from a qlm result. Columns:
-            BitString : str. String with the bits of the measurements done
-                during simulation of the circuit
-            BitInt : int. Integer representation of the BitString
-            Phi : float. Angle representation of the BitString between [0,1].
-            Probability : float. Probability of the measurement of the
-                classsical bits.
+        contains extracted information from intermediate_measurements 
+        from a qlm result. Columns:
+        BitString : str. String with the bits of the measurements done
+        during simulation of the circuit
+        BitInt : int. Integer representation of the BitString
+        Phi : float. Angle representation of the BitString between [0,1].
+        Probability : float. Probability of the measurement of the classsical bits.
         """
         list_of_results = []
 

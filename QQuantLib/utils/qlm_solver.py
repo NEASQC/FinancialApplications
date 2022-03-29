@@ -1,3 +1,13 @@
+"""
+This project has received funding from the European Union’s Horizon 2020
+research and innovation programme under Grant Agreement No. 951821
+https://www.neasqc.eu/
+
+This module contains functions for calling QLM solver
+
+Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
+"""
+
 from qat.qpus import PyLinalg
 global_qlmaas = True
 try:

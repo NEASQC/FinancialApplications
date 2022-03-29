@@ -9,6 +9,7 @@ https://www.neasqc.eu/
 This module contains all the functions in order to load data into the
 quantum state.
 There are two implementations for the loading of a function:
+
     * one based on brute force
     * one based on multiplexors.
 
@@ -20,7 +21,7 @@ The implementation of the multiplexors is a non-recursive version of:
     and Systems, 25(6):1000–1010, Jun 2006
     arXiv:quant-ph/0406176v5
 
-Authors: Alberto Pedro Manzano Herrero
+Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
 """
 
@@ -33,6 +34,7 @@ from QQuantLib.utils.utils import mask, fwht, left_conditional_probability
 def uniform_distribution(number_qubits: int):
     """
     Function to load a uniform distribution in a quantum circuit.
+
     Parameters
     ----------
     number_qubits : int
@@ -47,8 +49,8 @@ def uniform_distribution(number_qubits: int):
 @qlm.build_gate("LP", [int, int, float], arity=lambda x, y, z: x)
 def load_angle(number_qubits: int, index: int, angle: float):
     """
-    Auxiliary function that transforms the state |0>|index> into
-    cos(angle)|0>|index>+sin(angle)|1>|index>.
+    Auxiliary function that transforms the state |0>|index> into cos(angle)|0>|index>+sin(angle)|1>|index>.
+
     Parameters
     ----------
     number_qubits : int
@@ -80,14 +82,17 @@ def load_angle(number_qubits: int, index: int, angle: float):
 
 def load_angles_brute_force(angles: np.array):
     """
-    Creates an Abstract gate using multicontrolled rotations that
-    transforms the state:
+    Creates an Abstract gate using multicontrolled rotations.
+
+    Operator transforms the state:
     |0>|0>+ |0>|1>+ |0>|2>+...+ |0>|len(angle)-1>,
     into:
     cos(angle)|0>|0>+cos(angle)|0>|1>+cos(angle)|0>|2>+...
-        +cos(angle)|0>|len(angle)-1>
+    +cos(angle)|0>|len(angle)-1>
+
     +sin(angle)|0>|0>+sin(angle)|0>|1>+sin(angle)|0>|2>+...
-        +sin(angle)|0>|len(angle)-1>.
+    +sin(angle)|0>|len(angle)-1>.
+
     Parameters
     ----------
     angles : numpy array
@@ -108,9 +113,10 @@ def multiplexor_RY(angles: np.array, ordering: str = "sequency"):
     |0>|0>+ |0>|1>+ |0>|2>+...+ |0>|len(angle)-1>,
     into:
     cos(angle)|0>|0>+cos(angle)|0>|1>+cos(angle)|0>|2>+...
-        +cos(angle)|0>|len(angle)-1>
+    +cos(angle)|0>|len(angle)-1>
     +sin(angle)|0>|0>+sin(angle)|0>|1>+sin(angle)|0>|2>+...
-        +sin(angle)|0>|len(angle)-1>.
+    +sin(angle)|0>|len(angle)-1>.
+
     Parameters
     ----------
     angles : numpy array
@@ -137,14 +143,17 @@ def multiplexor_RY(angles: np.array, ordering: str = "sequency"):
 
 def load_angles(angles: np.array, method: str = "multiplexor"):
     """
-    Auxiliary function that transforms the state:
+    Auxiliary function
+
+    Transforms the state:
     |0>|0>+ |0>|1>+ |0>|2>+...+ |0>|len(angle)-1>,
     into:
     cos(angle)|0>|0>+cos(angle)|0>|1>+cos(angle)|0>|2>+...
-        +cos(angle)|0>|len(angle)-1>
+    +cos(angle)|0>|len(angle)-1>
     +sin(angle)|0>|0>+sin(angle)|0>|1>+sin(angle)|0>|2>+...
-        +sin(angle)|0>|len(angle)-1>.
+    +sin(angle)|0>|len(angle)-1>.
     It serves as an interface for the two methods for loading the angles.
+
     Parameters
     ----------
     angles : numpy array
@@ -257,8 +266,7 @@ def load_probability(probability_array: np.array):
 def load_pf(p_gate, f_gate):
     """
     Create complete AbstractGate for applying Operators P and R
-    The operator to implement is:
-        p_gate*r_gate
+    The operator to implement is: p_gate*r_gate
 
     Parameters
     ----------

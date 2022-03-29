@@ -1,5 +1,6 @@
 """
 Copyright 2022 CESGA
+
 This project has received funding from the European Union’s Horizon 2020
 research and innovation programme under Grant Agreement No. 951821
 https://www.neasqc.eu/
@@ -13,10 +14,7 @@ and Estimation as explained in the 2000 Brassard paper:
     AMS Contemporary Mathematics Series, 305, 06-2000
     https://arxiv.org/abs/quant-ph/0005055v1
 
-
-Version: Initial version
-
-MyQLM version:
+Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
 """
 
