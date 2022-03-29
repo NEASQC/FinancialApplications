@@ -38,7 +38,7 @@ The misc/notebooks folder contains jupyter notebooks that explain the use of the
 * 02\_AmplitudeAmplification\_Operators.ipynb. This notebook explains the *Amplitude Amplification* (**QQuantLib/AA**) package working. A carefully revision of the mandatory operators for creating grover-like operators is provided in this notebook. 
 * 03_MaximumLikelihood_Class.ipynb. This notebook explains the **MLAE** algorithm  and the working of the correspondent module *maximum\_likelihood\_ae* from *Amplitude Estimation* package (QQuantLib.AE.maximum\_likelihood\_ae).
  * 04_Iterative_QPE_Class.ipynb. The Kitaev *IPE* algorithm is explained in this notebook using the module *iterative\_quantum\_pe* from *Phase Estimation* package (QQuantLib.PE.iterative\_quantum\_pe)
-* 05_FinancialApplication_Example.ipynb. This notebook explains how to use the different packages of the *QQuantLib* for calculating the expected value of a function $f(x)$ when the $x$ follows a distribution probability $p$: <pre xml:lang="latex">\mathbb{E}[f]=\int_a^bp(x)f(x)dx</pre>. 
+* 05_FinancialApplication_Example.ipynb. This notebook explains how to use the different packages of the *QQuantLib* for calculating the expected value of a function $f(x)$ when the $x$ follows a distribution probability $p$: $'\mathbb{E}[f]=\int_a^bp(x)f(x)dx'$.
 
 ## Acknowledgements
 
