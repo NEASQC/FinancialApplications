@@ -1,11 +1,4 @@
 """
-Copyright 2022 CESGA
-License:
-
-This project has received funding from the European Union’s Horizon 2020
-research and innovation programme under Grant Agreement No. 951821
-https://www.neasqc.eu/
-
 This module contains all the functions in order to load data into the
 quantum state.
 There are two implementations for the loading of a function:

@@ -1,8 +1,4 @@
 """
-This project has received funding from the European Union’s Horizon 2020
-research and innovation programme under Grant Agreement No. 951821
-https://www.neasqc.eu/
-
 This module contains auxiliar functions for executing QLM programs based
 on QLM QRoutines or QLM gates and for postproccessing results from QLM
 qpu executions

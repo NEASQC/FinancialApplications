@@ -1,10 +1,4 @@
 """
-Copyright 2022 CESGA
-
-This project has received funding from the European Union’s Horizon 2020
-research and innovation programme under Grant Agreement No. 951821
-https://www.neasqc.eu/
-
 This module contains all functions needed for creating Grover-like
 operators mandatory for using Quantum Amplitude Amplification
 and Estimation as explained in the 2000 Brassard paper:

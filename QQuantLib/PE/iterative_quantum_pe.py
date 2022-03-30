@@ -1,8 +1,4 @@
 """
-This project has received funding from the European Union’s Horizon 2020
-research and innovation programme under Grant Agreement No. 951821
-https://www.neasqc.eu/
-
 This module contains necesary functions and classes to implement
 Iterative Quantum Phase Estimation (IQPE). The implementation is based on
 following paper:
