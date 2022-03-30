@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('../'))
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'nbsphinx',
               'sphinx.ext.mathjax', 'sphinx.ext.napoleon', 'sphinxcontrib.bibtex',
               'sphinxcontrib.programoutput', 'sphinxcontrib.contentui']
-autodoc_mock_imports = ["cirq", "numpy"]
+autodoc_mock_imports = ["cirq", "numpy", "qat", "scipy"]
 
 napoleon_google_docstring = True
 
