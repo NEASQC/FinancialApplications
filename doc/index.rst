@@ -33,15 +33,15 @@ QQuantLib.PE
 .. automodule:: QQuantLib.PE.iterative_quantum_pe
    :members:
 QQuantLib.utils.data_extracting
-===============
+===============================
 .. automodule:: QQuantLib.utils.data_extracting
     :members:
 QQuantLib.utils.utils
-===============
+=====================
 .. automodule:: QQuantLib.utils.utils
     :members:
 QQuantLib.utils.qlm_solver
-===============
+==========================
 .. automodule:: QQuantLib.utils.qlm_solver
     :members:
 
