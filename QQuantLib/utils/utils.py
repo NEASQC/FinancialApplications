@@ -264,15 +264,16 @@ def left_conditional_probability(initial_bins, probability):
     """
     This function calculate f(i) according to the Lov Grover and Terry
     Rudolph 2008 papper:
-        'Creating superpositions that correspond to efficiently integrable
-        probability distributions'
-        http://arXiv.org/abs/quant-ph/0208112v1
+    'Creating superpositions that correspond to efficiently integrable
+    probability distributions'
+    http://arXiv.org/abs/quant-ph/0208112v1
 
     Given a discretized probability and an initial number of bins
     the function splits each initial region in 2 equally regions and
     calculates the condicional probabilities for x is located in the
     left part of the new regions when x is located in the region that
     contains the corresponding left region
+
     Parameters
     ----------
 
@@ -281,6 +282,7 @@ def left_conditional_probability(initial_bins, probability):
     probability : np.darray.
         Numpy array with the probabilities to be load.
         initial_bins <= len(Probability)
+
     Returns
     ----------
 
@@ -326,6 +328,7 @@ def get_histogram(p, a, b, nbin):
     vector of the right dimensions and positive amplitudes.
     This procedure could be used to initialize any quantum state
     with real amplitudes
+
     Parameters
     ----------
 
@@ -339,6 +342,7 @@ def get_histogram(p, a, b, nbin):
         in the interval
     nbin : int
         number of bins in the interval
+
     Returns
     ----------
 

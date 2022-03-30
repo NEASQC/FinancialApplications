@@ -15,7 +15,6 @@
         :align: center
         :alt: NEASQC Project
 
-
 QQuantLib.DL
 ============
 .. automodule:: QQuantLib.DL.data_loading
