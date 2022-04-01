@@ -76,7 +76,7 @@ class MLAE:
         self.h_k = None
         schedule = kwargs.get('schedule', None)
         if schedule is None:
-            self.set_linear_schedule(5, 100)
+            self.set_linear_schedule(10, 100)
         else:
             self.schedule = schedule
 
@@ -174,13 +174,19 @@ class MLAE:
 
     @staticmethod
     def likelihood(theta: float, m_k: int, n_k: int, h_k: int)->float:
-        """
+        r"""
         Calculates Likelihood from Suzuki papper. For h_k positive events
         of n_k total events, this function calculates the probability of
         this taking into account that the probability of a positive
         event is given by theta and by m_k
         The idea is use this function to minimize it for this reason it gives
         minus Likelihood
+
+        Notes
+        -----
+        .. math::
+            l_k(\theta|h_k) = \sin^2\left((2m_k+1)\theta\right)^{h_k}\cos^2
+            \left((2m_k+1)\theta\right)^{n_k-h_k}
 
         Parameters
         ----------
@@ -210,8 +216,14 @@ class MLAE:
 
     @staticmethod
     def log_likelihood(theta: float, m_k: int, n_k: int, h_k: int)->float:
-        """
+        r"""
         Calculates log of the likelihood from Suzuki papper.
+
+        Notes
+        -----
+        .. math::
+            \log{l_k(\theta|h_k)} = 2h_k\log\big[\sin\left((2m_k+1)\theta\right)\big]
+            +2(n_k-h_k)\log\big[\cos\left((2m_k+1)\theta\right)\big]
 
         Parameters
         ----------
@@ -241,9 +253,14 @@ class MLAE:
 
 
     def cost_function(self, angle: float)->float:
-        """
+        r"""
         This method calculates the -Likelihood of angle theta
         for a given schedule m_k,n_k
+
+        Notes
+        -----
+        .. math::
+            L(\theta,\mathbf{h}) = -\sum_{k = 0}^M\log{l_k(\theta|h_k)}
 
         Parameters
         ----------

@@ -19,9 +19,16 @@ import qat.lang.AQASM as qlm
 
 
 def reflection(lista: np.ndarray):
-    """This function returns a QLM abstract gate
-        that does the following transformation
-        |lista>-->-|lista>
+    r"""
+    This function returns a QLM AbstractGate that implement a reflection
+    around the perpendicular state of a given state.
+
+    Notes
+    -----
+    .. math::
+        |\Psi\rangle=|\Psi_0\rangle+|\Psi_1\rangle\\
+        \mathcal{reflection}(|\Psi_0\rangle)|\Psi\rangle=
+        -|\Psi_0\rangle+|\Psi_1\rangle\\
 
     Parameters
     ----------
@@ -52,9 +59,17 @@ def reflection(lista: np.ndarray):
 
 
 def U0(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
-    """Given an oracle O|0> = a|target>+...
-    this function returns a QLM gate that does
-    a|target>--->-a|target>
+    r"""
+    This function creates a QLM AbstractGate that implements an oracle:
+    a reflection around the perpendicular state to a given state.
+
+    Notes
+    -----
+    .. math::
+        If \hspace{1em} |\Psi\rangle=\alpha_0|\Psi_0\rangle+\alpha_1|\Psi_1\rangle
+        \hspace{1em} where \hspace{1em} |\Psi_0\rangle \perp |\Psi_1\rangle
+        \hspace{1em} then \hspace{1em}
+        \mathcal{U0}(|\Psi_0\rangle)=\mathcal{I}-2|\Psi_0\rangle\langle\Psi_0|
 
     Parameters
     ----------
@@ -80,9 +95,14 @@ def U0(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
 
 
 def U(oracle: qlm.QRoutine):
-    """This function returns a QLM abstract gate that, given
-    O|0> = |Psi> does the transformation:
-    |Psi>--->-|Psi>
+    r"""
+    This function creates a QLM AbstractGate that implements a grover Diffusor
+    from an input state.
+
+    Notes
+    -----
+    .. math::
+        \mathcal{U}(|\Psi\rangle) = \mathcal{I}-2|\Psi\rangle\langle\Psi|
 
     Parameters
     ----------
@@ -107,9 +127,15 @@ def U(oracle: qlm.QRoutine):
 
 
 def grover(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
-    """This function returns a QLM abstract gate
-    that returns the grover associated grover to oracle for a
-    given target and index.
+    r"""
+    This function creates a QLM AbstractGate that returns the grover
+    operator associated to a given oracle. This function is a composition
+    of QLM AbstractGates generate by functions U and U0.
+
+    Notes
+    -----
+    .. math::
+        \mathcal{G} = \mathcal{U}(|\Psi\rangle)\mathcal{U0}(|\Psi_0\rangle)
 
     Parameters
     ----------

@@ -77,7 +77,7 @@ class IterativeQuantumPE:
         if self.linalg_qpu is None:
             self.linalg_qpu = get_qpu()
         self.shots = kwargs.get('shots', 10)
-        self.zalo = kwargs.get('zalo', False)
+        #self.zalo = kwargs.get('zalo', False)
 
         #Attributes not given as input
         self.q_prog = None
@@ -132,22 +132,22 @@ class IterativeQuantumPE:
         Apply a complete IQPE algorithm
         """
         for l in range(len(self.c_bits)):
-            if self.zalo:
-                self.q_prog = self.step_iqpe_zalo(
-                    self.q_prog,
-                    self.q_gate,
-                    self.q_aux,
-                    self.c_bits,
-                    l
-                )
-            else:
-                self.q_prog = self.step_iqpe(
-                    self.q_prog,
-                    self.q_gate,
-                    self.q_aux,
-                    self.c_bits,
-                    l
-                )
+            #if self.zalo:
+            #    self.q_prog = self.step_iqpe_zalo(
+            #        self.q_prog,
+            #        self.q_gate,
+            #        self.q_aux,
+            #        self.c_bits,
+            #        l
+            #    )
+            #else:
+            self.q_prog = self.step_iqpe(
+                self.q_prog,
+                self.q_gate,
+                self.q_aux,
+                self.c_bits,
+                l
+            )
 
     def iqpe(self, number_of_cbits=None, shots=None):
         """
@@ -180,56 +180,56 @@ class IterativeQuantumPE:
         self.final_results = self.post_proccess(self.classical_bits)
         self.sumary = self.sumarize(self.final_results)
 
-    @staticmethod
-    def step_iqpe_zalo(q_prog, q_gate, q_aux, c_bits, l):
-        """
-        Implements a iterative step of the Iterative Phase Estimation (IPE)
-        algorithm.
+    #@staticmethod
+    #def step_iqpe_zalo(q_prog, q_gate, q_aux, c_bits, l):
+    #    """
+    #    Implements a iterative step of the Iterative Phase Estimation (IPE)
+    #    algorithm.
 
-        Parameters
-        ----------
+    #    Parameters
+    #    ----------
 
-        q_prog : QLM program
-            QLM Program where the unitary operator will be applied
-        q_gate : QLM AbstractGate
-            QLM implementation of the unitary operator. We want estimate
-            the autovalue theta of this operator
-        q_aux : QLM qbit
-            auxiliar qbit for IPE. This qbit will be the control
-            for application of the unitary operator to the principal qbits
-            of the program. Aditionally will be the target qbit for the
-            classical bit controlled rotation. This qbit will be reset at
-            the end of the step.
-        c_bits : list
-            list with the classical bits allocated for phase estimation
-        l : int
-            iteration step of the IPE algorithm
-        """
-        print('VERSION GONZALO!!')
-        q_prog.reset(q_aux)
-        #Getting the principal qbits
-        q_bits = q_prog.registers[0]
-        #First apply a Haddamard Gate to auxiliar qbit
-        q_prog.apply(qlm.H, q_aux)
-        #number of bits for codify phase
-        m = len(c_bits)
+    #    q_prog : QLM program
+    #        QLM Program where the unitary operator will be applied
+    #    q_gate : QLM AbstractGate
+    #        QLM implementation of the unitary operator. We want estimate
+    #        the autovalue theta of this operator
+    #    q_aux : QLM qbit
+    #        auxiliar qbit for IPE. This qbit will be the control
+    #        for application of the unitary operator to the principal qbits
+    #        of the program. Aditionally will be the target qbit for the
+    #        classical bit controlled rotation. This qbit will be reset at
+    #        the end of the step.
+    #    c_bits : list
+    #        list with the classical bits allocated for phase estimation
+    #    l : int
+    #        iteration step of the IPE algorithm
+    #    """
+    #    print('VERSION GONZALO!!')
+    #    q_prog.reset(q_aux)
+    #    #Getting the principal qbits
+    #    q_bits = q_prog.registers[0]
+    #    #First apply a Haddamard Gate to auxiliar qbit
+    #    q_prog.apply(qlm.H, q_aux)
+    #    #number of bits for codify phase
+    #    m = len(c_bits)
 
-        #Number of controlled application of the unitary operator by auxiliar
-        #qbit over the principal qbits
-        unitary_applications = int(2**(m-l-1))
-        #print('unitary_applications: {}'.format(unitary_applications))
-        step_q_gate = load_qn_gate(q_gate, unitary_applications)
-        q_prog.apply(step_q_gate.ctrl(), q_aux, q_bits)
+    #    #Number of controlled application of the unitary operator by auxiliar
+    #    #qbit over the principal qbits
+    #    unitary_applications = int(2**(m-l-1))
+    #    #print('unitary_applications: {}'.format(unitary_applications))
+    #    step_q_gate = load_qn_gate(q_gate, unitary_applications)
+    #    q_prog.apply(step_q_gate.ctrl(), q_aux, q_bits)
 
-        for j in range(m-l+1, m+1, 1):
-            theta = 2**(m-l-j+1)
-            #print('\t j: {}. theta: {}'.format(j-1, theta))
-            q_prog.cc_apply(c_bits[j-1], qlm.PH(-(np.pi/2.0)*theta), q_aux)
-        #print('m: {}. l: {}'.format(m, l))
-        q_prog.apply(qlm.H, q_aux)
-        #print(m-l-1)
-        q_prog.measure(q_aux, c_bits[m-l-1])
-        return q_prog
+    #    for j in range(m-l+1, m+1, 1):
+    #        theta = 2**(m-l-j+1)
+    #        #print('\t j: {}. theta: {}'.format(j-1, theta))
+    #        q_prog.cc_apply(c_bits[j-1], qlm.PH(-(np.pi/2.0)*theta), q_aux)
+    #    #print('m: {}. l: {}'.format(m, l))
+    #    q_prog.apply(qlm.H, q_aux)
+    #    #print(m-l-1)
+    #    q_prog.measure(q_aux, c_bits[m-l-1])
+    #    return q_prog
 
     @staticmethod
     def step_iqpe(q_prog, q_gate, q_aux, c_bits, l):
@@ -286,7 +286,25 @@ class IterativeQuantumPE:
 
     @staticmethod
     def run(q_prog, q_aux, shots, linalg_qpu):
+        """
+        Executes a complete simulation
+
+        Parameters
+        ----------
+        
+        q_prog : QLM Program
+        q_aux : QLM qbit
+            auxiliar qbit for measuring during all ipe steps
+        shots : int
+            number of shots for simulation
+        linalg_qpu : QLM solver
+
+        """
         circuit = create_qcircuit(q_prog)
+        if shots == 0:
+            print('Number of shots can not be 0. It will be used: ',self.shots)
+            shots = self.shots
+
         job = create_qjob(
             circuit,
             shots=shots,

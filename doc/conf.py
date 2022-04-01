@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'NEASQC documentation'
-copyright = 'Atos 2021-2022'
+copyright = 'UDC & CESGA 2021-2022'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

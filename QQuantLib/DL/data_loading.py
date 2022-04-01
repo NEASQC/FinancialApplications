@@ -25,8 +25,14 @@ from QQuantLib.utils.utils import mask, fwht, left_conditional_probability
 # Loading uniform distribution
 @qlm.build_gate("UD", [int], arity=lambda x: x)
 def uniform_distribution(number_qubits: int):
-    """
+    r"""
     Function to load a uniform distribution in a quantum circuit.
+
+    Notes
+    -----
+    .. math::
+        \mathcal{H}^{\otimes n}|\Psi\rangle
+
 
     Parameters
     ----------
@@ -41,8 +47,19 @@ def uniform_distribution(number_qubits: int):
 
 @qlm.build_gate("LP", [int, int, float], arity=lambda x, y, z: x)
 def load_angle(number_qubits: int, index: int, angle: float):
-    """
-    Auxiliary function that transforms the state |0>|index> into cos(angle)|0>|index>+sin(angle)|1>|index>.
+    r"""
+    Creates an QLM Abstract Gate that apply a rotation of a given angle
+    into a auxiliar qbit controlled by a given state of the measurement basis. 
+    Direct QLM multicontrolled rotations were used for the implementation.
+
+    Notes
+    -----
+    .. math::
+        |\Psi\rangle = \sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle \\
+        \mathcal{load\_angle}(\theta, |i\rangle)|\Psi\rangle=\sum_{j=0, j\ne i}
+        ^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle+\alpha_i|i\rangle\otimes
+        \big(\cos(\theta)|0\rangle+\sin(\theta)|1\rangle\big)
+
 
     Parameters
     ----------
@@ -74,17 +91,20 @@ def load_angle(number_qubits: int, index: int, angle: float):
     return routine
 
 def load_angles_brute_force(angles: np.array):
-    """
-    Creates an Abstract gate using multicontrolled rotations.
+    r"""
+    Given a list of angles this function creates a QLM routine that applies
+    rotations of each angle of the list, over an auxiliar qbit, controlled
+    by the different states of the measurement basis.
+    Direct QLM multicontrolled rotations were used for the implementation.
 
-    Operator transforms the state:
-    |0>|0>+ |0>|1>+ |0>|2>+...+ |0>|len(angle)-1>,
-    into:
-    cos(angle)|0>|0>+cos(angle)|0>|1>+cos(angle)|0>|2>+...
-    +cos(angle)|0>|len(angle)-1>
+    Notes
+    -----
+    .. math::
+        |\Psi\rangle = \sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle \\
+        \mathcal{load\_angles\_brute\_force}([\theta_j]_{j=0,1,2...2^n-1})
+        |\Psi\rangle=\sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes
+        \big(\cos(\theta_j)|0\rangle+\sin(\theta_j)|1\rangle\big)
 
-    +sin(angle)|0>|0>+sin(angle)|0>|1>+sin(angle)|0>|2>+...
-    +sin(angle)|0>|len(angle)-1>.
 
     Parameters
     ----------
@@ -100,15 +120,19 @@ def load_angles_brute_force(angles: np.array):
     return routine
 
 def multiplexor_RY(angles: np.array, ordering: str = "sequency"):
-    """
-    Creates an Abstract gate using Quantum Multiplexors that transforms
-    the state:
-    |0>|0>+ |0>|1>+ |0>|2>+...+ |0>|len(angle)-1>,
-    into:
-    cos(angle)|0>|0>+cos(angle)|0>|1>+cos(angle)|0>|2>+...
-    +cos(angle)|0>|len(angle)-1>
-    +sin(angle)|0>|0>+sin(angle)|0>|1>+sin(angle)|0>|2>+...
-    +sin(angle)|0>|len(angle)-1>.
+    r"""
+    Given a list of angles this functions creates a QLM routine that applies
+    rotations of each angle of the list, over an auxiliar qbit, controlled
+    by the different states of the measurement basis.
+    The multi-controlled rotations were implemented using Quantum Multiplexors. 
+
+    Notes
+    -----
+    .. math::
+        |\Psi\rangle = \sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle \\
+        \mathcal{multiplexor\_RY}([\theta_j]_{j=0,1,2...2^n-1})|\Psi\rangle
+        =\sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes
+        \big(\cos(\theta_j)|0\rangle+\sin(\theta_j)|1\rangle\big)
 
     Parameters
     ----------
@@ -135,17 +159,17 @@ def multiplexor_RY(angles: np.array, ordering: str = "sequency"):
     return routine
 
 def load_angles(angles: np.array, method: str = "multiplexor"):
-    """
-    Auxiliary function
+    r"""
+    This function serves as an interface for the two different implementations
+    of multicontrolled rotations: load_angles_brute_force and multiplexor_RY.
 
-    Transforms the state:
-    |0>|0>+ |0>|1>+ |0>|2>+...+ |0>|len(angle)-1>,
-    into:
-    cos(angle)|0>|0>+cos(angle)|0>|1>+cos(angle)|0>|2>+...
-    +cos(angle)|0>|len(angle)-1>
-    +sin(angle)|0>|0>+sin(angle)|0>|1>+sin(angle)|0>|2>+...
-    +sin(angle)|0>|len(angle)-1>.
-    It serves as an interface for the two methods for loading the angles.
+    Notes
+    -----
+    .. math::
+        |\Psi\rangle = \sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle \\
+        \mathcal{load\_angles}([\theta_j]_{j=0,1,2...2^n-1})|\Psi\rangle
+        =\sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes
+        \big(\cos(\theta_j)|0\rangle+\sin(\theta_j)|1\rangle\big)
 
     Parameters
     ----------
@@ -170,7 +194,8 @@ def load_angles(angles: np.array, method: str = "multiplexor"):
 def load_array(function_array: np.array, method: str = "multiplexor",\
 id_name: str = '1'):
     """
-    Creates an Abstract gate for loading a normalised array.
+    Creates a QLM AbstractGate for loading a normalised array into a quantum
+    state.
 
     Parameters
     ----------
@@ -201,11 +226,10 @@ id_name: str = '1'):
         return routine
     return load_array_gate()
 
-
 def load_probability(probability_array: np.array):
     """
-    Creates an Abstract gate for loading an input discretized
-    Probability Distribution using Quantum Multiplexors.
+    Creates a QLM Abstract gate for loading a given discretized probability
+    distribution using Quantum Multiplexors.
 
     Parameters
     ----------
@@ -258,8 +282,8 @@ def load_probability(probability_array: np.array):
 
 def load_pf(p_gate, f_gate):
     """
-    Create complete AbstractGate for applying Operators P and R
-    The operator to implement is: p_gate*r_gate
+    Create a QLM AbstractGate for applying two given operators consecutively.
+    The operator to implement is: p_gate*f_gate
 
     Parameters
     ----------
@@ -269,8 +293,7 @@ def load_pf(p_gate, f_gate):
         Customized AbstractGatel for loading integral of a function f(x)
     Returns
     ----------
-    pr_gate : AbstractGate
-        Customized AbstractGate for loading the P and R operators
+    pf_gate : AbstractGate
     """
     nqbits = f_gate.arity
     @qlm.build_gate("PF", [], arity=nqbits)
