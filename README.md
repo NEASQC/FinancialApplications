@@ -24,6 +24,7 @@ The *Quantum Quantitative Finance Library* is deployed as typical Python library
     * maximum\_likelihood\_ae.py (QQuantLib.AE.maximum\_likelihood\_ae). This package implements *Maximum Likelihood Amplitude estimation* (**MLAE**) algorithm. The algorithm was implemented as a python class called *MLAE* 
 * *Phase Estimation* or **PE** package. Under **QQuantLib/PE**. This package contains modules for phase estimation algorithms that can be used in amplitude estimation procedure. 
     * iterative\_quantum\_pe.py (QQuantLib.PE.iterative\_quantum\_pe). This modules implements the *Kitaev Iterative Phase Estimation* (**IPE**) algorithm as python class called: *IterativeQuantumPE* 
+    * phase\_estimation\_wqft.py (QQuantLib.PE.phase\_estimation\_wqft). This modules implements the classical Phase Estimation algorithm (with inverse of Quantum Fourier Transformation) as a python class called: *PhaseEstimationwQFT*.
 * *utils* package. Under **QQuantLib/utils**. This package contains several modules with different utilities used for the before packages.
     * data\_extracting.py (QQuantLib.utils.data\_extracting). This module implements functions for creating QLM Programs from AbstractGates or QRoutines, creating their correspondent quantum circuits and jobs, simulating them and post processing the obtained results.
     * qlm\_solver.py (QQuantLib.utils.qlm\_solver). Module for calling the QLM solver.
@@ -38,19 +39,14 @@ The misc/notebooks folder contains jupyter notebooks that explain the use of the
 * 02\_AmplitudeAmplification\_Operators.ipynb. This notebook explains the *Amplitude Amplification* (**QQuantLib/AA**) package working. A carefully revision of the mandatory operators for creating grover-like operators is provided in this notebook. 
 * 03_MaximumLikelihood_Class.ipynb. This notebook explains the **MLAE** algorithm  and the working of the correspondent module *maximum\_likelihood\_ae* from *Amplitude Estimation* package (QQuantLib.AE.maximum\_likelihood\_ae).
  * 04_Iterative_QPE_Class.ipynb. The Kitaev *IPE* algorithm is explained in this notebook using the module *iterative\_quantum\_pe* from *Phase Estimation* package (QQuantLib.PE.iterative\_quantum\_pe)
-* 05_FinancialApplication_Example.ipynb. In this notebook the different developed packages of **QQuantLib** are used for develop an exaple of use for financial industry: calculations of expected value of a function. 
+* 05\_PhaseEstimationwitQFT\_Class.ipynb. The classical Phase Estimation algorithm (with QFT) is explained in this notebook using the module *phase\_estimation\_wqft* from *Phase Estimation* package (QQuantLib.PE.phase\_estimation\_wqft)
+* 06_FinancialApplication_Example.ipynb. In this notebook the different developed packages of **QQuantLib** are used for develop an exaple of use for financial industry: calculations of expected value of a function. 
 
 ## Acknowledgements
 
 This work is supported by the [NEASQC](https://cordis.europa.eu/project/id/951821) project, funded by the European Union's Horizon 2020 programme, Grant Agreement No. 951821.
 
 ## Documentation
-Customize the GitHub Workflow YAML file: *repo_name*/.github/workflow/sphinx\_doc.yml
-There is a basic index.rst template under 'doc'. Modify it as you want.
 
-Any modification under the folder 'doc' pushed to GitHub will trigger a rebuild of the documentation (using GitHub CI).
-If the build is successful, then the resulting html documentation can be access at: https://neasqc.github.io/FinancialApplications
+The html documentation of the **QQuantLib** library can be access at: https://neasqc.github.io/FinancialApplications
 
-Notes: 
-  - You can follow the build process on the 'Actions' tab below the name of the repository.
-  - neasqc.github.io does not immediately update. You may need to wait a minute or two before it see the changes.
