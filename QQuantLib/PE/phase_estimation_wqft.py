@@ -13,6 +13,7 @@ from QQuantLib.utils.data_extracting import create_qprogram, create_qjob,\
 create_qcircuit, proccess_qresults
 from QQuantLib.utils.qlm_solver import get_qpu
 from QQuantLib.utils.utils import load_qn_gate
+from QQuantLib.utils.data_extracting import get_results
 
 
 class PhaseEstimationwQFT:
@@ -139,8 +140,7 @@ class PhaseEstimationwQFT:
             self.shots,
             self.linalg_qpu
         )
-        self.classical_bits = self.meas_classical_bits(self.results)
-        self.final_results = self.post_proccess(self.classical_bits)
+        self.final_results = self.post_proccess(self.results)
 
 
     @staticmethod
@@ -186,7 +186,7 @@ class PhaseEstimationwQFT:
     @staticmethod
     def apply_inv_qft(q_prog_, q_aux):
         """
-        Apply an inverse of Quantum Fourier Transformation to the 
+        Apply an inverse of Quantum Fourier Transformation to the
         desired qbits of a QLM program
 
         Parameters
@@ -241,7 +241,7 @@ class PhaseEstimationwQFT:
 
         Parameters
         ----------
-        
+
         q_prog : QLM Program
         q_aux : QLM qbit
             auxiliar qbit for measuring during all ipe steps
@@ -255,34 +255,42 @@ class PhaseEstimationwQFT:
         result : QLM results
         circuit : QLM circuit
 
-
         """
-        circuit = create_qcircuit(q_prog)
-        if shots == 0:
-            shots = 10
-            print('Number of shots can not be 0. It will be used: ',shots)
-
-        job = create_qjob(
-            circuit,
-            shots=shots,
-            qubits=[q_aux]
+        start = q_aux.start
+        lenght = q_aux.length
+        result, circuit, q_prog, job = get_results(
+            q_prog, linalg_qpu=linalg_qpu, shots=shots,
+            qubits=list(range(start, start+lenght, 1))
         )
-        result = linalg_qpu.submit(job)
-        if not isinstance(result, Result):
-            result = result.join()
+        del result['Amplitude']
+        result['Phi'] = result['Int']/(2**lenght)
+        #circuit = create_qcircuit(q_prog)
+        #if shots == 0:
+        #    shots = 10
+        #    print('Number of shots can not be 0. It will be used: ',shots)
+
+        #job = create_qjob(
+        #    circuit,
+        #    shots=shots,
+        #    qubits=[q_aux]
+        #)
+        #result = linalg_qpu.submit(job)
+        #if not isinstance(result, Result):
+        #    result = result.join()
         return result, circuit
 
-    @staticmethod
-    def meas_classical_bits(result):
-        """
-        Given a QLM aggregated result generate a DataFrame with the
-        information of the inputs
-        """
-        fake_qbits = np.array([i for i in range(result.qregs[0].length)])
-        pdf=proccess_qresults(result, fake_qbits)
-        pdf['Phi'] = pdf['Int']/(2**len(fake_qbits))
-        del pdf['Amplitude']
-        return pdf
+
+    #@staticmethod
+    #def meas_classical_bits(result):
+    #    """
+    #    Given a QLM aggregated result generate a DataFrame with the
+    #    information of the inputs
+    #    """
+    #    fake_qbits = np.array([i for i in range(result.qregs[0].length)])
+    #    pdf=proccess_qresults(result, fake_qbits)
+    #    pdf['Phi'] = pdf['Int']/(2**len(fake_qbits))
+    #    del pdf['Amplitude']
+    #    return pdf
 
     @staticmethod
     def post_proccess(InputPDF):

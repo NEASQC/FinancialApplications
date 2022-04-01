@@ -46,12 +46,12 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
     #if type(quantum_object) == qlm.Program:
     if isinstance(quantum_object, qlm.Program):
         q_prog = deepcopy(quantum_object)
+        arity = q_prog.qbit_count
     else:
         q_prog = create_qprogram(quantum_object)
         #q_prog = qlm.Program()
         #qbits = q_prog.qalloc(arity)
         #q_prog.apply(quantum_object, qbits)
-
         arity = quantum_object.arity
 
     if qubits is None:
