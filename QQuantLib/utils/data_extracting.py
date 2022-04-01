@@ -42,12 +42,6 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
     job : QLM job
 
     """
-    arity = quantum_object.arity
-
-    if qubits is None:
-        qubits = np.arange(arity, dtype=int)
-    else:
-        qubits = check_list_type(qubits, int)
 
     #if type(quantum_object) == qlm.Program:
     if isinstance(quantum_object, qlm.Program):
@@ -58,6 +52,12 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
         #qbits = q_prog.qalloc(arity)
         #q_prog.apply(quantum_object, qbits)
 
+        arity = quantum_object.arity
+
+    if qubits is None:
+        qubits = np.arange(arity, dtype=int)
+    else:
+        qubits = check_list_type(qubits, int)
     #circuit = q_prog.to_circ(submatrices_only=True)
     circuit = create_qcircuit(q_prog)
     #job = circuit.to_job(nbshots=shots, qubits=qubits)

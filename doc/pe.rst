@@ -6,3 +6,4 @@ The **PE** or *Phase Estimation* package groups the python modules from **QQuant
 .. toctree::
 
    iterative_quantum_pe.rst 
+   phase_estimation_wqft.rst
