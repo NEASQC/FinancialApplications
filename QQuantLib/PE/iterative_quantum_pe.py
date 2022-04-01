@@ -302,8 +302,8 @@ class IterativeQuantumPE:
         """
         circuit = create_qcircuit(q_prog)
         if shots == 0:
-            print('Number of shots can not be 0. It will be used: ',self.shots)
-            shots = self.shots
+            shots = 10
+            print('Number of shots can not be 0. It will be used: ',shots)
 
         job = create_qjob(
             circuit,
