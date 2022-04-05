@@ -1,144 +1,110 @@
-# This file may be used to create an environment using:
-# $ conda create --name <env> --file <this file>
-# platform: linux-64
-_libgcc_mutex=0.1=main
-_openmp_mutex=4.5=1_gnu
-argon2-cffi=21.3.0=pyhd3eb1b0_0
-argon2-cffi-bindings=21.2.0=py39h7f8727e_0
-asttokens=2.0.5=pyhd3eb1b0_0
-attrs=21.4.0=pyhd3eb1b0_0
-backcall=0.2.0=pyhd3eb1b0_0
-beautifulsoup4=4.10.0=pypi_0
-bitstring=3.1.9=pypi_0
-blas=1.0=mkl
-bleach=4.1.0=pyhd3eb1b0_0
-bottleneck=1.3.4=py39hce1f21e_0
-ca-certificates=2022.3.29=h06a4308_0
-certifi=2021.10.8=py39h06a4308_2
-cffi=1.15.0=py39hd667e15_1
-cryptography=36.0.2=pypi_0
-cvxpy=1.2.0=pypi_0
-cycler=0.11.0=pypi_0
-debugpy=1.6.0=pypi_0
-decorator=5.1.1=pyhd3eb1b0_0
-defusedxml=0.7.1=pyhd3eb1b0_0
-dill=0.3.4=pypi_0
-ecos=2.0.10=pypi_0
-entrypoints=0.4=pypi_0
-executing=0.8.3=pyhd3eb1b0_0
-fastjsonschema=2.15.3=pypi_0
-fonttools=4.31.2=pypi_0
-importlib-metadata=4.11.3=py39h06a4308_0
-importlib_metadata=4.11.3=hd3eb1b0_0
-intel-openmp=2021.4.0=h06a4308_3561
-ipykernel=6.12.1=pypi_0
-ipython=8.2.0=py39h06a4308_0
-ipython_genutils=0.2.0=pyhd3eb1b0_1
-ipywidgets=7.7.0=pypi_0
-jedi=0.18.1=py39h06a4308_1
-jinja2=3.1.1=pypi_0
-jsonschema=4.4.0=pypi_0
-jupyter=1.0.0=pypi_0
-jupyter-client=7.2.1=pypi_0
-jupyter-console=6.4.3=pypi_0
-jupyter_client=7.1.2=pyhd3eb1b0_0
-jupyter_core=4.9.2=py39h06a4308_0
-jupyterlab-widgets=1.1.0=pypi_0
-jupyterlab_pygments=0.1.2=py_0
-kiwisolver=1.4.2=pypi_0
-ld_impl_linux-64=2.35.1=h7274673_9
-libffi=3.3=he6710b0_2
-libgcc-ng=9.3.0=h5101ec6_17
-libgfortran-ng=7.5.0=ha8ba4b0_17
-libgfortran4=7.5.0=ha8ba4b0_17
-libgomp=9.3.0=h5101ec6_17
-libsodium=1.0.18=h7b6447c_0
-libstdcxx-ng=9.3.0=hd4cf53a_17
-markupsafe=2.1.1=pypi_0
-matplotlib=3.5.1=pypi_0
-matplotlib-inline=0.1.3=pypi_0
-mistune=0.8.4=py39h27cfd23_1000
-mkl=2021.4.0=h06a4308_640
-mkl-service=2.4.0=py39h7f8727e_0
-mkl_fft=1.3.1=py39hd3c417c_0
-mkl_random=1.2.2=py39h51133e4_0
-myqlm=1.5.1=pypi_0
-myqlm-simulators=1.5.1=pypi_0
-nb_conda_kernels=2.3.1=py39h06a4308_0
-nbclient=0.5.13=pypi_0
-nbconvert=6.4.5=pypi_0
-nbformat=5.3.0=pypi_0
-ncurses=6.3=h7f8727e_2
-nest-asyncio=1.5.5=pypi_0
-networkx=2.7.1=pypi_0
-notebook=6.4.10=pypi_0
-numexpr=2.8.1=py39h6abb31d_0
-numpy=1.21.2=py39h20f2e39_0
-numpy-base=1.21.2=py39h79a1101_0
-openssl=1.1.1n=h7f8727e_0
-osqp=0.6.2.post5=pypi_0
-packaging=21.3=pyhd3eb1b0_0
-pandas=1.4.1=py39h295c915_1
-pandocfilters=1.5.0=pyhd3eb1b0_0
-parso=0.8.3=pyhd3eb1b0_0
-pexpect=4.8.0=pyhd3eb1b0_3
-pickleshare=0.7.5=pyhd3eb1b0_1003
-pillow=9.1.0=pypi_0
-pip=21.2.4=py39h06a4308_0
-ply=3.11=pypi_0
-prettytable=3.2.0=pypi_0
-prometheus_client=0.13.1=pyhd3eb1b0_0
-prompt-toolkit=3.0.29=pypi_0
-psutil=5.9.0=pypi_0
-ptyprocess=0.7.0=pyhd3eb1b0_2
-pure_eval=0.2.2=pyhd3eb1b0_0
-pycparser=2.21=pyhd3eb1b0_0
-pydoe=0.3.8=pypi_0
-pygments=2.11.2=pyhd3eb1b0_0
-pyopenssl=22.0.0=pypi_0
-pyparsing=3.0.4=pyhd3eb1b0_0
-pyrsistent=0.18.1=pypi_0
-python=3.9.11=h12debd9_2
-python-dateutil=2.8.2=pyhd3eb1b0_0
-pytz=2021.3=pyhd3eb1b0_0
-pyzmq=22.3.0=py39h295c915_2
-qat-comm=1.3.4=pypi_0
-qat-core=1.5.1=pypi_0
-qat-devices=0.1.5=pypi_0
-qat-hardware=1.2.3=pypi_0
-qat-lang=2.1.3=pypi_0
-qat-quops=1.2.1=pypi_0
-qat-variational=1.3.3=pypi_0
-qdldl=0.1.5.post2=pypi_0
-qlmaas=1.4.1=pypi_0
-qtconsole=5.3.0=pypi_0
-qtpy=2.0.1=pypi_0
-qutip=4.6.3=pypi_0
-readline=8.1.2=h7f8727e_1
-scipy=1.8.0=pypi_0
-scs=3.2.0=pypi_0
-send2trash=1.8.0=pyhd3eb1b0_1
-setuptools=58.0.4=py39h06a4308_0
-six=1.16.0=pyhd3eb1b0_1
-soupsieve=2.3.1=pypi_0
-sqlite=3.38.2=hc218d9a_0
-stack_data=0.2.0=pyhd3eb1b0_0
-svgwrite=1.4.2=pypi_0
-terminado=0.13.3=pypi_0
-testpath=0.6.0=pypi_0
-thrift=0.13.0=pypi_0
-tk=8.6.11=h1ccaba5_0
-tornado=6.1=py39h27cfd23_0
-traitlets=5.1.1=pyhd3eb1b0_0
-typing-extensions=4.1.1=hd3eb1b0_0
-typing_extensions=4.1.1=pyh06a4308_0
-tzdata=2022a=hda174b7_0
-wand=0.6.7=pypi_0
-wcwidth=0.2.5=pyhd3eb1b0_0
-webencodings=0.5.1=pypi_0
-wheel=0.37.1=pyhd3eb1b0_0
-widgetsnbextension=3.6.0=pypi_0
-xz=5.2.5=h7b6447c_0
-zeromq=4.3.4=h2531618_0
-zipp=3.7.0=pyhd3eb1b0_0
-zlib=1.2.11=h7f8727e_4
+argon2-cffi @ file:///opt/conda/conda-bld/argon2-cffi_1645000214183/work
+argon2-cffi-bindings @ file:///tmp/build/80754af9/argon2-cffi-bindings_1644569679365/work
+asttokens @ file:///opt/conda/conda-bld/asttokens_1646925590279/work
+attrs @ file:///opt/conda/conda-bld/attrs_1642510447205/work
+backcall @ file:///home/ktietz/src/ci/backcall_1611930011877/work
+beautifulsoup4==4.10.0
+bitstring==3.1.9
+bleach @ file:///opt/conda/conda-bld/bleach_1641577558959/work
+Bottleneck @ file:///tmp/build/80754af9/bottleneck_1648028898966/work
+certifi==2021.10.8
+cffi @ file:///opt/conda/conda-bld/cffi_1642701102775/work
+cryptography==36.0.2
+cvxpy==1.2.0
+cycler==0.11.0
+debugpy==1.6.0
+decorator @ file:///opt/conda/conda-bld/decorator_1643638310831/work
+defusedxml @ file:///tmp/build/80754af9/defusedxml_1615228127516/work
+dill==0.3.4
+ecos==2.0.10
+entrypoints==0.4
+executing @ file:///opt/conda/conda-bld/executing_1646925071911/work
+fastjsonschema==2.15.3
+fonttools==4.31.2
+importlib-metadata @ file:///tmp/build/80754af9/importlib-metadata_1648544546694/work
+ipykernel==6.12.1
+ipython @ file:///tmp/build/80754af9/ipython_1648817057602/work
+ipython-genutils @ file:///tmp/build/80754af9/ipython_genutils_1606773439826/work
+ipywidgets==7.7.0
+jedi @ file:///tmp/build/80754af9/jedi_1644297102865/work
+Jinja2==3.1.1
+jsonschema==4.4.0
+jupyter==1.0.0
+jupyter-client==7.2.1
+jupyter-console==6.4.3
+jupyter-core @ file:///tmp/build/80754af9/jupyter_core_1646976314572/work
+jupyterlab-pygments @ file:///tmp/build/80754af9/jupyterlab_pygments_1601490720602/work
+jupyterlab-widgets==1.1.0
+kiwisolver==1.4.2
+MarkupSafe==2.1.1
+matplotlib==3.5.1
+matplotlib-inline==0.1.3
+mistune @ file:///tmp/build/80754af9/mistune_1607364877025/work
+mkl-fft==1.3.1
+mkl-random @ file:///tmp/build/80754af9/mkl_random_1626186066731/work
+mkl-service==2.4.0
+myqlm==1.5.1
+myqlm-simulators==1.5.1
+nb-conda-kernels @ file:///tmp/build/80754af9/nb_conda_kernels_1636035787744/work
+nbclient==0.5.13
+nbconvert==6.4.5
+nbformat==5.3.0
+nest-asyncio==1.5.5
+networkx==2.7.1
+notebook==6.4.10
+numexpr @ file:///tmp/build/80754af9/numexpr_1640689833592/work
+numpy @ file:///tmp/build/80754af9/numpy_and_numpy_base_1634095651905/work
+osqp==0.6.2.post5
+packaging @ file:///tmp/build/80754af9/packaging_1637314298585/work
+pandas==1.4.1
+pandocfilters @ file:///opt/conda/conda-bld/pandocfilters_1643405455980/work
+parso @ file:///opt/conda/conda-bld/parso_1641458642106/work
+pexpect @ file:///tmp/build/80754af9/pexpect_1605563209008/work
+pickleshare @ file:///tmp/build/80754af9/pickleshare_1606932040724/work
+Pillow==9.1.0
+ply==3.11
+prettytable==3.2.0
+prometheus-client @ file:///opt/conda/conda-bld/prometheus_client_1643788673601/work
+prompt-toolkit==3.0.29
+psutil==5.9.0
+ptyprocess @ file:///tmp/build/80754af9/ptyprocess_1609355006118/work/dist/ptyprocess-0.7.0-py2.py3-none-any.whl
+pure-eval @ file:///opt/conda/conda-bld/pure_eval_1646925070566/work
+pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
+pyDOE==0.3.8
+Pygments @ file:///opt/conda/conda-bld/pygments_1644249106324/work
+pyOpenSSL==22.0.0
+pyparsing @ file:///tmp/build/80754af9/pyparsing_1635766073266/work
+pyrsistent==0.18.1
+python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+pytz==2021.3
+pyzmq @ file:///tmp/build/80754af9/pyzmq_1638434985866/work
+qat-comm==1.3.4
+qat-core==1.5.1
+qat-devices==0.1.5
+qat-hardware==1.2.3
+qat-lang==2.1.3
+qat-quops==1.2.1
+qat-variational==1.3.3
+qdldl==0.1.5.post2
+qlmaas==1.4.1
+qtconsole==5.3.0
+QtPy==2.0.1
+qutip==4.6.3
+scipy==1.8.0
+scs==3.2.0
+Send2Trash @ file:///tmp/build/80754af9/send2trash_1632406701022/work
+six @ file:///tmp/build/80754af9/six_1644875935023/work
+soupsieve==2.3.1
+stack-data @ file:///opt/conda/conda-bld/stack_data_1646927590127/work
+svgwrite==1.4.2
+terminado==0.13.3
+testpath==0.6.0
+thrift==0.13.0
+tornado @ file:///tmp/build/80754af9/tornado_1606942317143/work
+traitlets @ file:///tmp/build/80754af9/traitlets_1636710298902/work
+typing_extensions @ file:///opt/conda/conda-bld/typing_extensions_1647553014482/work
+Wand==0.6.7
+wcwidth @ file:///Users/ktietz/demo/mc3/conda-bld/wcwidth_1629357192024/work
+webencodings==0.5.1
+widgetsnbextension==3.6.0
+zipp @ file:///opt/conda/conda-bld/zipp_1641824620731/work
