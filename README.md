@@ -49,4 +49,9 @@ This work is supported by the [NEASQC](https://cordis.europa.eu/project/id/95182
 ## Documentation
 
 The html documentation of the **QQuantLib** library can be access at: https://neasqc.github.io/FinancialApplications
+## Test it
+
+You can test the libray in binder using following link:
+
+[Binder Link for QQuantLib](https://mybinder.org/v2/gh/NEASQC/FinancialApplications/HEAD)
 
