@@ -1,0 +1,11 @@
+channels:
+  - defaults
+dependencies:
+  - python=3.9.11
+  - numpy
+  - pandas
+  - scipy
+  - jupyter
+  - pip:
+    - myqlm==1.5.1
+    - qlmaas==1.4.1
