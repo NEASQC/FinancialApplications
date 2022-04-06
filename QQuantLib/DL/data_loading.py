@@ -180,7 +180,7 @@ def load_angles(angles: np.array, method: str = "multiplexor"):
         Method used in the loading. Default method.
     """
     number_qubits = int(np.log2(angles.size))+1
-    if np.max(angles) > np.pi:
+    if np.max(angles) > 2*np.pi:
         print("ERROR: function f not properly normalised")
         return
     if angles.size != 2**(number_qubits-1):
