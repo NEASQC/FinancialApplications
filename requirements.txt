@@ -1,14 +1,7 @@
+myqlm 
 numpy 
 pandas 
 scipy
-myqlm 
 matplotlib
 matplotlib-inline
-qat-comm
-qat-core
-qat-devices
-qat-hardware
-qat-lang
-qat-quops
-qat-variational
 qlmaas
