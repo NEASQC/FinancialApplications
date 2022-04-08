@@ -212,9 +212,12 @@ class IQAE:
 
     @staticmethod
     def chebysev_bound(N: int,gamma: float):
-        """
+        r"""
         Computes the length of the confidence interval for a given number of samples
-        N and an accuracy gamma.
+        N and an accuracy gamma:
+
+        .. math::
+            \epsilon = \dfrac{1}{\sqrt{2N}}\log\left(\dfrac{2}{\gamma}\right)
 
         Parameters
         ----------
