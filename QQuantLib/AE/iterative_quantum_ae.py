@@ -12,14 +12,12 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 """
 
 from copy import deepcopy
-import sys
 import numpy as np
 import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.data_extracting import get_results
-from QQuantLib.utils.utils import bitfield_to_int, check_list_type, mask
-from qat.core.console import display
+from QQuantLib.utils.utils import bitfield_to_int, check_list_type
 
 
 
@@ -54,7 +52,7 @@ class IQAE:
         #Setting attributes
         self._oracle = deepcopy(oracle)
         self._target = check_list_type(target, int)
-        self._index = check_list_type(index, int) 
+        self._index = check_list_type(index, int)
         self._grover_oracle = grover(self.oracle,self.target,self.index)
 
         #Set the QPU to use
@@ -71,7 +69,7 @@ class IQAE:
     @oracle.setter
     def oracle(self, value):
         self._oracle = deepcopy(value)
-    
+
     @property
     def target(self):
         return self._target
@@ -106,7 +104,7 @@ class IQAE:
         theta_upper : float
             upper bound for the estimation of the angle
         flag : bool
-            flag to keep track of weather we are in the 
+            flag to keep track of weather we are in the
             upper or lower half pane
         r : float
             ratio of amplifications between consecutive iterations
@@ -116,9 +114,9 @@ class IQAE:
         k : int
             number of times to apply the grover operator to the quantum circuit
         flag : bool
-            flag to keep track of weather we are in the 
+            flag to keep track of weather we are in the
             upper or lower half pane
-            
+
         """
         K_i = 4*k+2
         theta_min = K_i*theta_lower
@@ -127,12 +125,12 @@ class IQAE:
         K = K_max-np.mod(K_max-2,4)
         while (K>r*K_i):
             q = K/K_i
-            if (np.mod(q*theta_max,2*np.pi)<=np.pi) and (np.mod(q*theta_min,2*np.pi)<=np.pi): 
+            if (np.mod(q*theta_max,2*np.pi)<=np.pi) and (np.mod(q*theta_min,2*np.pi)<=np.pi):
                 K_next = K
                 flag = True
                 k_next = (K_next-2)/4
                 return [int(k_next),flag]
-            if (np.mod(q*theta_max,2*np.pi)>=np.pi) and (np.mod(q*theta_min,2*np.pi)>=np.pi): 
+            if (np.mod(q*theta_max,2*np.pi)>=np.pi) and (np.mod(q*theta_min,2*np.pi)>=np.pi):
                 K_next = K
                 flag = False
                 k_next = (K_next-2)/4
@@ -140,7 +138,7 @@ class IQAE:
 
             K = K-4
         return [int(k),flag]
-    
+
     @staticmethod
     def invert_sector(a_min: float ,a_max: float,flag: bool = True):
         r"""
@@ -150,7 +148,7 @@ class IQAE:
         -----
         .. math::
             a = \dfrac{1-\cos(\theta)}{2}
-            
+
         for a pair of bounds (a_min,a_max). The result
         belongs to the domain (0,2\pi)
 
@@ -161,7 +159,7 @@ class IQAE:
         a_max : float
             upper bound
         flag : bool
-            flag to keep track of weather we are in the 
+            flag to keep track of weather we are in the
             upper or lower half pane
 
         Returns
@@ -170,7 +168,7 @@ class IQAE:
            lower bound for the associated angle
         theta_max : float
            upper bound for the associated angle
-            
+
         """
         theta_1 = np.minimum(np.arccos(1-2*a_min),np.arccos(1-2*a_max))
         theta_2 = np.maximum(np.arccos(1-2*a_min),np.arccos(1-2*a_max))
@@ -213,19 +211,19 @@ class IQAE:
         print("Maximum number of amplifications: ",int(k_max))
         print("Maximum number of calls to the oracle: ",int(N_oracle))
         print("-------------------------------------------------------------")
-    
+
     @staticmethod
     def chebysev_bound(N: int,gamma: float):
         """
         Computes the length of the confidence interval for a given number of samples
         N and an accuracy gamma.
-        
+
         Parameters
         ----------
         N : int
             number of samples
         gamma : float
-            accuracy 
+            accuracy
 
         Returns
         ----------
@@ -233,8 +231,8 @@ class IQAE:
         """
         return np.sqrt(1/(2*N)*np.log(2/gamma))
 
-    
-    
+
+
 
     def run(self,epsilon: float = 0.01,N: int = 100,alpha: float = 0.05):
         """
@@ -257,7 +255,7 @@ class IQAE:
            lower bound for the probability to be estimated
         a_u : float
            upper bound for the probability to be estimated
-            
+
         """
         #####################################################
         i = 0
@@ -294,7 +292,7 @@ class IQAE:
             else:
                 h_k = int(a*N)
                 N_effective = N
-            
+
 
             # Compute the rest
             epsilon_a = IQAE.chebysev_bound(N_effective,alpha/T)
@@ -303,16 +301,8 @@ class IQAE:
             [theta_min,theta_max] = self.invert_sector(a_min,a_max,flag)
             theta_l = (2*np.pi*np.floor(K*theta_l/(2*np.pi))+theta_min)/K
             theta_u = (2*np.pi*np.floor(K*theta_u/(2*np.pi))+theta_max)/K
-            
-        
-        
+
+
+
         [a_l,a_u] = [np.sin(theta_l)**2,np.sin(theta_u)**2]
         return [a_l,a_u]
-
-
-
-
-
-
-
-
