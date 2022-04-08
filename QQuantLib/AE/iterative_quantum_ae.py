@@ -144,8 +144,6 @@ class IQAE:
         r"""
         This function inverts the expression:
 
-        Notes
-        -----
         .. math::
             a = \dfrac{1-\cos(\theta)}{2}
 
