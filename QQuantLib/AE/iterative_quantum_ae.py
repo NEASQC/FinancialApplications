@@ -143,8 +143,11 @@ class IQAE:
     
     @staticmethod
     def invert_sector(a_min: float ,a_max: float,flag: bool = True):
-        """
+        r"""
         This function inverts the expression:
+
+        Notes
+        -----
         .. math::
             a = \dfrac{1-\cos(\theta)}{2}
             
