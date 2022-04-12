@@ -72,6 +72,28 @@ def check_list_type(x, tipo):
         raise Exception(exception)
     return y
 
+def expmod(n: int, b: int):
+    r""" For a pair of integer numbers, performs the decomposition:
+    .. math::
+        n = b^p+r
+    Parameters
+    ----------
+    n : int
+        number to decompose
+    b : int
+        basis
+
+    Returns
+    -------
+    p : int
+        power
+    r : int
+        remainder
+    """
+    p = int(np.floor(np.log(n)/np.log(b)))
+    r = int(n-b**p)
+    return (p,r)
+
 
 @qlm.build_gate("Mask", [int, int], arity=lambda x, y: x)
 def mask(number_qubits, index):
