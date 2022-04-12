@@ -336,7 +336,9 @@ def left_conditional_probability(initial_bins, probability):
     #Basically this is the f(j) function of the article with
     #j=0,1,2,...2^(i-1)-1 and i the number of qbits of the initial
     #domain division
-    left_cond_prob = np.array(left_probabilities)/np.array(prob4dd)
+    with np.errstate(divide='ignore',invalid = 'ignore'):
+        left_cond_prob = np.array(left_probabilities)/np.array(prob4dd)
+    left_cond_prob[np.isnan(left_cond_prob)] = 0
     return left_cond_prob
 
 
