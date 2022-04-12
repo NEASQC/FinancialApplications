@@ -20,7 +20,7 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
 import numpy as np
 import qat.lang.AQASM as qlm
-from QQuantLib.utils.utils import mask, fwht, left_conditional_probability
+from QQuantLib.utils.utils import mask, fwht, left_conditional_probability, expmod
 
 # Loading uniform distribution
 @qlm.build_gate("UD", [int], arity=lambda x: x)
@@ -279,6 +279,42 @@ def load_probability(probability_array: np.array):
                 )
         return routine
     return load_probability_gate()
+
+
+def step_array(index: int,size: int):
+    """
+    Creates are routine which loads an array of size "size".
+    This array has ones up to but not included
+    the index position. The rest of the values are zero.
+    This is why it is called step_array.
+
+    Parameters
+    ----------
+    index : int
+       position where the step is produced
+    size : int
+        size of the array. It has to be a power of 2
+
+    Returns
+    -------
+    step_function_gate : Abstract Gate
+        gate which loads the corresponding array. Note that
+        the arity is: np.log2(size)+1
+    """
+    (power,remainder) = expmod(size,2)
+    assert (remainder==0), "ERROR: size must be a power of 2"
+
+    arity = power+1
+    @qlm.build_gate("Step["+str(index)+","+str(size)+"]",[],arity = arity)
+    def step_function_gate():
+        ones = np.ones(index)
+        zeros = np.zeros(size-index)
+        array = np.concatenate((ones,zeros))
+        routine = qlm.QRoutine()
+        register = routine.new_wires(arity)
+        routine.apply(load_array(array),register)
+        return routine
+    return step_function_gate()
 
 def load_pf(p_gate, f_gate):
     """
