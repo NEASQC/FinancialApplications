@@ -74,8 +74,10 @@ def check_list_type(x, tipo):
 
 def expmod(n: int, b: int):
     r""" For a pair of integer numbers, performs the decomposition:
+
     .. math::
         n = b^p+r
+
     Parameters
     ----------
     n : int
@@ -349,7 +351,7 @@ def bs_density(s_t: float,s_0: float,r: float,volatility: float,maturity: float)
     .. math::
         \dfrac{1}{S_T\sigma\sqrt{2\pi T}}\exp\left(-\dfrac{\left(\log(S_T)-\mu\right)}{2\sigma^2T}\right)
 
-    where :math:`\mu = (r-0.5\sigma^)T+\log(S_0)`.
+    where :math:`\mu = (r-0.5\sigma)T+\log(S_0)`.
 
     Parameters
     ----------
