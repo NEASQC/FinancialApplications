@@ -37,9 +37,9 @@ The misc/notebooks folder contains jupyter notebooks that explain the use of the
 
 * 01\_DataLoading\_Module\_Use.ipynb. The working of the *Data Loading* (**QQuantLib/DL**) package (and the data_loading module)  is explained in this module. Several examples of data loading in a quantum circuit are provided.
 * 02\_AmplitudeAmplification\_Operators.ipynb. This notebook explains the *Amplitude Amplification* (**QQuantLib/AA**) package working. A carefully revision of the mandatory operators for creating grover-like operators is provided in this notebook. 
-* 03_MaximumLikelihood_Class.ipynb. This notebook explains the **MLAE** algorithm  and the working of the correspondent module *maximum\_likelihood\_ae* from *Amplitude Estimation* package (QQuantLib.AE.maximum\_likelihood\_ae).
- * 04_Iterative_QPE_Class.ipynb. The Kitaev *IPE* algorithm is explained in this notebook using the module *iterative\_quantum\_pe* from *Phase Estimation* package (QQuantLib.PE.iterative\_quantum\_pe)
-* 05\_PhaseEstimationwitQFT\_Class.ipynb. The classical Phase Estimation algorithm (with QFT) is explained in this notebook using the module *phase\_estimation\_wqft* from *Phase Estimation* package (QQuantLib.PE.phase\_estimation\_wqft)
+* 03\_MaximumLikelihood\_Class.ipynb. This notebook explains the **MLAE** algorithm  and the working of the correspondent module *maximum\_likelihood\_ae* from *Amplitude Estimation* package (QQuantLib.AE.maximum\_likelihood\_ae).
+* 04\_PhaseEstimationwitQFT\_Class.ipynb. The classical Phase Estimation algorithm (with QFT) is explained in this notebook using the module *phase\_estimation\_wqft* from *Phase Estimation* package (QQuantLib.PE.phase\_estimation\_wqft)
+ * 05\_Iterative\_QPE\_Class.ipynb. The Kitaev *IPE* algorithm is explained in this notebook using the module *iterative\_quantum\_pe* from *Phase Estimation* package (QQuantLib.PE.iterative\_quantum\_pe)
 * 06_FinancialApplication_Example.ipynb. In this notebook the different developed packages of **QQuantLib** are used for develop an exaple of use for financial industry: calculations of expected value of a function. 
 
 ## Acknowledgements
