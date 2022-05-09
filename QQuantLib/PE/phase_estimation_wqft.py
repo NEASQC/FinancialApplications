@@ -12,8 +12,9 @@ from qat.core import Result
 from QQuantLib.utils.data_extracting import create_qprogram, create_qjob,\
 create_qcircuit, proccess_qresults
 from QQuantLib.utils.qlm_solver import get_qpu
-from QQuantLib.utils.utils import load_qn_gate
+from QQuantLib.utils.utils import load_qn_gate, check_list_type
 from QQuantLib.utils.data_extracting import get_results
+from QQuantLib.AA.amplitude_amplification import grover
 
 
 class PhaseEstimationwQFT:
@@ -58,7 +59,7 @@ class PhaseEstimationwQFT:
             raise KeyError(text)
 
         #Number Of classical bits for estimating phase
-        self.auxiliar_qbits_number_ = kwargs.get('auxiliar_qbits_number', 8)
+        self.auxiliar_qbits_number = kwargs.get('auxiliar_qbits_number', 8)
         #Set the QPU to use
         self.linalg_qpu = kwargs.get('qpu', None)#, get_qpu())
         if self.linalg_qpu is None:
@@ -69,8 +70,6 @@ class PhaseEstimationwQFT:
         #Attributes not given as input
         self.q_prog = None
         self.q_aux = None
-        self.c_bits = None
-        self.classical_bits = None
         self.final_results = None
         self.sumary = None
 
@@ -83,26 +82,12 @@ class PhaseEstimationwQFT:
         """
         self.q_prog = None
         self.q_aux = None
-        self.c_bits = None
-        self.classical_bits = None
         self.final_results = None
         self.circuit = None
         self.results = None
 
 
         self.job = None
-
-    @property
-    def auxiliar_qbits_number(self):
-        return self.auxiliar_qbits_number_
-
-    @auxiliar_qbits_number.setter
-    def auxiliar_qbits_number(self, value):
-        print('The number of auxiliar qbits for phase estimation will be:'\
-            '{}'.format(value))
-        self.auxiliar_qbits_number_ = value
-        #We update the allocate classical bits each time we change cbits_number
-
 
     def init_pe(self):
         """
@@ -113,7 +98,7 @@ class PhaseEstimationwQFT:
         self.q_prog = create_qprogram(deepcopy(self.initial_state))
         self.q_aux = self.q_prog.qalloc(self.auxiliar_qbits_number)
 
-    def pe_wqft(self, number_of_cbits=None, shots=None):
+    def pe_wqft(self):
         """
         This method apply a workflow for executing a complete IQPE
         algorithm
@@ -121,25 +106,19 @@ class PhaseEstimationwQFT:
         Parameters
         ----------
 
-        number_of_cbits : int (overwrite correspondient property)
-            Number of classical bits for storing the phase estimation
-        shots : int (overwrite correspondient property)
-            Number of shots for executing the QLM job
         """
-
-        if number_of_cbits is not None:
-            self.cbits_number = number_of_cbits
-        if shots is not None:
-            self.shots = shots
-
+        #Initialize program
         self.init_pe()
+        #Create algorithm
         self.q_prog = self.apply_pe_wqft(self.q_prog, self.q_gate, self.q_aux)
+        #Execute algorithm
         self.results, self.circuit = self.run(
             self.q_prog,
             self.q_aux,
             self.shots,
             self.linalg_qpu
         )
+        #Post-Proccess results
         self.final_results = self.post_proccess(self.results)
 
 
@@ -280,17 +259,6 @@ class PhaseEstimationwQFT:
         return result, circuit
 
 
-    #@staticmethod
-    #def meas_classical_bits(result):
-    #    """
-    #    Given a QLM aggregated result generate a DataFrame with the
-    #    information of the inputs
-    #    """
-    #    fake_qbits = np.array([i for i in range(result.qregs[0].length)])
-    #    pdf=proccess_qresults(result, fake_qbits)
-    #    pdf['Phi'] = pdf['Int']/(2**len(fake_qbits))
-    #    del pdf['Amplitude']
-    #    return pdf
 
     @staticmethod
     def post_proccess(InputPDF):
@@ -313,4 +281,122 @@ class PhaseEstimationwQFT:
         #distribution probability
         #final_results['E_p(f)'] = np.sin(final_results['Theta'])**2
         return final_results
+
+class AE_PhaseEstimationwQFT:
+    """
+    Class for doing Amplitude Estimation (AE) using Quantum Amplitude
+    Estimation with QFT (PhaseEstimationwQFT)
+    algorithm
+    """
+
+    def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
+        """
+
+        Method for initializing the class
+
+        Parameters
+        ----------
+        oracle: QLM gate
+            QLM gate with the Oracle for implementing the
+            Grover operator
+        target : list of ints
+            python list with the target for the amplitude estimation
+        index : list of ints
+            qubits which mark the register to do the amplitude
+            estimation
+
+        kwars : dictionary
+            dictionary that allows the configuration of the IQAE algorithm:
+            Implemented keys:
+        qpu : QLM solver
+            solver for simulating the resulting circutis
+        """
+        #Setting attributes
+        self._oracle = deepcopy(oracle)
+        self._target = check_list_type(target, int)
+        self._index = check_list_type(index, int)
+        #First thing is create the grover operator from the oracle
+        self._grover_oracle = grover(self.oracle,self.target,self.index)
+
+        #Set the QPU to use
+        self.linalg_qpu = kwargs.get('qpu', None)#, get_qpu())
+        if self.linalg_qpu is None:
+            self.linalg_qpu = get_qpu()
+        self.auxiliar_qbits_number = kwargs.get(
+            'auxiliar_qbits_number', 8)
+        self.shots = kwargs.get('shots', 10)
+
+        #For storing results
+        self.theta = None
+        self.a = None        
+    #####################################################################
+    @property
+    def oracle(self):
+        return self._oracle
+
+    @oracle.setter
+    def oracle(self, value):
+        self._oracle = deepcopy(value)
+
+    @property
+    def target(self):
+        return self._target
+
+    @target.setter
+    def target(self, value):
+        self._target = check_list_type(value, int)
+        self._grover_oracle = grover(self.oracle, self.target, self.index)
+
+    @property
+    def index(self):
+        return self._index
+
+    @index.setter
+    def index(self, value):
+        self._index = check_list_type(value, int)
+        self._grover_oracle = grover(self.oracle, self.target, self.index)
+    #####################################################################
+
+    def run(self):
+        r"""
+        run method for the class.
+
+        Parameters
+        ----------
+
+        Returns
+        ----------
+
+        result :
+            the estimation of a
+
+        Notes
+        -----
+        .. math::
+            a = \cos^2(\theta)
+            \; where \; \theta \; is \;
+            \mathcal{Q}|\Psi\rangle = e^{2i\theta}|\Psi\rangle
+            \; and \; \mathcal{Q} \; the \; Grover \; Operator
+
+
+        """
+        dict_pe_qft = {
+            'initial_state': self.oracle,
+            'unitary_operator': self._grover_oracle,
+            'auxiliar_qbits_number': self.auxiliar_qbits_number,
+            'shots': self.shots,
+            'qpu' : self.linalg_qpu,
+        }
+
+        self.pe_qft = PhaseEstimationwQFT(**dict_pe_qft)
+        self.pe_qft.pe_wqft()
+        self.final_results = self.pe_qft.final_results
+        self.final_results.sort_values(
+            'Probability',
+            ascending=False,
+            inplace=True,
+        )
+        self.theta = self.final_results['theta_90'].iloc[0]
+        self.a = np.cos(self.theta)**2
+        return self.a
 

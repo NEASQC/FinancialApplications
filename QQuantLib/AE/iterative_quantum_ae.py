@@ -59,8 +59,17 @@ class IQAE:
         self.linalg_qpu = kwargs.get('qpu')
         if self.linalg_qpu is None:
             self.linalg_qpu = get_default_qpu()
+        self.epsilon = kwargs.get('epsilon', 0.01)
+        self.alpha = kwargs.get('alpha', 0.05)
+        self.N = kwargs.get('N', 100)
 
-        # Optimization
+        self.a_l = None 
+        self.a_u = None
+        self.theta_l = None
+        self.theta_u = None
+        self.theta = None 
+        self.a = None 
+
     #####################################################################
     @property
     def oracle(self):
@@ -179,10 +188,9 @@ class IQAE:
 
         return [theta_min,theta_max]
 
-    @staticmethod
-    def display_information(epsilon: float = 0.01,N: int = 100,alpha: float = 0.05):
+    def display_information(self, epsilon: float = None,N: int = None,alpha: float = None):
         """
-        This function displays information of the propoerties of the method for a given
+        This function displays information of the properties of the method for a given
         set of parameters
 
         Parameters
@@ -197,6 +205,20 @@ class IQAE:
         Returns
         ----------
         """
+        if epsilon is None:
+            epsilon = self.epsilon
+        if alpha is None:
+            alpha = self.alpha
+        if N is None:
+            N = self.N
+
+        print("-------------------------------------------------------------")
+        print('epsilon: ', epsilon)
+        print('alpha: ', alpha)
+        print('N: ', N)
+        print("-------------------------------------------------------------")
+        
+
         T = np.ceil(np.log2(np.pi/(8*epsilon)))
         N_max = 32/(1-2*np.sin(np.pi/14))**2*np.log(2/alpha*np.log2(np.pi/(4*epsilon)))
         N_oracle = 50/epsilon*np.log(2/alpha*np.log2(np.pi/(4*epsilon)))
@@ -233,9 +255,7 @@ class IQAE:
         return np.sqrt(1/(2*N)*np.log(2/gamma))
 
 
-
-
-    def run(self,epsilon: float = 0.01,N: int = 100,alpha: float = 0.05):
+    def iqae(self,epsilon: float = None,N: int = None,alpha: float = None):
         """
         This function implements Algorithm 1 from the IQAE paper. The result
         is an estimation of the desired probability with precision at least
@@ -256,8 +276,19 @@ class IQAE:
            lower bound for the probability to be estimated
         a_u : float
            upper bound for the probability to be estimated
+        theta_l :
+           lower bound for the angle to be estimated
+        theta_u :
+           upper bound for the angle to be estimated
 
         """
+        if epsilon is None:
+            epsilon = self.epsilon
+        if alpha is None:
+            alpha = self.alpha
+        if N is None:
+            N = self.N
+
         #####################################################
         i = 0
         k = int(0)
@@ -281,7 +312,11 @@ class IQAE:
             routine.apply(self.oracle,wires)
             for j in range(k):
                 routine.apply(self._grover_oracle,wires)
-            results,_,_,_ = get_results(routine,linalg_qpu = self.linalg_qpu,shots = N,qubits = self.index)
+            results,_,_,_ = get_results(
+                routine,linalg_qpu = self.linalg_qpu,
+                shots = N,
+                qubits = self.index
+            )
             a = results["Probability"].iloc[bitfield_to_int(self.target)]
             #####################################################
             # Agregate results from different iterations
@@ -303,7 +338,20 @@ class IQAE:
             theta_l = (2*np.pi*np.floor(K*theta_l/(2*np.pi))+theta_min)/K
             theta_u = (2*np.pi*np.floor(K*theta_u/(2*np.pi))+theta_max)/K
 
-
-
         [a_l,a_u] = [np.sin(theta_l)**2,np.sin(theta_u)**2]
-        return [a_l,a_u]
+        return [a_l, a_u, theta_l, theta_u]
+
+    def run(self):
+        [a_l, a_u, theta_l, theta_u] = self.iqae(
+            self.epsilon,
+            self.N,
+            self.alpha
+        )
+        self.a_l = a_l
+        self.a_u = a_u
+        self.theta_l = theta_l
+        self.theta_u = theta_u
+        self.theta = (self.theta_u+self.theta_l)/2.0
+        self.a = (self.a_u+self.a_l)/2.0
+        return self.a
+

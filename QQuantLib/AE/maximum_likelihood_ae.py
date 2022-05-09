@@ -87,6 +87,10 @@ class MLAE:
             'optimizer',
             lambda x: so.brute(func=x, ranges=self.theta_domain)
         )
+        #For storing results
+        self.theta = None
+        self.a = None        
+
     #####################################################################
     @property
     def oracle(self):
@@ -303,4 +307,32 @@ class MLAE:
         for i in range(len(self.m_k)):
             self.h_k[i], _ = self.run_step(self.m_k[i], self.n_k[i])
         result = self.optimizer(self.cost_function)
+        return result
+    
+    def run(self)->float:
+        r"""
+        run method for the class.
+
+        Parameters
+        ----------
+
+        Returns
+        ----------
+
+        result :
+            list with the estimation of a
+
+        Notes
+        -----
+        .. math::
+            a^*  = \sin^2(\theta^*)
+            \; where \; \theta^* = \arg \min_{\theta} L(\theta,\mathbf{h})
+
+
+        """
+        
+        theta = self.optimize()
+        self.theta = theta[0]
+        self.a = np.sin(self.theta)**2
+        result = self.a
         return result

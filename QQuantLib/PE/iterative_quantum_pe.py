@@ -22,7 +22,8 @@ from qat.core import Result
 from QQuantLib.utils.data_extracting import create_qprogram, create_qjob,\
 create_qcircuit
 from QQuantLib.utils.qlm_solver import get_qpu
-from QQuantLib.utils.utils import load_qn_gate
+from QQuantLib.utils.utils import load_qn_gate, check_list_type
+from QQuantLib.AA.amplitude_amplification import grover
 
 
 class IterativeQuantumPE:
@@ -170,7 +171,7 @@ class IterativeQuantumPE:
 
         self.init_iqpe()
         self.apply_iqpe()
-        results = self.run(
+        results, self.circuit = self.run(
             self.q_prog,
             self.q_aux,
             self.shots,
@@ -314,7 +315,7 @@ class IterativeQuantumPE:
         result = linalg_qpu.submit(job)
         if not isinstance(result, Result):
             result = result.join()
-        return result
+        return result, circuit
 
     @staticmethod
     def meas_classical_bits(result):
@@ -392,3 +393,117 @@ class IterativeQuantumPE:
         pds = pdf.value_counts(column)
         pds.name = 'Frequency'
         return pd.DataFrame(pds).reset_index()
+
+
+class AE_IterativeQuantumPE:
+    """
+    Class for doing Amplitude Estimation (AE) using Iterative Quantum
+    Phase Estimation (IterativeQuantumPE)
+    algorithm
+    """
+
+    def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
+        """
+
+        Method for initializing the class
+
+        Parameters
+        ----------
+        oracle: QLM gate
+            QLM gate with the Oracle for implementing the
+            Grover operator
+        target : list of ints
+            python list with the target for the amplitude estimation
+        index : list of ints
+            qubits which mark the register to do the amplitude
+            estimation
+
+        kwars : dictionary
+            dictionary that allows the configuration of the IQAE algorithm:
+            Implemented keys:
+        qpu : QLM solver
+            solver for simulating the resulting circutis
+        """
+        #Setting attributes
+        self._oracle = deepcopy(oracle)
+        self._target = check_list_type(target, int)
+        self._index = check_list_type(index, int)
+        #First thing is create the grover operator from the oracle
+        self._grover_oracle = grover(self.oracle,self.target,self.index)
+
+        #Set the QPU to use
+        self.linalg_qpu = kwargs.get('qpu', None)#, get_qpu())
+        if self.linalg_qpu is None:
+            self.linalg_qpu = get_qpu()
+        self.cbits_number = kwargs.get(
+            'cbits_number', 8)
+        self.shots = kwargs.get('shots', 10)
+
+        #For storing results
+        self.theta = None
+        self.a = None        
+    #####################################################################
+    @property
+    def oracle(self):
+        return self._oracle
+
+    @oracle.setter
+    def oracle(self, value):
+        self._oracle = deepcopy(value)
+
+    @property
+    def target(self):
+        return self._target
+
+    @target.setter
+    def target(self, value):
+        self._target = check_list_type(value, int)
+        self._grover_oracle = grover(self.oracle, self.target, self.index)
+
+    @property
+    def index(self):
+        return self._index
+
+    @index.setter
+    def index(self, value):
+        self._index = check_list_type(value, int)
+        self._grover_oracle = grover(self.oracle, self.target, self.index)
+    #####################################################################
+
+    def run(self):
+        r"""
+        run method for the class.
+
+        Parameters
+        ----------
+
+        Returns
+        ----------
+
+        result :
+            the estimation of a
+
+        Notes
+        -----
+        .. math::
+            a  = \cos^2(\theta)
+            \; where \; \theta \; is \;
+            \mathcal{Q}|\Psi\rangle = e^{2i\theta}|\Psi\rangle
+            \; and \; \mathcal{Q} \; the \; Grover \; Operator
+        """
+
+        dict_pe_iqpe = {
+            'initial_state': self.oracle,
+            'unitary_operator': self._grover_oracle,
+            'cbits_number': self.cbits_number,
+            'shots': self.shots,
+            'qpu' : self.linalg_qpu,
+        }
+
+        self.pe_iqpe = IterativeQuantumPE(**dict_pe_iqpe)
+        self.pe_iqpe.iqpe()
+        self.theta =  self.pe_iqpe.sumary.sort_values(
+            'Frequency', ascending=False)['theta_90'].iloc[0]
+        self.a = np.cos(self.theta)**2
+        return self.a
+
