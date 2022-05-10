@@ -69,8 +69,6 @@ class MLAE:
             self.linalg_qpu = get_default_qpu()
         ##delta for avoid problems in 0 and pi/2 theta limits
         self.delta = kwargs.get('delta', 1.0e-5)
-        #ns for the brute force optimizer
-        self.ns = kwargs.get('ns', 1000)
 
         # The schedule of the method
         self.m_k = None
@@ -87,7 +85,7 @@ class MLAE:
         self.theta_domain = [(0+self.delta, 0.5*np.pi-self.delta)]
         self.optimizer = kwargs.get(
             'optimizer',
-            lambda x: so.brute(func=x, ranges=self.theta_domain, Ns=self.ns)
+            lambda x: so.brute(func=x, ranges=self.theta_domain)
         )
         #For storing results
         self.theta = None
@@ -258,8 +256,7 @@ class MLAE:
         return l_k
 
 
-    @staticmethod
-    def cost_function(angle: float, m_k: list, n_k: list, h_k: list)->float:
+    def cost_function(self, angle: float)->float:
         r"""
         This method calculates the -Likelihood of angle theta
         for a given schedule m_k,n_k
@@ -282,53 +279,17 @@ class MLAE:
             the aggregation of the individual likelihoods
         """
         log_cost = 0
-        for i in range(len(m_k)):
+        for i in range(len(self.m_k)):
             log_l_k = MLAE.log_likelihood(
                 angle,
-                m_k[i],
-                n_k[i],
-                h_k[i]
+                self.m_k[i],
+                self.n_k[i],
+                self.h_k[i]
             )
             log_cost = log_cost+log_l_k
         return -log_cost
 
-    def run_schedule(self, schedule):
-        """
-        This method execute the run_step method for each pair of values
-        of a given schedule.
-
-        Parameters
-        ----------
-
-        schedule : list of two lists
-            the schedule for the algorithm
-
-        Returns
-        ----------
-        h_k : list
-            list with the h_k result of each pair of the input schedule
-
-        result :
-            the type of the result is the type of the result
-            of the optimizer
-        """
-        x_ = check_list_type(schedule, int)
-        if x_.shape[0] != 2:
-            raise Exception("The shape of the schedule must be (2,n)")
-        schedule_ = x_
-        m_k = schedule_[0]
-        n_k = schedule_[1]
-        h_k = np.zeros(len(m_k), dtype=int)
-        for i in range(len(m_k)):
-            h_k[i], _ = self.run_step(m_k[i], n_k[i])
-        return h_k
-
-    def mlae(self, schedule=None):
-        if schedule is not None:
-            self.schedule = schedule
-        self.h_k = self.run_schedule(self.schedule)
-
-    def optimize_2(self)->float:
+    def optimize(self)->float:
         """
         This functions optimizes the cost_function
 
