@@ -26,7 +26,7 @@ from QQuantLib.utils.utils import load_qn_gate, check_list_type
 from QQuantLib.AA.amplitude_amplification import grover
 
 
-class IterativeQuantumPE:
+class IQPE:
     """
     Class for using Iterative Quantum Phase Estimation (IQPE) algorithm
     """
@@ -169,17 +169,21 @@ class IterativeQuantumPE:
         if shots is not None:
             self.shots = shots
 
+        #Initialize the algorithm
         self.init_iqpe()
+        #Create the complete algorithm
         self.apply_iqpe()
-        results, self.circuit = self.run(
+        #Execute quantum algorithm
+        results, self.circuit = self.run_qprogram(
             self.q_prog,
             self.q_aux,
             self.shots,
             self.linalg_qpu
         )
-        self.classical_bits = self.meas_classical_bits(results)
-        self.final_results = self.post_proccess(self.classical_bits)
-        self.sumary = self.sumarize(self.final_results)
+        #Extract information of the classical bits measurements
+        self.classical_bits = IQPE.measure_classical_bits(results)
+        #Aggregating classical bits measurements
+        self.final_results = IQPE.post_proccess(self.classical_bits)
 
     #@staticmethod
     #def step_iqpe_zalo(q_prog, q_gate, q_aux, c_bits, l):
@@ -286,13 +290,13 @@ class IterativeQuantumPE:
         return q_prog
 
     @staticmethod
-    def run(q_prog, q_aux, shots, linalg_qpu):
+    def run_qprogram(q_prog, q_aux, shots, linalg_qpu):
         """
         Executes a complete simulation
 
         Parameters
         ----------
-        
+
         q_prog : QLM Program
         q_aux : QLM qbit
             auxiliar qbit for measuring during all ipe steps
@@ -318,7 +322,7 @@ class IterativeQuantumPE:
         return result, circuit
 
     @staticmethod
-    def meas_classical_bits(result):
+    def measure_classical_bits(result):
         """
         Post Proccess intermediate measurements from a qlm result.
 
@@ -331,7 +335,7 @@ class IterativeQuantumPE:
         ----------
 
         pdf : pandas DataFrame
-        contains extracted information from intermediate_measurements 
+        contains extracted information from intermediate_measurements
         from a qlm result. Columns:
         BitString : str. String with the bits of the measurements done
         during simulation of the circuit
@@ -363,15 +367,16 @@ class IterativeQuantumPE:
             list_of_results.append(pdf)
         pdf_results = pd.concat(list_of_results)
         pdf_results.reset_index(drop=True, inplace=True)
-        return pdf_results
+        pdf_result_aggregated = IQPE.sumarize(pdf_results)
+        return pdf_result_aggregated
 
     @staticmethod
-    def post_proccess(InputPDF):
+    def post_proccess(input_pdf):
         """
         This function uses the results property and add it additional
         columns that are useful for Amplitude Amplification procedure
         """
-        final_results = InputPDF.copy(deep=True)
+        final_results = input_pdf.copy(deep=True)
         #Eigenvalue of the Grover-like operator
         final_results['2*theta'] = 2*np.pi*final_results['Phi']
         #Rotation angle for Grover-like operator.
@@ -382,24 +387,30 @@ class IterativeQuantumPE:
             final_results['theta_90'] < 0.5*np.pi,
             np.pi-final_results['theta_90'],
             inplace=True)
+        #sorting dataframe by frequency
+        final_results.sort_values('Frequency', ascending=False, inplace=True)
         #Expected value of the function f(x) when x follows a p(x)
         #distribution probability
         #final_results['E_p(f)'] = np.sin(final_results['Theta'])**2
         return final_results
 
+
     @staticmethod
-    def sumarize(InputPDF, column=['theta_90']):
-        pdf = InputPDF.copy(deep=True)
-        pds = pdf.value_counts(column)
+    def sumarize(input_pdf, columns=None):
+        pdf = input_pdf.copy(deep=True)
+        if columns is None:
+            pds = pdf.value_counts()
+        else:
+            pds = pdf.value_counts(columns)
         pds.name = 'Frequency'
         return pd.DataFrame(pds).reset_index()
 
 
-class AE_IterativeQuantumPE:
+class IQPE_AE:
     """
-    Class for doing Amplitude Estimation (AE) using Iterative Quantum
-    Phase Estimation (IterativeQuantumPE)
-    algorithm
+    Class for using Iterative Quantum Phase Estimation (IQPE) class for
+    doing Amplitude Estimation (AE)
+
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
@@ -437,11 +448,13 @@ class AE_IterativeQuantumPE:
             self.linalg_qpu = get_qpu()
         self.cbits_number = kwargs.get(
             'cbits_number', 8)
-        self.shots = kwargs.get('shots', 10)
+        self.shots = kwargs.get('shots', 100)
 
         #For storing results
         self.theta = None
-        self.a = None        
+        self.a = None
+        self.iqpe = None
+        self.final_results = None
     #####################################################################
     @property
     def oracle(self):
@@ -492,7 +505,7 @@ class AE_IterativeQuantumPE:
             \; and \; \mathcal{Q} \; the \; Grover \; Operator
         """
 
-        dict_pe_iqpe = {
+        dict_ae_iqpe = {
             'initial_state': self.oracle,
             'unitary_operator': self._grover_oracle,
             'cbits_number': self.cbits_number,
@@ -500,10 +513,11 @@ class AE_IterativeQuantumPE:
             'qpu' : self.linalg_qpu,
         }
 
-        self.pe_iqpe = IterativeQuantumPE(**dict_pe_iqpe)
-        self.pe_iqpe.iqpe()
-        self.theta =  self.pe_iqpe.sumary.sort_values(
-            'Frequency', ascending=False)['theta_90'].iloc[0]
+        #Create object IQPE class from Amplitude Estimation inputs
+        self.iqpe_object = IQPE(**dict_ae_iqpe)
+        #Execute IQPE algorithm
+        self.iqpe_object.iqpe()
+        self.final_results = self.iqpe_object.final_results
+        self.theta = self.final_results['theta_90'].iloc[0]
         self.a = np.cos(self.theta)**2
         return self.a
-
