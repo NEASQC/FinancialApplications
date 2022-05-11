@@ -6,20 +6,18 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
 from copy import deepcopy
 import numpy as np
-import pandas as pd
 import qat.lang.AQASM as qlm
-from qat.core import Result
-from QQuantLib.utils.data_extracting import create_qprogram, create_qjob,\
-create_qcircuit, proccess_qresults
+from QQuantLib.utils.data_extracting import create_qprogram
 from QQuantLib.utils.qlm_solver import get_qpu
 from QQuantLib.utils.utils import load_qn_gate, check_list_type
 from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.AA.amplitude_amplification import grover
 
 
-class PhaseEstimationwQFT:
+class PE_QFT:
     """
-    Class for using Iterative Quantum Phase Estimation (IQPE) algorithm
+    Class for using classical Quantum Phase Estimation, with inverse of
+    Quantum Fourier Transformation.
     """
 
     def __init__(self, **kwargs):
@@ -74,7 +72,7 @@ class PhaseEstimationwQFT:
         self.sumary = None
 
         self.circuit = None
-        self.job = None
+        self.results = None
 
     def restart(self):
         """
@@ -87,8 +85,6 @@ class PhaseEstimationwQFT:
         self.results = None
 
 
-        self.job = None
-
     def init_pe(self):
         """
         Initialize several properties
@@ -98,9 +94,9 @@ class PhaseEstimationwQFT:
         self.q_prog = create_qprogram(deepcopy(self.initial_state))
         self.q_aux = self.q_prog.qalloc(self.auxiliar_qbits_number)
 
-    def pe_wqft(self):
+    def pe_qft(self):
         """
-        This method apply a workflow for executing a complete IQPE
+        This method apply a workflow for executing a complete PE with QFT
         algorithm
 
         Parameters
@@ -112,7 +108,7 @@ class PhaseEstimationwQFT:
         #Create algorithm
         self.q_prog = self.apply_pe_wqft(self.q_prog, self.q_gate, self.q_aux)
         #Execute algorithm
-        self.results, self.circuit = self.run(
+        self.results, self.circuit = self.run_qprogram(
             self.q_prog,
             self.q_aux,
             self.shots,
@@ -209,12 +205,12 @@ class PhaseEstimationwQFT:
 
         """
         q_prog = deepcopy(q_prog_)
-        q_prog = PhaseEstimationwQFT.apply_controlled_operations(q_prog, q_gate, q_aux)
-        q_prog = PhaseEstimationwQFT.apply_inv_qft(q_prog, q_aux)
+        q_prog = PE_QFT.apply_controlled_operations(q_prog, q_gate, q_aux)
+        q_prog = PE_QFT.apply_inv_qft(q_prog, q_aux)
         return q_prog
 
     @staticmethod
-    def run(q_prog, q_aux, shots, linalg_qpu):
+    def run_qprogram(q_prog, q_aux, shots, linalg_qpu):
         """
         Executes a complete simulation
 
@@ -243,30 +239,15 @@ class PhaseEstimationwQFT:
         )
         del result['Amplitude']
         result['Phi'] = result['Int']/(2**lenght)
-        #circuit = create_qcircuit(q_prog)
-        #if shots == 0:
-        #    shots = 10
-        #    print('Number of shots can not be 0. It will be used: ',shots)
-
-        #job = create_qjob(
-        #    circuit,
-        #    shots=shots,
-        #    qubits=[q_aux]
-        #)
-        #result = linalg_qpu.submit(job)
-        #if not isinstance(result, Result):
-        #    result = result.join()
         return result, circuit
 
-
-
     @staticmethod
-    def post_proccess(InputPDF):
+    def post_proccess(input_pdf):
         """
         This function uses the results property and add it additional
         columns that are useful for Amplitude Amplification procedure
         """
-        final_results = InputPDF.copy(deep=True)
+        final_results = input_pdf.copy(deep=True)
         #Eigenvalue of the Grover-like operator
         final_results['2*theta'] = 2*np.pi*final_results['Phi']
         #Rotation angle for Grover-like operator.
@@ -282,7 +263,7 @@ class PhaseEstimationwQFT:
         #final_results['E_p(f)'] = np.sin(final_results['Theta'])**2
         return final_results
 
-class AE_PhaseEstimationwQFT:
+class PE_QFT_AE:
     """
     Class for doing Amplitude Estimation (AE) using Quantum Amplitude
     Estimation with QFT (PhaseEstimationwQFT)
@@ -324,11 +305,13 @@ class AE_PhaseEstimationwQFT:
             self.linalg_qpu = get_qpu()
         self.auxiliar_qbits_number = kwargs.get(
             'auxiliar_qbits_number', 8)
-        self.shots = kwargs.get('shots', 10)
+        self.shots = kwargs.get('shots', 100)
 
         #For storing results
         self.theta = None
         self.a = None        
+        self.pe_qft = None
+        self.final_results = None
     #####################################################################
     @property
     def oracle(self):
@@ -388,8 +371,8 @@ class AE_PhaseEstimationwQFT:
             'qpu' : self.linalg_qpu,
         }
 
-        self.pe_qft = PhaseEstimationwQFT(**dict_pe_qft)
-        self.pe_qft.pe_wqft()
+        self.pe_qft = PE_QFT(**dict_pe_qft)
+        self.pe_qft.pe_qft()
         self.final_results = self.pe_qft.final_results
         self.final_results.sort_values(
             'Probability',
