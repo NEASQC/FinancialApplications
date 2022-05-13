@@ -255,7 +255,7 @@ class IQAE:
         return np.sqrt(1/(2*N)*np.log(2/gamma))
 
 
-    def iqae(self,epsilon: float = None,N: int = None,alpha: float = None):
+    def iqae(self,epsilon: float = 0.01,N: int = 100,alpha: float = 0.05):
         """
         This function implements Algorithm 1 from the IQAE paper. The result
         is an estimation of the desired probability with precision at least
@@ -282,12 +282,6 @@ class IQAE:
            upper bound for the angle to be estimated
 
         """
-        if epsilon is None:
-            epsilon = self.epsilon
-        if alpha is None:
-            alpha = self.alpha
-        if N is None:
-            N = self.N
 
         #####################################################
         i = 0
@@ -323,7 +317,7 @@ class IQAE:
             if (k == k_old):
                 h_k = h_k+int(a*N)
                 N_effective = N_effective+N
-                a = h_k/N_effective 
+                a = h_k/N_effective
                 i = i-1
             else:
                 h_k = int(a*N)
@@ -339,18 +333,16 @@ class IQAE:
             theta_u = (2*np.pi*np.floor(K*theta_u/(2*np.pi))+theta_max)/K
 
         [a_l,a_u] = [np.sin(theta_l)**2,np.sin(theta_u)**2]
-        return [a_l, a_u, theta_l, theta_u]
+        return [a_l, a_u]
 
     def run(self):
-        [a_l, a_u, theta_l, theta_u] = self.iqae(
+        [self.a_l, self.a_u] = self.iqae(
             self.epsilon,
             self.N,
             self.alpha
         )
-        self.a_l = a_l
-        self.a_u = a_u
-        self.theta_l = theta_l
-        self.theta_u = theta_u
+        self.theta_l = np.arcsin(np.sqrt(self.a_l))
+        self.theta_u = np.arcsin(np.sqrt(self.a_u))
         self.theta = (self.theta_u+self.theta_l)/2.0
         self.a = (self.a_u+self.a_l)/2.0
         return self.a
