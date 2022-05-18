@@ -46,8 +46,14 @@ class IQAE:
         kwars : dictionary
             dictionary that allows the configuration of the IQAE algorithm:
             Implemented keys:
-        qpu : QLM solver
-            solver for simulating the resulting circutis
+            qpu : QLM solver
+                solver for simulating the resulting circutis
+            epsilon : float
+                precision
+            alpha : float
+                accuracy
+            N : int
+                number of measurements on each iteration
         """
         #Setting attributes
         self._oracle = deepcopy(oracle)
@@ -63,12 +69,12 @@ class IQAE:
         self.alpha = kwargs.get('alpha', 0.05)
         self.N = kwargs.get('N', 100)
 
-        self.a_l = None 
+        self.a_l = None
         self.a_u = None
         self.theta_l = None
         self.theta_u = None
-        self.theta = None 
-        self.a = None 
+        self.theta = None
+        self.a = None
 
     #####################################################################
     @property
