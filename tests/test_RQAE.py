@@ -12,27 +12,37 @@ import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
 from qat.core.console import display
 
-n = 3
-x = np.arange(2**n)
-f = -x/np.max(x)
+def test_rqae():
+    n = 3
+    x = np.arange(2**n)
+    f = -x/np.max(x)
+    
+    
+    oracle = qlm.QRoutine()
+    register = oracle.new_wires(n+1)
+    oracle.apply(dl.uniform_distribution(n),register[:n])
+    oracle.apply(dl.load_array(f),register)
+    
+    target = [0,0,1,1]
+    index = [0,1,2,3]
+    
+    q = 2
+    epsilon = 0.01
+    gamma = 0.05
+    rqae_dict = {
+        'epsilon': epsilon,
+        'q': q,
+        'gamma': gamma
+    }
 
+    rqae = RQAE(oracle,target,index, **rqae_dict)
+    a_real = f[bitfield_to_int(target)]
 
-oracle = qlm.QRoutine()
-register = oracle.new_wires(n+1)
-oracle.apply(dl.uniform_distribution(n),register[:n])
-oracle.apply(dl.load_array(f),register)
+    a_estimated = rqae.run()
+    a_low = rqae.a_l*np.sqrt(2)**n
+    a_up = rqae.a_u*np.sqrt(2)**n
 
-target = [0,0,1,1]
-index = [0,1,2,3]
+    
+    assert (a_real > a_low) and (a_real <= a_up)
 
-rqae = RQAE(oracle,target,index)
-q = 2
-epsilon = 0.01
-gamma = 0.05
-#RQAE.display_information(q = q,epsilon = epsilon, gamma = gamma)
-amplitude = rqae.run(q = q,epsilon = epsilon, gamma = gamma)
-
-assert (f[bitfield_to_int(target)]>np.sqrt(2)**n*amplitude[0]) and (f[bitfield_to_int(target)]<=np.sqrt(2)**n*amplitude[1])
-
-
-
+test_rqae()

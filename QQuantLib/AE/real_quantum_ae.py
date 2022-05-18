@@ -64,6 +64,7 @@ class RQAE:
         #Set the QPU to use
         self.linalg_qpu = kwargs.get('qpu')
         if self.linalg_qpu is None:
+            print('Not QPU was provide. Default QPU will be used')
             self.linalg_qpu = get_default_qpu()
         self.epsilon = kwargs.get('epsilon', 0.01)
         self.gamma = kwargs.get('gamma', 0.05)
