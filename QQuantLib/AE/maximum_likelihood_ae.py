@@ -67,8 +67,9 @@ class MLAE:
         self._grover_oracle = grover(self._oracle, self.target, self.index)
 
         #Set the QPU to use
-        self.linalg_qpu = kwargs.get('qpu')
+        self.linalg_qpu = kwargs.get('qpu', None)
         if self.linalg_qpu is None:
+            print('Not QPU was provide. Default QPU will be used')
             self.linalg_qpu = get_default_qpu()
         ##delta for avoid problems in 0 and pi/2 theta limits
         self.delta = kwargs.get('delta', 1.0e-5)

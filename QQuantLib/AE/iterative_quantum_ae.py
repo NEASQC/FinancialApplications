@@ -62,8 +62,9 @@ class IQAE:
         self._grover_oracle = grover(self.oracle,self.target,self.index)
 
         #Set the QPU to use
-        self.linalg_qpu = kwargs.get('qpu')
+        self.linalg_qpu = kwargs.get('qpu', None)
         if self.linalg_qpu is None:
+            print('Not QPU was provide. Default QPU will be used')
             self.linalg_qpu = get_default_qpu()
         self.epsilon = kwargs.get('epsilon', 0.01)
         self.alpha = kwargs.get('alpha', 0.05)

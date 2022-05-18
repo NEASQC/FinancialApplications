@@ -44,8 +44,8 @@ def test_maximum_likelihood():
         index=[pf_gate.arity-1],
         schedule=schedule
     )
-    angle = mlae_.optimize()
-    calculated_integral = np.sin(angle)[0]**2
+    estimated_a = mlae_.run()
+    calculated_integral = mlae_.a
     theoric_integral = np.sum(f_x*p_x)
     print(calculated_integral)
     print(theoric_integral)

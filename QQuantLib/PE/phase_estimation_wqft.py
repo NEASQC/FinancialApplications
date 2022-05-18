@@ -7,8 +7,8 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 from copy import deepcopy
 import numpy as np
 import qat.lang.AQASM as qlm
+from qat.qpus import get_default_qpu
 from QQuantLib.utils.data_extracting import create_qprogram
-from QQuantLib.utils.qlm_solver import get_qpu
 from QQuantLib.utils.utils import load_qn_gate, check_list_type
 from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.AA.amplitude_amplification import grover
@@ -61,9 +61,9 @@ class PE_QFT:
         #Set the QPU to use
         self.linalg_qpu = kwargs.get('qpu', None)#, get_qpu())
         if self.linalg_qpu is None:
-            self.linalg_qpu = get_qpu()
+            print('Not QPU was provide. Default QPU will be used')
+            self.linalg_qpu = get_default_qpu()
         self.shots = kwargs.get('shots', 10)
-        #self.zalo = kwargs.get('zalo', False)
 
         #Attributes not given as input
         self.q_prog = None
@@ -302,7 +302,8 @@ class PE_QFT_AE:
         #Set the QPU to use
         self.linalg_qpu = kwargs.get('qpu', None)#, get_qpu())
         if self.linalg_qpu is None:
-            self.linalg_qpu = get_qpu()
+            print('Not QPU was provide. Default QPU will be used')
+            self.linalg_qpu = get_default_qpu()
         self.auxiliar_qbits_number = kwargs.get(
             'auxiliar_qbits_number', 8)
         self.shots = kwargs.get('shots', 100)

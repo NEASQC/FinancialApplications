@@ -9,11 +9,6 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
 """
 
 from qat.qpus import PyLinalg
-global_qlmaas = True
-try:
-    from qlmaas.qpus import LinAlg
-except (ImportError, OSError) as exception:
-    global_qlmaas = False
 
 def get_qpu(qlmass=False):
     """
@@ -34,10 +29,11 @@ def get_qpu(qlmass=False):
     linal_qpu : solver for quantum jobs
     """
     if qlmass:
-        if global_qlmaas:
-            print('Using: LinAlg')
+        try:
+            from qlmaas.qpus import LinAlg
             linalg_qpu = LinAlg()
-        else:
+            print('Using: LinAlg')
+        except (ImportError, OSError) as exception:
             raise ImportError("""Problem Using QLMaaS.
             Please create config file or use mylm solver""")
     else:
