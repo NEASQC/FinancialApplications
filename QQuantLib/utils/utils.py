@@ -8,7 +8,6 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
 
 import time
 import numpy as np
-from scipy.stats import norm
 import qat.lang.AQASM as qlm
 
 # Convierte un entero n en un array de bits de longitud size
@@ -94,7 +93,7 @@ def expmod(n: int, b: int):
     """
     p = int(np.floor(np.log(n)/np.log(b)))
     r = int(n-b**p)
-    return (p,r)
+    return (p, r)
 
 
 @qlm.build_gate("Mask", [int, int], arity=lambda x, y: x)
@@ -338,201 +337,10 @@ def left_conditional_probability(initial_bins, probability):
     #Basically this is the f(j) function of the article with
     #j=0,1,2,...2^(i-1)-1 and i the number of qbits of the initial
     #domain division
-    with np.errstate(divide='ignore',invalid = 'ignore'):
+    with np.errstate(divide='ignore', invalid='ignore'):
         left_cond_prob = np.array(left_probabilities)/np.array(prob4dd)
     left_cond_prob[np.isnan(left_cond_prob)] = 0
     return left_cond_prob
-
-
-def bs_density(s_t: float,s_0: float,r: float,volatility: float,maturity: float):
-    r""" Evaluates the Black-Scholes density function at s_t
-    for a given set of parameters. The formula is:
-
-    .. math::
-        \dfrac{1}{S_T\sigma\sqrt{2\pi T}}\exp\left(-\dfrac{\left(\log(S_T)-\mu\right)}{2\sigma^2T}\right)
-
-    where :math:`\mu = (r-0.5\sigma)T+\log(S_0)`.
-
-    Parameters
-    ----------
-        s_t : float
-            point where we do the evaluation
-        s_0 : float
-            current price
-        r : float
-            risk free rate
-        volatility : float
-            the volatility
-        maturity: float
-            the maturity
-
-    Returns
-    -------
-        density : float
-            value of the Black-Scholes denisty function
-            in s_t
-    """
-    mean = (r-0.5*volatility*volatility)*maturity+np.log(s_0)
-    factor = s_t*volatility*np.sqrt(2*np.pi*maturity)
-    exponent = -(np.log(s_t)-mean)**2/(2*volatility*volatility*maturity)
-    density = np.exp(exponent)/factor
-    return density
-
-def bs_probability(s_t: np.array,s_0: float,r: float,volatility: float,maturity: float):
-    r""" Computes a discrete probability distribution from the  Black-Scholes 
-    density function for a given set of parameters. This is done by evaluating
-    the Black-Scholes density function in s_t and the normlising this result.
-
-    Parameters
-    ----------
-        s_t : numpy array
-            points where we define the discrete probability distribution
-        s_0 : float
-            current price
-        r : float
-            risk free rate
-        volatility : float
-            the volatility
-        maturity: float
-            the maturity
-
-    Returns
-    -------
-        distribution : numpy array
-            discrete probability distribution from Black-Scholes density
-    """
-    density = bs_density(s_t,s_0,r,volatility,maturity)
-    return density/np.sum(density)
-
-def bs_call_price(s_0: float,r: float,volatility: float,maturity: float,strike: float):
-    r""" Computes the price for a european call option.
-    The formula is:
-
-    .. math::
-        C(S,T) = S\Phi(d_1)-Ke^{-rT}\Phi(d_2)
-
-
-    Parameters
-    ----------
-        s_0 : float
-            current price of the underlying
-        r : float
-            risk free rate
-        volatility : float
-            the volatility
-        maturity : float
-            the maturity
-        strike : float
-            the strike
-
-    Returns
-    -------
-        price : float
-            price of the european call option
-    """
-    first = np.log(s_0/strike)
-    positive = (r+volatility*volatility/2)*maturity
-    negative = (r-volatility*volatility/2)*maturity
-    d_1 = (first+positive)/(volatility*np.sqrt(maturity))
-    d_2 = (first+negative)/(volatility*np.sqrt(maturity))
-    price = s_0*norm.cdf(d_1)-strike*np.exp(-r*maturity)*norm.cdf(d_2)
-    return price
-
-def bs_put_price(s_0: float,r: float,volatility: float,maturity: float,strike: float):
-    r""" Computes the price for a european put option.
-    The formula is:
-
-    .. math::
-        C(S,T) = Ke^{-rT}\Phi(-d_2)-S\Phi(-d_1)
-
-
-    Parameters
-    ----------
-        s_0 : float
-            current price of the underlying
-        r : float
-            risk free rate
-        volatility : float
-            the volatility
-        maturity : float
-            the maturity
-        strike : float
-            the strike
-
-    Returns
-    -------
-        price : float
-            price of the european put option
-    """
-    first = np.log(s_0/strike)
-    positive = (r+volatility*volatility/2)*maturity
-    negative = (r-volatility*volatility/2)*maturity
-    d_1 = (first+positive)/(volatility*np.sqrt(maturity))
-    d_2 = (first+negative)/(volatility*np.sqrt(maturity))
-    price = strike*np.exp(-r*maturity)*norm.cdf(-d_2)-s_0*norm.cdf(-d_1)
-    return price
-
-def call_payoff(s_t: float,strike: float):
-    r""" Computes the payoff of a european call option.
-    
-    .. math::
-        C(S_T,K) = \left(S_T-K,0\right)^+
-
-    Parameters
-    ----------
-        s_t : float
-            price
-        strike : float
-            the strike
-
-    Returns
-    -------
-        payoff : float
-            the payoff
-    """
-    return np.maximum(s_t-strike,0)
-
-def put_payoff(s_t: float,strike: float):
-    r""" Computes the payoff of a european put option.
-    
-    .. math::
-        P(S_T,K) = \left(K-S_T,0\right)^+
-
-    Parameters
-    ----------
-        s_t : float
-            price
-        strike : float
-            the strike
-
-    Returns
-    -------
-        payoff : float
-            the payoff
-    """
-    return np.maximum(strike-s_t,0)
-
-def futures_payoff(s_t: float,strike: float):
-    r""" Computes the payoff of a futures contract.
-    
-    .. math::
-        F(S_T,K) = \left(S_T-K,0\right)
-
-    Parameters
-    ----------
-        s_t : float
-            price
-        strike : float
-            the strike
-
-    Returns
-    -------
-        payoff : float
-            the payoff
-    """
-    return s_t-strike
-
-
 
 def get_histogram(p, a, b, nbin):
     """
@@ -607,4 +415,3 @@ def load_qn_gate(qlm_gate, n_times):
             q_rout.apply(qlm_gate, q_bits)
         return q_rout
     return q_n_gate()
-
