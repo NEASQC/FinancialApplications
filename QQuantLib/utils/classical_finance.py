@@ -167,7 +167,7 @@ def bs_SDE_solution(x: np.array, s_0: float, r: float, volatility: float, maturi
     and the probability density of that value of the underlying.
     The formulas are:
     .. math::
-        S_T = S_0e^{\sigmax+(r-\sigma^2/2)t}
+        S_T = S_0e^{\sigma x+(r-\sigma^2/2)t}
         p(S_T(x)) = N(x;mean = 0, variance = T)
     Parameters
     ----------

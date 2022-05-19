@@ -396,6 +396,7 @@ class MLAE:
         self.theta, self.h_k, self.partial_cost_function = self.mlae(
             self.schedule, self.optimizer
         )
+        self.theta = self.theta[0]
         self.a = np.sin(self.theta)**2
         result = self.a
         return result
