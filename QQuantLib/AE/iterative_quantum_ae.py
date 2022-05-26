@@ -52,7 +52,7 @@ class IQAE:
                 precision
             alpha : float
                 accuracy
-            N : int
+            shots : int
                 number of measurements on each iteration
         """
         #Setting attributes
@@ -68,7 +68,7 @@ class IQAE:
             self.linalg_qpu = get_default_qpu()
         self.epsilon = kwargs.get('epsilon', 0.01)
         self.alpha = kwargs.get('alpha', 0.05)
-        self.N = kwargs.get('N', 100)
+        self.shots = kwargs.get('shots', 100)
 
         self.a_l = None
         self.a_u = None
@@ -195,7 +195,7 @@ class IQAE:
 
         return [theta_min,theta_max]
 
-    def display_information(self, epsilon: float = None,N: int = None,alpha: float = None):
+    def display_information(self, epsilon: float = 0.01, shots: int = 100, alpha: float = 0.05):
         """
         This function displays information of the properties of the method for a given
         set of parameters
@@ -206,18 +206,13 @@ class IQAE:
             precision
         alpha : float
             accuracy
-        N : int
+        shots : int
             number of measurements on each iteration
 
         Returns
         ----------
         """
-        if epsilon is None:
-            epsilon = self.epsilon
-        if alpha is None:
-            alpha = self.alpha
-        if N is None:
-            N = self.N
+        N = shots
 
         print("-------------------------------------------------------------")
         print('epsilon: ', epsilon)
@@ -262,7 +257,7 @@ class IQAE:
         return np.sqrt(1/(2*N)*np.log(2/gamma))
 
 
-    def iqae(self,epsilon: float = 0.01,N: int = 100,alpha: float = 0.05):
+    def iqae(self, epsilon: float = 0.01, shots: int = 100, alpha: float = 0.05):
         """
         This function implements Algorithm 1 from the IQAE paper. The result
         is an estimation of the desired probability with precision at least
@@ -274,7 +269,7 @@ class IQAE:
             precision
         alpha : float
             accuracy
-        N : int
+        shots : int
             number of measurements on each iteration
 
         Returns
@@ -289,7 +284,8 @@ class IQAE:
            upper bound for the angle to be estimated
 
         """
-
+        
+        N = shots
         #####################################################
         i = 0
         k = int(0)
@@ -344,9 +340,9 @@ class IQAE:
 
     def run(self):
         [self.a_l, self.a_u] = self.iqae(
-            self.epsilon,
-            self.N,
-            self.alpha
+            epsilon = self.epsilon,
+            shots = self.shots,
+            alpha = self.alpha
         )
         self.theta_l = np.arcsin(np.sqrt(self.a_l))
         self.theta_u = np.arcsin(np.sqrt(self.a_u))
