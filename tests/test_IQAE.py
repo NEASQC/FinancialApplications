@@ -30,7 +30,7 @@ def test_iqae():
     N_shots = 100
     iqae_dict = {
         'epsilon': epsilon,
-        'N': N_shots,
+        'shots': N_shots,
         'alpha': alpha,
     }
     
