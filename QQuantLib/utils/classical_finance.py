@@ -9,8 +9,9 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
 import numpy as np
 from scipy.stats import norm
 
-def call_payoff(s_t: float, strike: float):
-    r""" Computes the payoff of a european call option.
+
+def call_payoff(s_t: float, strike: float, **kwargs):
+    r"""Computes the payoff of a european call option.
 
     Notes
     -----
@@ -29,10 +30,11 @@ def call_payoff(s_t: float, strike: float):
     payoff : float
         the payoff
     """
-    return np.maximum(s_t-strike, 0)
+    return np.maximum(s_t - strike, 0)
 
-def put_payoff(s_t: float, strike: float):
-    r""" Computes the payoff of a european put option.
+
+def put_payoff(s_t: float, strike: float, **kwargs):
+    r"""Computes the payoff of a european put option.
 
     Notes
     -----
@@ -51,10 +53,11 @@ def put_payoff(s_t: float, strike: float):
     payoff : float
         the payoff
     """
-    return np.maximum(strike-s_t, 0)
+    return np.maximum(strike - s_t, 0)
 
-def futures_payoff(s_t: float, strike: float):
-    r""" Computes the payoff of a futures contract.
+
+def futures_payoff(s_t: float, strike: float, **kwargs):
+    r"""Computes the payoff of a futures contract.
 
     Notes
     -----
@@ -73,10 +76,11 @@ def futures_payoff(s_t: float, strike: float):
     payoff : float
         the payoff
     """
-    return s_t-strike
+    return s_t - strike
 
-def digital_call_payoff(s_t: float, strike: float, coupon: float = 1.):
-    r""" Computes the payoff for a digital(binary) call option.
+
+def digital_call_payoff(s_t: float, strike: float, coupon: float = 1.0, **kwargs):
+    r"""Computes the payoff for a digital(binary) call option.
     The formula is:
 
     Notes
@@ -102,8 +106,9 @@ def digital_call_payoff(s_t: float, strike: float, coupon: float = 1.):
     """
     return np.where(s_t > strike, coupon, 0.0)
 
-def digital_put_payoff(s_t: float, strike: float, coupon: float = 1.):
-    r""" Computes the payoff for a digital(binary) put option.
+
+def digital_put_payoff(s_t: float, strike: float, coupon: float = 1.0, **kwargs):
+    r"""Computes the payoff for a digital(binary) put option.
     The formula is:
 
     Notes
@@ -130,15 +135,17 @@ def digital_put_payoff(s_t: float, strike: float, coupon: float = 1.):
     return np.where(s_t < strike, coupon, 0.0)
 
 
-def bs_density(s_t: float, s_0: float, r: float, volatility: float, maturity: float):
-    r""" Evaluates the Black-Scholes density function at s_t
+def bs_density(
+    s_t: float, s_0: float, risk_free_rate: float, volatility: float, maturity: float, **kwargs
+):
+    r"""Evaluates the Black-Scholes density function at s_t
     for a given set of parameters. The formula is:
 
     Notes
     -----
     .. math::
         \dfrac{1}{S_T\sigma\sqrt{2\pi T}}\exp\left(-\dfrac{\left(\log(S_T)-\mu\right)}{2\sigma^2T}\right)
-    where :math:`\mu = (r-0.5\sigma)T+\log(S_0)`.
+    where :math:`\mu = (risk_free_rate-0.5\sigma)T+\log(S_0)`.
 
     Parameters
     ----------
@@ -146,7 +153,7 @@ def bs_density(s_t: float, s_0: float, r: float, volatility: float, maturity: fl
         point where we do the evaluation
     s_0 : float
         current price
-    r : float
+    risk_free_rate : float
         risk free rate
     volatility : float
         the volatility
@@ -159,14 +166,17 @@ def bs_density(s_t: float, s_0: float, r: float, volatility: float, maturity: fl
         value of the Black-Scholes denisty function
         in s_t
     """
-    mean = (r-0.5*volatility*volatility)*maturity+np.log(s_0)
-    factor = s_t*volatility*np.sqrt(2*np.pi*maturity)
-    exponent = -(np.log(s_t)-mean)**2/(2*volatility*volatility*maturity)
-    density = np.exp(exponent)/factor
+    mean = (risk_free_rate - 0.5 * volatility * volatility) * maturity + np.log(s_0)
+    factor = s_t * volatility * np.sqrt(2 * np.pi * maturity)
+    exponent = -((np.log(s_t) - mean) ** 2) / (2 * volatility * volatility * maturity)
+    density = np.exp(exponent) / factor
     return density
 
-def bs_probability(s_t: np.array, s_0: float, r: float, volatility: float, maturity: float):
-    r""" Computes a discrete probability distribution from the  Black-Scholes
+
+def bs_probability(
+    s_t: np.array, s_0: float, risk_free_rate: float, volatility: float, maturity: float, **kwargs
+):
+    r"""Computes a discrete probability distribution from the  Black-Scholes
     density function for a given set of parameters. This is done by evaluating
     the Black-Scholes density function in s_t and the normlising this result.
 
@@ -176,7 +186,7 @@ def bs_probability(s_t: np.array, s_0: float, r: float, volatility: float, matur
         points where we define the discrete probability distribution
     s_0 : float
         current price
-    r : float
+    risk_free_rate : float
         risk free rate
     volatility : float
         the volatility
@@ -188,18 +198,21 @@ def bs_probability(s_t: np.array, s_0: float, r: float, volatility: float, matur
     distribution : numpy array
         discrete probability distribution from Black-Scholes density
     """
-    density = bs_density(s_t, s_0, r, volatility, maturity)
-    return density/np.sum(density)
+    density = bs_density(s_t, s_0, risk_free_rate, volatility, maturity)
+    return density / np.sum(density)
 
-def bs_SDE_solution(x: np.array, s_0: float, r: float, volatility: float, maturity: float):
-    r""" For a certain parametrization $x$ it returns a value of the underlying $S_T(x)$
+
+def bs_SDE_solution(
+    x: np.array, s_0: float, risk_free_rate: float, volatility: float, maturity: float, **kwargs
+):
+    r"""For a certain parametrization $x$ it returns a value of the underlying $S_T(x)$
     and the probability density of that value of the underlying.
     The formulas are:
 
     Notes
     -----
     .. math::
-        S_T = S_0e^{\sigma x+(r-\sigma^2/2)t}
+        S_T = S_0e^{\sigma x+(risk_free_rate-\sigma^2/2)t}
         p(S_T(x)) = N(x;mean = 0, variance = T)
 
     Parameters
@@ -208,7 +221,7 @@ def bs_SDE_solution(x: np.array, s_0: float, r: float, volatility: float, maturi
         parametrization
     s_0 : float
         current price of the underlying
-    r : float
+    risk_free_rate : float
         risk free rate
     volatility : float
         the volatility
@@ -222,13 +235,16 @@ def bs_SDE_solution(x: np.array, s_0: float, r: float, volatility: float, maturi
     probability_density : numpy array
         probability density corresponding to s_t
     """
-    probability = norm.pdf(x)*np.sqrt(maturity)
-    probability = probability/np.sum(probability)
-    s_t = s_0*np.exp(volatility*x+(r-volatility*volatility/2)*maturity)
+    probability = norm.pdf(x) * np.sqrt(maturity)
+    probability = probability / np.sum(probability)
+    s_t = s_0 * np.exp(volatility * x + (risk_free_rate - volatility * volatility / 2) * maturity)
     return s_t, probability
 
-def bs_call_price(s_0: float, r: float, volatility: float, maturity: float, strike: float):
-    r""" Computes the price for a european call option.
+
+def bs_call_price(
+    s_0: float, risk_free_rate: float, volatility: float, maturity: float, strike: float, **kwargs
+):
+    r"""Computes the price for a european call option.
     The formula is:
 
     Notes
@@ -240,7 +256,7 @@ def bs_call_price(s_0: float, r: float, volatility: float, maturity: float, stri
     ----------
     s_0 : float
         current price of the underlying
-    r : float
+    risk_free_rate : float
         risk free rate
     volatility : float
         the volatility
@@ -254,16 +270,19 @@ def bs_call_price(s_0: float, r: float, volatility: float, maturity: float, stri
     price : float
         price of the european call option
     """
-    first = np.log(s_0/strike)
-    positive = (r+volatility*volatility/2)*maturity
-    negative = (r-volatility*volatility/2)*maturity
-    d_1 = (first+positive)/(volatility*np.sqrt(maturity))
-    d_2 = (first+negative)/(volatility*np.sqrt(maturity))
-    price = s_0*norm.cdf(d_1)-strike*np.exp(-r*maturity)*norm.cdf(d_2)
+    first = np.log(s_0 / strike)
+    positive = (risk_free_rate + volatility * volatility / 2) * maturity
+    negative = (risk_free_rate - volatility * volatility / 2) * maturity
+    d_1 = (first + positive) / (volatility * np.sqrt(maturity))
+    d_2 = (first + negative) / (volatility * np.sqrt(maturity))
+    price = s_0 * norm.cdf(d_1) - strike * np.exp(-risk_free_rate * maturity) * norm.cdf(d_2)
     return price
 
-def bs_put_price(s_0: float, r: float, volatility: float, maturity: float, strike: float):
-    r""" Computes the price for a european put option.
+
+def bs_put_price(
+    s_0: float, risk_free_rate: float, volatility: float, maturity: float, strike: float, **kwargs
+):
+    r"""Computes the price for a european put option.
     The formula is:
 
     Notes
@@ -275,7 +294,7 @@ def bs_put_price(s_0: float, r: float, volatility: float, maturity: float, strik
     ----------
     s_0 : float
         current price of the underlying
-    r : float
+    risk_free_rate : float
         risk free rate
     volatility : float
         the volatility
@@ -289,17 +308,25 @@ def bs_put_price(s_0: float, r: float, volatility: float, maturity: float, strik
     price : float
         price of the european put option
     """
-    first = np.log(s_0/strike)
-    positive = (r+volatility*volatility/2)*maturity
-    negative = (r-volatility*volatility/2)*maturity
-    d_1 = (first+positive)/(volatility*np.sqrt(maturity))
-    d_2 = (first+negative)/(volatility*np.sqrt(maturity))
-    price = strike*np.exp(-r*maturity)*norm.cdf(-d_2)-s_0*norm.cdf(-d_1)
+    first = np.log(s_0 / strike)
+    positive = (risk_free_rate + volatility * volatility / 2) * maturity
+    negative = (risk_free_rate - volatility * volatility / 2) * maturity
+    d_1 = (first + positive) / (volatility * np.sqrt(maturity))
+    d_2 = (first + negative) / (volatility * np.sqrt(maturity))
+    price = strike * np.exp(-risk_free_rate * maturity) * norm.cdf(-d_2) - s_0 * norm.cdf(-d_1)
     return price
 
 
-def bs_digital_call_price(s_0: float, r: float, volatility: float, maturity: float, strike: float, coupon: float):
-    r""" Computes the price for a digital(binary) call option.
+def bs_digital_call_price(
+    s_0: float,
+    risk_free_rate: float,
+    volatility: float,
+    maturity: float,
+    strike: float,
+    coupon: float,
+    **kwargs
+):
+    r"""Computes the price for a digital(binary) call option.
     The formula is:
 
     Notes
@@ -311,7 +338,7 @@ def bs_digital_call_price(s_0: float, r: float, volatility: float, maturity: flo
     ----------
     s_0 : float
         current price of the underlying
-    r : float
+    risk_free_rate : float
         risk free rate
     volatility : float
         the volatility
@@ -329,14 +356,23 @@ def bs_digital_call_price(s_0: float, r: float, volatility: float, maturity: flo
     price : float
         price of the european digital call option
     """
-    first = np.log(s_0/strike)
-    negative = (r-volatility*volatility/2)*maturity
-    d_2 = (first+negative)/(volatility*np.sqrt(maturity))
-    price = coupon*np.exp(-r*maturity)*norm.cdf(d_2)
+    first = np.log(s_0 / strike)
+    negative = (risk_free_rate - volatility * volatility / 2) * maturity
+    d_2 = (first + negative) / (volatility * np.sqrt(maturity))
+    price = coupon * np.exp(-risk_free_rate * maturity) * norm.cdf(d_2)
     return price
 
-def bs_digital_put_price(s_0: float, r: float, volatility: float, maturity: float, strike: float, coupon: float):
-    r""" Computes the price for a digital (binary) put option.
+
+def bs_digital_put_price(
+    s_0: float,
+    risk_free_rate: float,
+    volatility: float,
+    maturity: float,
+    strike: float,
+    coupon: float,
+    **kwargs
+):
+    r"""Computes the price for a digital (binary) put option.
     The formula is:
 
     Notes
@@ -348,7 +384,7 @@ def bs_digital_put_price(s_0: float, r: float, volatility: float, maturity: floa
     ----------
     s_0 : float
         current price of the underlying
-    r : float
+    risk_free_rate : float
         risk free rate
     volatility : float
         the volatility
@@ -366,26 +402,34 @@ def bs_digital_put_price(s_0: float, r: float, volatility: float, maturity: floa
     price : float
         price of the european digital call option
     """
-    first = np.log(s_0/strike)
-    negative = (r-volatility*volatility/2)*maturity
-    d_2 = (first+negative)/(volatility*np.sqrt(maturity))
-    price = coupon*np.exp(-r*maturity)*norm.cdf(-d_2)
+    first = np.log(s_0 / strike)
+    negative = (risk_free_rate - volatility * volatility / 2) * maturity
+    d_2 = (first + negative) / (volatility * np.sqrt(maturity))
+    price = coupon * np.exp(-risk_free_rate * maturity) * norm.cdf(-d_2)
     return price
 
-def bs_exact_samples(s_0: float, r: float, volatility: float, maturity: float, number_samples: int):
-    r""" Computes samples from the exact solution of the Black-Scholes SDE.
+
+def bs_exact_samples(
+    s_0: float,
+    risk_free_rate: float,
+    volatility: float,
+    maturity: float,
+    number_samples: int,
+    **kwargs
+):
+    r"""Computes samples from the exact solution of the Black-Scholes SDE.
     The formula is:
 
     Notes
     -----
     .. math::
-        S_T = S_0e^{\sigma*W_t+(r-\sigma^2/2)t}
+        S_T = S_0e^{\sigma*W_t+(risk_free_rate-\sigma^2/2)t}
 
     Parameters
     ----------
     s_0 : float
         current price of the underlying
-    r : float
+    risk_free_rate : float
         risk free rate
     volatility : float
         the volatility
@@ -401,12 +445,21 @@ def bs_exact_samples(s_0: float, r: float, volatility: float, maturity: float, n
     s_t : numpy array of floats
         array of samples from the SDE.
     """
-    dW_t = np.random.randn(number_samples)*np.sqrt(maturity)
-    s_t = s_0*np.exp(volatility*dW_t+(r-volatility*volatility/2)*maturity)
+    dW_t = np.random.randn(number_samples) * np.sqrt(maturity)
+    s_t = s_0 * np.exp(volatility * dW_t + (risk_free_rate - volatility * volatility / 2) * maturity)
     return s_t
 
-def bs_em_samples(s_0: float, r: float, volatility: float, maturity: float, number_samples: int, time_steps: int):
-    r""" Computes samples from the approximated solution of the Black-Scholes SDE
+
+def bs_em_samples(
+    s_0: float,
+    risk_free_rate: float,
+    volatility: float,
+    maturity: float,
+    number_samples: int,
+    time_steps: int,
+    **kwargs
+):
+    r"""Computes samples from the approximated solution of the Black-Scholes SDE
             using the Euler-Maruyama discretization.
     The formula is:
 
@@ -419,7 +472,7 @@ def bs_em_samples(s_0: float, r: float, volatility: float, maturity: float, numb
     ----------
     s_0 : float
         current price of the underlying
-    r : float
+    risk_free_rate : float
         risk free rate
     volatility : float
         the volatility
@@ -437,16 +490,26 @@ def bs_em_samples(s_0: float, r: float, volatility: float, maturity: float, numb
     s_t : numpy array of floats
         array of samples from the SDE.
     """
-    dt = maturity/time_steps
-    s_t = np.ones(number_samples)*s_0
+    dt = maturity / time_steps
+    s_t = np.ones(number_samples) * s_0
     for i in range(time_steps):
-        dW_t = np.random.randn(number_samples)*np.sqrt(dt)
-        s_t = s_t+r*s_t*dt+volatility*s_t*dW_t
+        dW_t = np.random.randn(number_samples) * np.sqrt(dt)
+        s_t = s_t + risk_free_rate * s_t * dt + volatility * s_t * dW_t
     return s_t
 
-def bs_tree(s_0: float, r: float, volatility: float, maturity: float, \
-        number_samples: int, time_steps: int, discretization: int, bounds: float):
-    r""" Computes the probabilities of all possible pahts
+
+def bs_tree(
+    s_0: float,
+    risk_free_rate: float,
+    volatility: float,
+    maturity: float,
+    number_samples: int,
+    time_steps: int,
+    discretization: int,
+    bounds: float,
+    **kwargs
+):
+    r"""Computes the probabilities of all possible pahts
          from the approximated solution of the Black-Scholes SDE
          using the Euler-Maruyama discretization
          for a given discretization of the brownian motion.
@@ -455,7 +518,7 @@ def bs_tree(s_0: float, r: float, volatility: float, maturity: float, \
     ----------
     s_0 : float
         current price of the underlying
-    r : float
+    risk_free_rate : float
         risk free rate
     volatility : float
         the volatility
@@ -478,29 +541,36 @@ def bs_tree(s_0: float, r: float, volatility: float, maturity: float, \
     s_t : numpy array of floats
         array of samples from the SDE.
     """
-    dt = maturity/time_steps
+    dt = maturity / time_steps
     x = np.linspace(-bounds, bounds, discretization)
     p_x = norm.pdf(x)
-    p_x = p_x/np.sum(p_x)
+    p_x = p_x / np.sum(p_x)
 
     s_t = []
     p_t = []
     s_t.append(np.array([s_0]))
-    p_t.append(np.array([1.]))
+    p_t.append(np.array([1.0]))
     for i in range(time_steps):
-        all_possible_paths = np.array(np.zeros(discretization**(i+1)))
-        all_possible_probabilities = np.array(np.zeros(discretization**(i+1)))
+        all_possible_paths = np.array(np.zeros(discretization ** (i + 1)))
+        all_possible_probabilities = np.array(np.zeros(discretization ** (i + 1)))
         for j in range(len(s_t[i])):
-            single_possible_paths = s_t[i][j]+r*s_t[i][j]*dt+volatility*s_t[i][j]*x*np.sqrt(dt)
-            single_possible_probabilities = p_t[i][j]*p_x
+            single_possible_paths = (
+                s_t[i][j]
+                + risk_free_rate * s_t[i][j] * dt
+                + volatility * s_t[i][j] * x * np.sqrt(dt)
+            )
+            single_possible_probabilities = p_t[i][j] * p_x
 
-            index = j*discretization
-            all_possible_paths[index:index+discretization] = single_possible_paths
-            all_possible_probabilities[index:index+discretization] = single_possible_probabilities
+            index = j * discretization
+            all_possible_paths[index : index + discretization] = single_possible_paths
+            all_possible_probabilities[
+                index : index + discretization
+            ] = single_possible_probabilities
 
         s_t.append(all_possible_paths)
         p_t.append(all_possible_probabilities)
     return s_t, p_t
 
-def geometric_sum(base: float, exponent: int, a: float = 1.0):
-    return a*(base**(exponent+1)-1)/(base-1)
+
+def geometric_sum(base: float, exponent: int, a: float = 1.0, **kwargs):
+    return a * (base ** (exponent + 1) - 1) / (base - 1)
