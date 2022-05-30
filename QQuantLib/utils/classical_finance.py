@@ -135,9 +135,7 @@ def digital_put_payoff(s_t: float, strike: float, coupon: float = 1.0, **kwargs)
     return np.where(s_t < strike, coupon, 0.0)
 
 
-def bs_density(
-    s_t: float, s_0: float, risk_free_rate: float, volatility: float, maturity: float, **kwargs
-):
+def bs_density( s_t: float, s_0: float, risk_free_rate: float, volatility: float, maturity: float, **kwargs):
     r"""Evaluates the Black-Scholes density function at s_t
     for a given set of parameters. The formula is:
 
@@ -173,9 +171,7 @@ def bs_density(
     return density
 
 
-def bs_probability(
-    s_t: np.array, s_0: float, risk_free_rate: float, volatility: float, maturity: float, **kwargs
-):
+def bs_probability( s_t: np.array, s_0: float, risk_free_rate: float, volatility: float, maturity: float, **kwargs):
     r"""Computes a discrete probability distribution from the  Black-Scholes
     density function for a given set of parameters. This is done by evaluating
     the Black-Scholes density function in s_t and the normlising this result.
@@ -202,9 +198,7 @@ def bs_probability(
     return density / np.sum(density)
 
 
-def bs_SDE_solution(
-    x: np.array, s_0: float, risk_free_rate: float, volatility: float, maturity: float, **kwargs
-):
+def bs_SDE_solution( x: np.array, s_0: float, risk_free_rate: float, volatility: float, maturity: float, **kwargs):
     r"""For a certain parametrization $x$ it returns a value of the underlying $S_T(x)$
     and the probability density of that value of the underlying.
     The formulas are:
@@ -241,9 +235,7 @@ def bs_SDE_solution(
     return s_t, probability
 
 
-def bs_call_price(
-    s_0: float, risk_free_rate: float, volatility: float, maturity: float, strike: float, **kwargs
-):
+def bs_call_price( s_0: float, risk_free_rate: float, volatility: float, maturity: float, strike: float, **kwargs):
     r"""Computes the price for a european call option.
     The formula is:
 
@@ -279,9 +271,7 @@ def bs_call_price(
     return price
 
 
-def bs_put_price(
-    s_0: float, risk_free_rate: float, volatility: float, maturity: float, strike: float, **kwargs
-):
+def bs_put_price( s_0: float, risk_free_rate: float, volatility: float, maturity: float, strike: float, **kwargs):
     r"""Computes the price for a european put option.
     The formula is:
 
@@ -317,15 +307,7 @@ def bs_put_price(
     return price
 
 
-def bs_digital_call_price(
-    s_0: float,
-    risk_free_rate: float,
-    volatility: float,
-    maturity: float,
-    strike: float,
-    coupon: float,
-    **kwargs
-):
+def bs_digital_call_price( s_0: float, risk_free_rate: float, volatility: float, maturity: float, strike: float, coupon: float, **kwargs):
     r"""Computes the price for a digital(binary) call option.
     The formula is:
 
@@ -363,15 +345,7 @@ def bs_digital_call_price(
     return price
 
 
-def bs_digital_put_price(
-    s_0: float,
-    risk_free_rate: float,
-    volatility: float,
-    maturity: float,
-    strike: float,
-    coupon: float,
-    **kwargs
-):
+def bs_digital_put_price( s_0: float, risk_free_rate: float, volatility: float, maturity: float, strike: float, coupon: float, **kwargs):
     r"""Computes the price for a digital (binary) put option.
     The formula is:
 
@@ -409,14 +383,7 @@ def bs_digital_put_price(
     return price
 
 
-def bs_exact_samples(
-    s_0: float,
-    risk_free_rate: float,
-    volatility: float,
-    maturity: float,
-    number_samples: int,
-    **kwargs
-):
+def bs_exact_samples( s_0: float, risk_free_rate: float, volatility: float, maturity: float, number_samples: int, **kwargs):
     r"""Computes samples from the exact solution of the Black-Scholes SDE.
     The formula is:
 
@@ -450,15 +417,7 @@ def bs_exact_samples(
     return s_t
 
 
-def bs_em_samples(
-    s_0: float,
-    risk_free_rate: float,
-    volatility: float,
-    maturity: float,
-    number_samples: int,
-    time_steps: int,
-    **kwargs
-):
+def bs_em_samples( s_0: float, risk_free_rate: float, volatility: float, maturity: float, number_samples: int, time_steps: int, **kwargs):
     r"""Computes samples from the approximated solution of the Black-Scholes SDE
             using the Euler-Maruyama discretization.
     The formula is:
@@ -498,17 +457,7 @@ def bs_em_samples(
     return s_t
 
 
-def bs_tree(
-    s_0: float,
-    risk_free_rate: float,
-    volatility: float,
-    maturity: float,
-    number_samples: int,
-    time_steps: int,
-    discretization: int,
-    bounds: float,
-    **kwargs
-):
+def bs_tree( s_0: float, risk_free_rate: float, volatility: float, maturity: float, number_samples: int, time_steps: int, discretization: int, bounds: float, **kwargs):
     r"""Computes the probabilities of all possible pahts
          from the approximated solution of the Black-Scholes SDE
          using the Euler-Maruyama discretization
