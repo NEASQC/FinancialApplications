@@ -7,4 +7,5 @@ The **utils** package groups python auxiliary modules used by the other packages
 
     utils_utils.rst
     data_extracting.rst
+    classical_finance.rst
 

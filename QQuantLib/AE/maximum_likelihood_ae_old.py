@@ -12,7 +12,6 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 """
 
 from copy import deepcopy
-from functools import partial
 import numpy as np
 import scipy.optimize as so
 import qat.lang.AQASM as qlm
@@ -20,7 +19,6 @@ from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.utils.utils import bitfield_to_int, check_list_type, load_qn_gate
-from QQuantLib.utils.utils import load_qn_gate, check_list_type
 
 
 
@@ -50,16 +48,14 @@ class MLAE:
         kwars : dictionary
             dictionary that allows the configuration of the MLAE algorithm:
             Implemented keys:
-                qpu : QLM solver
-                    solver for simulating the resulting circuits
-                schedule : list of two lists
-                    the schedule for the algorithm
-                optimizer :
-                    an optimizer with just one possible entry
-                delta : float
-                    tolerance to avoid division by zero warnings
-                ns : int
-                    number of grid points for brute scipy optimizer
+        qpu : QLM solver
+            solver for simulating the resulting circutis
+        schedule : list of two lists
+            the schedule for the algorithm
+        optimizer :
+            an optimizer with just one possible entry
+        delta : float
+            tolerance to avoid division by zero warnings
         """
         #Setting attributes
         self._oracle = deepcopy(oracle)
@@ -68,18 +64,16 @@ class MLAE:
         self._grover_oracle = grover(self._oracle, self.target, self.index)
 
         #Set the QPU to use
-        self.linalg_qpu = kwargs.get('qpu', None)
+        self.linalg_qpu = kwargs.get('qpu')
         if self.linalg_qpu is None:
-            print('Not QPU was provide. Default QPU will be used')
             self.linalg_qpu = get_default_qpu()
         ##delta for avoid problems in 0 and pi/2 theta limits
         self.delta = kwargs.get('delta', 1.0e-5)
-        #ns for the brute force optimizer
-        self.ns = kwargs.get('ns', 1000)
 
         # The schedule of the method
         self.m_k = None
         self.n_k = None
+        self.h_k = None
         schedule = kwargs.get('schedule', None)
         if schedule is None:
             self.set_linear_schedule(10, 100)
@@ -89,16 +83,13 @@ class MLAE:
         # Optimization
         #For avoiding problem with 0 and 0.5*pi
         self.theta_domain = [(0+self.delta, 0.5*np.pi-self.delta)]
-        self.brute_force = lambda x: so.brute(func=x, ranges=self.theta_domain, Ns=self.ns)
         self.optimizer = kwargs.get(
             'optimizer',
-            self.brute_force
+            lambda x: so.brute(func=x, ranges=self.theta_domain)
         )
         #For storing results
-        self.h_k = None
-        self.partial_cost_function = None
         self.theta = None
-        self.a = None
+        self.a = None        
 
     #####################################################################
     @property
@@ -265,8 +256,7 @@ class MLAE:
         return l_k
 
 
-    @staticmethod
-    def cost_function(angle: float, m_k: list, n_k: list, h_k: list)->float:
+    def cost_function(self, angle: float)->float:
         r"""
         This method calculates the -Likelihood of angle theta
         for a given schedule m_k,n_k
@@ -280,14 +270,7 @@ class MLAE:
         ----------
 
         angle: float
-            Angle (radians) for calculating the probability of measure a
-            positive event.
-        m_k : list of ints
-            number of times the grover operator was applied.
-        n_k : list of ints
-            number of total events measured for the specific  m_k
-        h_k : list of ints
-            number of positive events measured for each m_k
+            the hypothetical angle
 
         Returns
         ----------
@@ -296,82 +279,36 @@ class MLAE:
             the aggregation of the individual likelihoods
         """
         log_cost = 0
-        for i in range(len(m_k)):
+        for i in range(len(self.m_k)):
             log_l_k = MLAE.log_likelihood(
                 angle,
-                m_k[i],
-                n_k[i],
-                h_k[i]
+                self.m_k[i],
+                self.n_k[i],
+                self.h_k[i]
             )
             log_cost = log_cost+log_l_k
         return -log_cost
 
-    def run_schedule(self, schedule):
+    def optimize(self)->float:
         """
-        This method execute the run_step method for each pair of values
-        of a given schedule.
+        This functions optimizes the cost_function
 
         Parameters
         ----------
 
-        schedule : list of two lists
-            the schedule for the algorithm
-
-        Returns
-        ----------
-        h_k : list
-            list with the h_k result of each pair of the input schedule
-
-        """
-        x_ = check_list_type(schedule, int)
-        if x_.shape[0] != 2:
-            raise Exception("The shape of the schedule must be (2,n)")
-        schedule_ = x_
-        m_k = schedule_[0]
-        n_k = schedule_[1]
-        h_k = np.zeros(len(m_k), dtype=int)
-        for i in range(len(m_k)):
-            h_k[i], _ = self.run_step(m_k[i], n_k[i])
-        return h_k
-
-    def mlae(self, schedule, optimizer):
-        """
-        This method executes a complete Maximum Likelihood Algorithm,
-        including executing schedule, defining the correspondient cost
-        function and optimizing it.
-
-        Parameters
-        ----------
-
-        schedule : list of two lists
-            the schedule for the algorithm
-        optimizer : optimization routine.
-            the optimizer should receive a function of one variable
-            the angle to be optimized. Using lambda functions is the
-            recomended way.
-
         Returns
         ----------
 
-        result : optimizer results
-            the type of the result is the type of the result of the optimizer
-        h_k : list
-            list with number of positive outcomes from quantum circuit
-            for each pair element of the input schedule
-        cost_function_partial : function
-            partial cost function with the m_k, n_k and h_k fixed to the
-            obtained values of the different experiments.
+        result :
+            the type of the result is the type of the result
+            of the optimizer
         """
-        h_k = self.run_schedule(schedule)
-        m_k = schedule[0]
-        n_k = schedule[1]
-        cost_function_partial = partial(
-            self.cost_function,
-            m_k = m_k, n_k=n_k, h_k=h_k
-        )
-        result = optimizer(cost_function_partial)
-        return result, h_k, cost_function_partial
-
+        self.h_k = np.zeros(len(self.m_k), dtype=int)
+        for i in range(len(self.m_k)):
+            self.h_k[i], _ = self.run_step(self.m_k[i], self.n_k[i])
+        result = self.optimizer(self.cost_function)
+        return result
+    
     def run(self)->float:
         r"""
         run method for the class.
@@ -393,12 +330,9 @@ class MLAE:
 
 
         """
-
-        #overwrite of the different propeties of the class
-        self.theta, self.h_k, self.partial_cost_function = self.mlae(
-            self.schedule, self.brute_force
-        )
-        self.theta = self.theta[0]
+        
+        theta = self.optimize()
+        self.theta = theta[0]
         self.a = np.sin(self.theta)**2
         result = self.a
         return result

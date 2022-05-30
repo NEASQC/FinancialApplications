@@ -1,4 +1,15 @@
 """
+This module contains necesary functions and classes to implement
+the clasical Quantum Phase Estimation with inverse of the
+Quantum Fourier Transform. Following references were used:
+
+    Brassard, G., Hoyer, P., Mosca, M., & Tapp, A. (2000).
+    Quantum amplitude amplification and estimation.
+    AMS Contemporary Mathematics Series, 305.
+    https://arxiv.org/abs/quant-ph/0005055v1
+
+    NEASQC deliverable: D5.1: Review of state-of-the-art for Pricing
+    and Computation of VaR
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
@@ -6,19 +17,18 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
 from copy import deepcopy
 import numpy as np
-import pandas as pd
 import qat.lang.AQASM as qlm
-from qat.core import Result
-from QQuantLib.utils.data_extracting import create_qprogram, create_qjob,\
-create_qcircuit, proccess_qresults
-from QQuantLib.utils.qlm_solver import get_qpu
-from QQuantLib.utils.utils import load_qn_gate
+from qat.qpus import get_default_qpu
+from QQuantLib.utils.data_extracting import create_qprogram
+from QQuantLib.utils.utils import load_qn_gate, check_list_type
 from QQuantLib.utils.data_extracting import get_results
+from QQuantLib.AA.amplitude_amplification import grover
 
 
-class PhaseEstimationwQFT:
+class cQPE:
     """
-    Class for using Iterative Quantum Phase Estimation (IQPE) algorithm
+    Class for using classical Quantum Phase Estimation, with inverse of
+    Quantum Fourier Transformation.
     """
 
     def __init__(self, **kwargs):
@@ -58,24 +68,22 @@ class PhaseEstimationwQFT:
             raise KeyError(text)
 
         #Number Of classical bits for estimating phase
-        self.auxiliar_qbits_number_ = kwargs.get('auxiliar_qbits_number', 8)
+        self.auxiliar_qbits_number = kwargs.get('auxiliar_qbits_number', 8)
         #Set the QPU to use
         self.linalg_qpu = kwargs.get('qpu', None)#, get_qpu())
         if self.linalg_qpu is None:
-            self.linalg_qpu = get_qpu()
+            print('Not QPU was provide. Default QPU will be used')
+            self.linalg_qpu = get_default_qpu()
         self.shots = kwargs.get('shots', 10)
-        #self.zalo = kwargs.get('zalo', False)
 
         #Attributes not given as input
         self.q_prog = None
         self.q_aux = None
-        self.c_bits = None
-        self.classical_bits = None
         self.final_results = None
         self.sumary = None
 
         self.circuit = None
-        self.job = None
+        self.results = None
 
     def restart(self):
         """
@@ -83,25 +91,9 @@ class PhaseEstimationwQFT:
         """
         self.q_prog = None
         self.q_aux = None
-        self.c_bits = None
-        self.classical_bits = None
         self.final_results = None
         self.circuit = None
         self.results = None
-
-
-        self.job = None
-
-    @property
-    def auxiliar_qbits_number(self):
-        return self.auxiliar_qbits_number_
-
-    @auxiliar_qbits_number.setter
-    def auxiliar_qbits_number(self, value):
-        print('The number of auxiliar qbits for phase estimation will be:'\
-            '{}'.format(value))
-        self.auxiliar_qbits_number_ = value
-        #We update the allocate classical bits each time we change cbits_number
 
 
     def init_pe(self):
@@ -113,33 +105,27 @@ class PhaseEstimationwQFT:
         self.q_prog = create_qprogram(deepcopy(self.initial_state))
         self.q_aux = self.q_prog.qalloc(self.auxiliar_qbits_number)
 
-    def pe_wqft(self, number_of_cbits=None, shots=None):
+    def pe_qft(self):
         """
-        This method apply a workflow for executing a complete IQPE
+        This method apply a workflow for executing a complete PE with QFT
         algorithm
 
         Parameters
         ----------
 
-        number_of_cbits : int (overwrite correspondient property)
-            Number of classical bits for storing the phase estimation
-        shots : int (overwrite correspondient property)
-            Number of shots for executing the QLM job
         """
-
-        if number_of_cbits is not None:
-            self.cbits_number = number_of_cbits
-        if shots is not None:
-            self.shots = shots
-
+        #Initialize program
         self.init_pe()
+        #Create algorithm
         self.q_prog = self.apply_pe_wqft(self.q_prog, self.q_gate, self.q_aux)
-        self.results, self.circuit = self.run(
+        #Execute algorithm
+        self.results, self.circuit = self.run_qprogram(
             self.q_prog,
             self.q_aux,
             self.shots,
             self.linalg_qpu
         )
+        #Post-Proccess results
         self.final_results = self.post_proccess(self.results)
 
 
@@ -230,12 +216,12 @@ class PhaseEstimationwQFT:
 
         """
         q_prog = deepcopy(q_prog_)
-        q_prog = PhaseEstimationwQFT.apply_controlled_operations(q_prog, q_gate, q_aux)
-        q_prog = PhaseEstimationwQFT.apply_inv_qft(q_prog, q_aux)
+        q_prog = cQPE.apply_controlled_operations(q_prog, q_gate, q_aux)
+        q_prog = cQPE.apply_inv_qft(q_prog, q_aux)
         return q_prog
 
     @staticmethod
-    def run(q_prog, q_aux, shots, linalg_qpu):
+    def run_qprogram(q_prog, q_aux, shots, linalg_qpu):
         """
         Executes a complete simulation
 
@@ -264,41 +250,15 @@ class PhaseEstimationwQFT:
         )
         del result['Amplitude']
         result['Phi'] = result['Int']/(2**lenght)
-        #circuit = create_qcircuit(q_prog)
-        #if shots == 0:
-        #    shots = 10
-        #    print('Number of shots can not be 0. It will be used: ',shots)
-
-        #job = create_qjob(
-        #    circuit,
-        #    shots=shots,
-        #    qubits=[q_aux]
-        #)
-        #result = linalg_qpu.submit(job)
-        #if not isinstance(result, Result):
-        #    result = result.join()
         return result, circuit
 
-
-    #@staticmethod
-    #def meas_classical_bits(result):
-    #    """
-    #    Given a QLM aggregated result generate a DataFrame with the
-    #    information of the inputs
-    #    """
-    #    fake_qbits = np.array([i for i in range(result.qregs[0].length)])
-    #    pdf=proccess_qresults(result, fake_qbits)
-    #    pdf['Phi'] = pdf['Int']/(2**len(fake_qbits))
-    #    del pdf['Amplitude']
-    #    return pdf
-
     @staticmethod
-    def post_proccess(InputPDF):
+    def post_proccess(input_pdf):
         """
         This function uses the results property and add it additional
         columns that are useful for Amplitude Amplification procedure
         """
-        final_results = InputPDF.copy(deep=True)
+        final_results = input_pdf.copy(deep=True)
         #Eigenvalue of the Grover-like operator
         final_results['2*theta'] = 2*np.pi*final_results['Phi']
         #Rotation angle for Grover-like operator.

@@ -45,21 +45,34 @@ class RQAE:
         kwars : dictionary
             dictionary that allows the configuration of the IQAE algorithm:
             Implemented keys:
-        qpu : QLM solver
-            solver for simulating the resulting circutis
+            qpu : QLM solver
+                solver for simulating the resulting circutis
+            q : int
+                amplification ratio
+            epsilon : int
+                precision
+            gamma : float
+                accuracy
         """
         ###########################################
         #Setting attributes
         self._oracle = deepcopy(oracle)
         self._target = check_list_type(target, int)
         self._index = check_list_type(index, int)
+        self._grover_oracle = grover(self.oracle,self.target,self.index)
 
         #Set the QPU to use
         self.linalg_qpu = kwargs.get('qpu')
         if self.linalg_qpu is None:
+            print('Not QPU was provide. Default QPU will be used')
             self.linalg_qpu = get_default_qpu()
+        self.epsilon = kwargs.get('epsilon', 0.01)
+        self.gamma = kwargs.get('gamma', 0.05)
+        self.q = kwargs.get('q', 2)
 
-        # Optimization
+        self.a_l = None
+        self.a_u = None
+        self.a = None
     #####################################################################
     @property
     def oracle(self):
@@ -239,7 +252,7 @@ class RQAE:
         return np.sqrt(1/(2*N)*np.log(2/gamma))
 
 
-    def run(self,q: float = 2,epsilon: float = 0.01,gamma: float = 0.05):
+    def rqae(self,q: float = 2,epsilon: float = 0.01,gamma: float = 0.05):
         """
         This function implements the first step of the RQAE paper. The result
         is an estimation of the desired amplitude with precision epsilon
@@ -286,3 +299,12 @@ class RQAE:
             epsilon_amplitude = (amplitude_max-amplitude_min)/2
 
         return [2*amplitude_min,2*amplitude_max]
+
+    def run(self):
+        [self.a_l, self.a_u] = self.rqae(
+            q = self.q,
+            epsilon = self.epsilon,
+            gamma = self.gamma
+        )
+        self.a = (self.a_u+self.a_l)/2.0
+        return self.a

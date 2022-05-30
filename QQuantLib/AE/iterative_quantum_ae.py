@@ -46,8 +46,14 @@ class IQAE:
         kwars : dictionary
             dictionary that allows the configuration of the IQAE algorithm:
             Implemented keys:
-        qpu : QLM solver
-            solver for simulating the resulting circutis
+            qpu : QLM solver
+                solver for simulating the resulting circutis
+            epsilon : float
+                precision
+            alpha : float
+                accuracy
+            shots : int
+                number of measurements on each iteration
         """
         #Setting attributes
         self._oracle = deepcopy(oracle)
@@ -56,11 +62,21 @@ class IQAE:
         self._grover_oracle = grover(self.oracle,self.target,self.index)
 
         #Set the QPU to use
-        self.linalg_qpu = kwargs.get('qpu')
+        self.linalg_qpu = kwargs.get('qpu', None)
         if self.linalg_qpu is None:
+            print('Not QPU was provide. Default QPU will be used')
             self.linalg_qpu = get_default_qpu()
+        self.epsilon = kwargs.get('epsilon', 0.01)
+        self.alpha = kwargs.get('alpha', 0.05)
+        self.shots = kwargs.get('shots', 100)
 
-        # Optimization
+        self.a_l = None
+        self.a_u = None
+        self.theta_l = None
+        self.theta_u = None
+        self.theta = None
+        self.a = None
+
     #####################################################################
     @property
     def oracle(self):
@@ -179,10 +195,9 @@ class IQAE:
 
         return [theta_min,theta_max]
 
-    @staticmethod
-    def display_information(epsilon: float = 0.01,N: int = 100,alpha: float = 0.05):
+    def display_information(self, epsilon: float = 0.01, shots: int = 100, alpha: float = 0.05):
         """
-        This function displays information of the propoerties of the method for a given
+        This function displays information of the properties of the method for a given
         set of parameters
 
         Parameters
@@ -191,12 +206,21 @@ class IQAE:
             precision
         alpha : float
             accuracy
-        N : int
+        shots : int
             number of measurements on each iteration
 
         Returns
         ----------
         """
+        N = shots
+
+        print("-------------------------------------------------------------")
+        print('epsilon: ', epsilon)
+        print('alpha: ', alpha)
+        print('N: ', N)
+        print("-------------------------------------------------------------")
+        
+
         T = np.ceil(np.log2(np.pi/(8*epsilon)))
         N_max = 32/(1-2*np.sin(np.pi/14))**2*np.log(2/alpha*np.log2(np.pi/(4*epsilon)))
         N_oracle = 50/epsilon*np.log(2/alpha*np.log2(np.pi/(4*epsilon)))
@@ -233,9 +257,7 @@ class IQAE:
         return np.sqrt(1/(2*N)*np.log(2/gamma))
 
 
-
-
-    def run(self,epsilon: float = 0.01,N: int = 100,alpha: float = 0.05):
+    def iqae(self, epsilon: float = 0.01, shots: int = 100, alpha: float = 0.05):
         """
         This function implements Algorithm 1 from the IQAE paper. The result
         is an estimation of the desired probability with precision at least
@@ -247,7 +269,7 @@ class IQAE:
             precision
         alpha : float
             accuracy
-        N : int
+        shots : int
             number of measurements on each iteration
 
         Returns
@@ -256,8 +278,14 @@ class IQAE:
            lower bound for the probability to be estimated
         a_u : float
            upper bound for the probability to be estimated
+        theta_l :
+           lower bound for the angle to be estimated
+        theta_u :
+           upper bound for the angle to be estimated
 
         """
+        
+        N = shots
         #####################################################
         i = 0
         k = int(0)
@@ -281,14 +309,18 @@ class IQAE:
             routine.apply(self.oracle,wires)
             for j in range(k):
                 routine.apply(self._grover_oracle,wires)
-            results,_,_,_ = get_results(routine,linalg_qpu = self.linalg_qpu,shots = N,qubits = self.index)
+            results,_,_,_ = get_results(
+                routine,linalg_qpu = self.linalg_qpu,
+                shots = N,
+                qubits = self.index
+            )
             a = results["Probability"].iloc[bitfield_to_int(self.target)]
             #####################################################
             # Agregate results from different iterations
             if (k == k_old):
                 h_k = h_k+int(a*N)
                 N_effective = N_effective+N
-                a = h_k/N_effective 
+                a = h_k/N_effective
                 i = i-1
             else:
                 h_k = int(a*N)
@@ -303,7 +335,18 @@ class IQAE:
             theta_l = (2*np.pi*np.floor(K*theta_l/(2*np.pi))+theta_min)/K
             theta_u = (2*np.pi*np.floor(K*theta_u/(2*np.pi))+theta_max)/K
 
-
-
         [a_l,a_u] = [np.sin(theta_l)**2,np.sin(theta_u)**2]
-        return [a_l,a_u]
+        return [a_l, a_u]
+
+    def run(self):
+        [self.a_l, self.a_u] = self.iqae(
+            epsilon = self.epsilon,
+            shots = self.shots,
+            alpha = self.alpha
+        )
+        self.theta_l = np.arcsin(np.sqrt(self.a_l))
+        self.theta_u = np.arcsin(np.sqrt(self.a_u))
+        self.theta = (self.theta_u+self.theta_l)/2.0
+        self.a = (self.a_u+self.a_l)/2.0
+        return self.a
+

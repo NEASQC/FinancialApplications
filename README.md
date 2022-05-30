@@ -22,13 +22,18 @@ The *Quantum Quantitative Finance Library* is deployed as typical Python library
     * amplitude\_amplification.py (QQuantLib.AA.amplitude\_amplification). This module contains functions for creating mandatory operators for amplitude amplifications and grover-like operators as QLM AbstractGate or QRoutines.
 * *Amplitude Estimation* or **AE** package. Under **QQuantLib/AE**. This package is devoted to the implementation of different amplitude amplification algorithms.
     * maximum\_likelihood\_ae.py (QQuantLib.AE.maximum\_likelihood\_ae). This package implements *Maximum Likelihood Amplitude estimation* (**MLAE**) algorithm. The algorithm was implemented as a python class called *MLAE* 
+    * iterative\_quantum\_ae.py (QQuantLib.AE.iterative\_quantum\_ae). This package implements *Iterative Quantum Amplitude Estimation* (**IQAE**) algorithm. The algorithm was implemented as a python class called *IQAE* 
+    * real\_quantum\_ae.py (QQuantLib.AE.real\_quantum\_ae). This package implements *Real Quantum Amplitude Estimation* (**RQAE**) algorithm. The algorithm was implemented as a python class called *RQAE* 
+    * ae\_classical\_qpe.py (QQuantLib.AE.ae\_classical\_qpe). This packages uses the cQPE class from QQuantLib.PE.classical\_qpe for solving amplitude estimation problems. The algorithm was implemented as a python class called *cQPE_AE*  
+    * ae\_iterative\_quantum\_pe.py (QQuantLib.AE.ae\_iterative\_quantum\_pe). This packages uses the IQPE class from QQuantLib.PE.iterative\_quantum\_pe for solving amplitede estimations problem. The algorithm was implemented as a python class called *IQPE_AE*   
 * *Phase Estimation* or **PE** package. Under **QQuantLib/PE**. This package contains modules for phase estimation algorithms that can be used in amplitude estimation procedure. 
-    * iterative\_quantum\_pe.py (QQuantLib.PE.iterative\_quantum\_pe). This modules implements the *Kitaev Iterative Phase Estimation* (**IPE**) algorithm as python class called: *IterativeQuantumPE* 
-    * phase\_estimation\_wqft.py (QQuantLib.PE.phase\_estimation\_wqft). This modules implements the classical Phase Estimation algorithm (with inverse of Quantum Fourier Transformation) as a python class called: *PhaseEstimationwQFT*.
+    * iterative\_quantum\_pe.py (QQuantLib.PE.iterative\_quantum\_pe). This modules implements the *Kitaev Iterative Phase Estimation* (**IPE**) algorithm as python class called: *IQPE* 
+    * classical\_qpe.py (QQuantLib.PE.classical\_qpe). This modules implements the classical Phase Estimation algorithm (with inverse of Quantum Fourier Transformation) as a python class called: *cQPE*.
 * *utils* package. Under **QQuantLib/utils**. This package contains several modules with different utilities used for the before packages.
     * data\_extracting.py (QQuantLib.utils.data\_extracting). This module implements functions for creating QLM Programs from AbstractGates or QRoutines, creating their correspondent quantum circuits and jobs, simulating them and post processing the obtained results.
     * qlm\_solver.py (QQuantLib.utils.qlm\_solver). Module for calling the QLM solver.
     * utils.py (QQuantLib.utils.utils). Module with different auxiliary functions used for the other packages of the library.
+    * classical\_finance.py (QQuantLib.utils.classical\_finance). Module with several functions from classical quantitative finance.
 
 
 ## Jupyter Notebooks
@@ -38,9 +43,15 @@ The misc/notebooks folder contains jupyter notebooks that explain the use of the
 * 01\_DataLoading\_Module\_Use.ipynb. The working of the *Data Loading* (**QQuantLib/DL**) package (and the data_loading module)  is explained in this module. Several examples of data loading in a quantum circuit are provided.
 * 02\_AmplitudeAmplification\_Operators.ipynb. This notebook explains the *Amplitude Amplification* (**QQuantLib/AA**) package working. A carefully revision of the mandatory operators for creating grover-like operators is provided in this notebook. 
 * 03\_MaximumLikelihood\_Class.ipynb. This notebook explains the **MLAE** algorithm  and the working of the correspondent module *maximum\_likelihood\_ae* from *Amplitude Estimation* package (QQuantLib.AE.maximum\_likelihood\_ae).
-* 04\_PhaseEstimationwitQFT\_Class.ipynb. The classical Phase Estimation algorithm (with QFT) is explained in this notebook using the module *phase\_estimation\_wqft* from *Phase Estimation* package (QQuantLib.PE.phase\_estimation\_wqft)
- * 05\_Iterative\_QPE\_Class.ipynb. The Kitaev *IPE* algorithm is explained in this notebook using the module *iterative\_quantum\_pe* from *Phase Estimation* package (QQuantLib.PE.iterative\_quantum\_pe)
-* 06_FinancialApplication_Example.ipynb. In this notebook the different developed packages of **QQuantLib** are used for develop an exaple of use for financial industry: calculations of expected value of a function. 
+* 04\_Classical\_Phase\_Estimation\_Class.ipynb. The classical Phase Estimation algorithm (with QFT) is explained in this notebook using the module *classical\_qpe* from *Phase Estimation* package (QQuantLib.PE.classical\_qpe)
+ * 05\_Iterative\_Quantum\_Phase\_Estimation\_Class.ipynb. The Kitaev *IPE* algorithm is explained in this notebook using the module *iterative\_quantum\_pe* from *Phase Estimation* package (QQuantLib.PE.iterative\_quantum\_pe)
+* 06\_Iterative\_Quantum\_Amplitude\_Estimation\_class.ipynb. The Iterative Quantum Amplitude Estimation is explained in this notebook using the iterative\_quantum\_ae from *Amplitude Estimation* package (QQuantLib.AE.iterative\_quantum\_ae). 
+* 07\_Real\_Quantum\_Amplitude\_Estimation\_class.ipynb. The Real Quantum Amplitude Estimation algorithm and it associated class, from the module *real\_quantum\_ae* from  *Amplitude Estimation* package (QQuantLib.AE.real\_quantum\_ae), is presented in this notebook.
+* 08\_ApplicationTo\_Finance\_01\_StandardApproach.ipynb. In this notebook we present how to use the diferent **amplitude estimation** classes of the library for computing the expectation of agiven function $f(x)$ when $x$ follows a probability density $p(x)$. 
+* 09\_ApplicationTo\_Finance\_02\_Call\_Option\_BlackScholes.ipynb. This notebook uses the **amplitude estimation** classes of the library for solving the pricing problem of a *vanilla european call option* under the **Black Scholes** model.
+* 10\_ApplicationTo\_Finance\_03\_StandardApproachProblems.ipynb. This notebook presents several problems of the **amplitude estimation** procedures when are applied to the computation of the expectation of a function. Additionally a new loading procedure is presented and the **RQAE** algorithm is used for solving the presented issues.
+* 11\_ApplicationTo\_Finance\_04\_NewDataLoading.ipynb. This notebooks uses the modifications presented on previous one for solving several price estimation of **derivative contracts** using different **amplitude estimation** techniques.
+
 
 ## Acknowledgements
 
