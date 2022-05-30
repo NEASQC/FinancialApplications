@@ -20,6 +20,7 @@ from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.utils.utils import bitfield_to_int, check_list_type, load_qn_gate
+from QQuantLib.utils.utils import load_qn_gate, check_list_type
 
 
 
@@ -88,9 +89,10 @@ class MLAE:
         # Optimization
         #For avoiding problem with 0 and 0.5*pi
         self.theta_domain = [(0+self.delta, 0.5*np.pi-self.delta)]
+        self.brute_force = lambda x: so.brute(func=x, ranges=self.theta_domain, Ns=self.ns)
         self.optimizer = kwargs.get(
             'optimizer',
-            lambda x: so.brute(func=x, ranges=self.theta_domain, Ns=self.ns)
+            self.brute_force
         )
         #For storing results
         self.h_k = None
@@ -394,7 +396,7 @@ class MLAE:
 
         #overwrite of the different propeties of the class
         self.theta, self.h_k, self.partial_cost_function = self.mlae(
-            self.schedule, self.optimizer
+            self.schedule, self.brute_force
         )
         self.theta = self.theta[0]
         self.a = np.sin(self.theta)**2

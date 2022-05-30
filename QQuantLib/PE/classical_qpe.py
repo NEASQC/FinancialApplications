@@ -1,4 +1,15 @@
 """
+This module contains necesary functions and classes to implement
+the clasical Quantum Phase Estimation with inverse of the
+Quantum Fourier Transform. Following references were used:
+
+    Brassard, G., Hoyer, P., Mosca, M., & Tapp, A. (2000).
+    Quantum amplitude amplification and estimation.
+    AMS Contemporary Mathematics Series, 305.
+    https://arxiv.org/abs/quant-ph/0005055v1
+
+    NEASQC deliverable: D5.1: Review of state-of-the-art for Pricing
+    and Computation of VaR
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
@@ -14,7 +25,7 @@ from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.AA.amplitude_amplification import grover
 
 
-class PE_QFT:
+class cQPE:
     """
     Class for using classical Quantum Phase Estimation, with inverse of
     Quantum Fourier Transformation.
@@ -205,8 +216,8 @@ class PE_QFT:
 
         """
         q_prog = deepcopy(q_prog_)
-        q_prog = PE_QFT.apply_controlled_operations(q_prog, q_gate, q_aux)
-        q_prog = PE_QFT.apply_inv_qft(q_prog, q_aux)
+        q_prog = cQPE.apply_controlled_operations(q_prog, q_gate, q_aux)
+        q_prog = cQPE.apply_inv_qft(q_prog, q_aux)
         return q_prog
 
     @staticmethod
@@ -262,125 +273,4 @@ class PE_QFT:
         #distribution probability
         #final_results['E_p(f)'] = np.sin(final_results['Theta'])**2
         return final_results
-
-class PE_QFT_AE:
-    """
-    Class for doing Amplitude Estimation (AE) using Quantum Amplitude
-    Estimation with QFT (PhaseEstimationwQFT)
-    algorithm
-    """
-
-    def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
-        """
-
-        Method for initializing the class
-
-        Parameters
-        ----------
-        oracle: QLM gate
-            QLM gate with the Oracle for implementing the
-            Grover operator
-        target : list of ints
-            python list with the target for the amplitude estimation
-        index : list of ints
-            qubits which mark the register to do the amplitude
-            estimation
-
-        kwars : dictionary
-            dictionary that allows the configuration of the IQAE algorithm:
-            Implemented keys:
-        qpu : QLM solver
-            solver for simulating the resulting circutis
-        """
-        #Setting attributes
-        self._oracle = deepcopy(oracle)
-        self._target = check_list_type(target, int)
-        self._index = check_list_type(index, int)
-        #First thing is create the grover operator from the oracle
-        self._grover_oracle = grover(self.oracle,self.target,self.index)
-
-        #Set the QPU to use
-        self.linalg_qpu = kwargs.get('qpu', None)#, get_qpu())
-        if self.linalg_qpu is None:
-            print('Not QPU was provide. Default QPU will be used')
-            self.linalg_qpu = get_default_qpu()
-        self.auxiliar_qbits_number = kwargs.get(
-            'auxiliar_qbits_number', 8)
-        self.shots = kwargs.get('shots', 100)
-
-        #For storing results
-        self.theta = None
-        self.a = None        
-        self.pe_qft = None
-        self.final_results = None
-    #####################################################################
-    @property
-    def oracle(self):
-        return self._oracle
-
-    @oracle.setter
-    def oracle(self, value):
-        self._oracle = deepcopy(value)
-
-    @property
-    def target(self):
-        return self._target
-
-    @target.setter
-    def target(self, value):
-        self._target = check_list_type(value, int)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
-
-    @property
-    def index(self):
-        return self._index
-
-    @index.setter
-    def index(self, value):
-        self._index = check_list_type(value, int)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
-    #####################################################################
-
-    def run(self):
-        r"""
-        run method for the class.
-
-        Parameters
-        ----------
-
-        Returns
-        ----------
-
-        result :
-            the estimation of a
-
-        Notes
-        -----
-        .. math::
-            a = \cos^2(\theta)
-            \; where \; \theta \; is \;
-            \mathcal{Q}|\Psi\rangle = e^{2i\theta}|\Psi\rangle
-            \; and \; \mathcal{Q} \; the \; Grover \; Operator
-
-
-        """
-        dict_pe_qft = {
-            'initial_state': self.oracle,
-            'unitary_operator': self._grover_oracle,
-            'auxiliar_qbits_number': self.auxiliar_qbits_number,
-            'shots': self.shots,
-            'qpu' : self.linalg_qpu,
-        }
-
-        self.pe_qft = PE_QFT(**dict_pe_qft)
-        self.pe_qft.pe_qft()
-        self.final_results = self.pe_qft.final_results
-        self.final_results.sort_values(
-            'Probability',
-            ascending=False,
-            inplace=True,
-        )
-        self.theta = self.final_results['theta_90'].iloc[0]
-        self.a = np.cos(self.theta)**2
-        return self.a
 
