@@ -24,6 +24,8 @@ The *Quantum Quantitative Finance Library* is deployed as typical Python library
     * maximum\_likelihood\_ae.py (QQuantLib.AE.maximum\_likelihood\_ae). This package implements *Maximum Likelihood Amplitude estimation* (**MLAE**) algorithm. The algorithm was implemented as a python class called *MLAE* 
     * iterative\_quantum\_ae.py (QQuantLib.AE.iterative\_quantum\_ae). This package implements *Iterative Quantum Amplitude Estimation* (**IQAE**) algorithm. The algorithm was implemented as a python class called *IQAE* 
     * real\_quantum\_ae.py (QQuantLib.AE.real\_quantum\_ae). This package implements *Real Quantum Amplitude Estimation* (**RQAE**) algorithm. The algorithm was implemented as a python class called *RQAE* 
+    * ae\_classical\_qpe.py (QQuantLib.AE.ae\_classical\_qpe). This packages uses the cQPE class from QQuantLib.PE.classical\_qpe for solving amplitude estimation problems 
+    * ae\_iterative\_quantum\_pe.py (QQuantLib.AE.ae\_iterative\_quantum\_pe). This packages uses the IQPE class from QQuantLib.PE.iterative\_quantum\_pe for solving amplitede estimations problem 
 * *Phase Estimation* or **PE** package. Under **QQuantLib/PE**. This package contains modules for phase estimation algorithms that can be used in amplitude estimation procedure. 
     * iterative\_quantum\_pe.py (QQuantLib.PE.iterative\_quantum\_pe). This modules implements the *Kitaev Iterative Phase Estimation* (**IPE**) algorithm as python class called: *IQPE* 
     * phase\_estimation\_wqft.py (QQuantLib.PE.phase\_estimation\_wqft). This modules implements the classical Phase Estimation algorithm (with inverse of Quantum Fourier Transformation) as a python class called: *PE_QFT*.
