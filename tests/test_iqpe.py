@@ -7,7 +7,8 @@ import qat.lang.AQASM as qlm
 from QQuantLib.utils.utils import get_histogram
 from QQuantLib.DL.data_loading import load_probability, load_array, load_pf
 from QQuantLib.AA.amplitude_amplification import grover
-from QQuantLib.PE.iterative_quantum_pe import IQPE, IQPE_AE
+from QQuantLib.PE.iterative_quantum_pe import IQPE
+from QQuantLib.AE.ae_iterative_quantum_pe import IQPE_AE
 
 
 #### Phase Estimation Test-01: Phase of S Gate ###
@@ -88,7 +89,7 @@ def test_ae_w_iqpe():
     ae_iqpe = IQPE_AE(
         oracle=oracle,
         target=target,
-        index=index, 
+        index=index,
         **ae_iqpe_dict
     )
 

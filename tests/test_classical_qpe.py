@@ -7,7 +7,7 @@ import qat.lang.AQASM as qlm
 from QQuantLib.utils.utils import get_histogram
 from QQuantLib.DL.data_loading import load_probability, load_array, load_pf
 from QQuantLib.AA.amplitude_amplification import grover
-from QQuantLib.PE.phase_estimation_wqft import PE_QFT, PE_QFT_AE
+from QQuantLib.PE.classical_qpe import cQPE 
 
 
 #### Phase Estimation Test-01: Phase of S Gate ###
@@ -28,7 +28,7 @@ def test_pe_s_gate():
         'auxiliar_qbits_number' : auxiliar_qbits_number,
         'shots': 100
     }
-    qft_pe = PE_QFT(**qft_pe_dict)
+    qft_pe = cQPE(**qft_pe_dict)
     qft_pe.pe_qft()
     phi_meas = qft_pe.final_results.iloc[
         qft_pe.final_results['Probability'].idxmax()
@@ -57,7 +57,7 @@ def test_pe_c_t_gate():
         'auxiliar_qbits_number' : auxiliar_qbits_number,
         'shots': 100
     }
-    qft_pe = PE_QFT(**qft_pe_dict)
+    qft_pe = cQPE(**qft_pe_dict)
     qft_pe.pe_qft()
     phi_meas = qft_pe.final_results.iloc[
         qft_pe.final_results['Probability'].idxmax()
@@ -65,6 +65,7 @@ def test_pe_c_t_gate():
     assert np.isclose(phi_meas, 0.125)
 
 ###Phase Estimation with classical QPE###
+from QQuantLib.AE.ae_classical_qpe import cQPE_AE
 
 def test_ae_w_qpe_qft():
 
@@ -85,10 +86,10 @@ def test_ae_w_qpe_qft():
         'shots': 10
     }
 
-    ae_pe_qft = PE_QFT_AE(
+    ae_pe_qft = cQPE_AE(
         oracle=oracle,
         target=target,
-        index=index, 
+        index=index,
         **ae_pe_qft_dict
     )
 
