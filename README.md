@@ -48,7 +48,7 @@ The misc/notebooks folder contains jupyter notebooks that explain the use of the
 * 08\_ApplicationTo\_Finance\_01\_StandardApproach.ipynb. In this notebook we present how to use the diferent **amplitude estimation** classes of the library for computing the expectation of agiven function $f(x)$ when $x$ follows a probability density $p(x)$. 
 * 09\_ApplicationTo\_Finance\_02\_Call\_Option\_BlackScholes.ipynb. This notebook uses the **amplitude estimation** classes of the library for solving the pricing problem of a *vanilla european call option* under the **Black Scholes** model.
 * 10\_ApplicationTo\_Finance\_03\_StandardApproachProblems.ipynb. This notebook presents several problems of the **amplitude estimation** procedures when are applied to the computation of the expectation of a function. Additionally a new loading procedure is presented and the **RQAE** algorithm is used for solving the presented issues.
-* 11\_ApplicationTo\_Finance\_03\_NewDataLoading.ipynb. This notebooks uses the modifications presented on previous one for solving several price estimation of **derivative contracts** using different **amplitude estimation** techniques.
+* 11\_ApplicationTo\_Finance\_04\_NewDataLoading.ipynb. This notebooks uses the modifications presented on previous one for solving several price estimation of **derivative contracts** using different **amplitude estimation** techniques.
 
 
 ## Acknowledgements
