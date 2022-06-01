@@ -20,8 +20,6 @@ from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.utils.utils import bitfield_to_int, check_list_type, load_qn_gate
-from QQuantLib.utils.utils import load_qn_gate, check_list_type
-
 
 
 class MLAE:
@@ -61,95 +59,139 @@ class MLAE:
                 ns : int
                     number of grid points for brute scipy optimizer
         """
-        #Setting attributes
+        # Setting attributes
         self._oracle = deepcopy(oracle)
         self._target = check_list_type(target, int)
         self._index = check_list_type(index, int)
         self._grover_oracle = grover(self._oracle, self.target, self.index)
 
-        #Set the QPU to use
-        self.linalg_qpu = kwargs.get('qpu', None)
+        # Set the QPU to use
+        self.linalg_qpu = kwargs.get("qpu", None)
         if self.linalg_qpu is None:
-            print('Not QPU was provide. Default QPU will be used')
+            print("Not QPU was provide. Default QPU will be used")
             self.linalg_qpu = get_default_qpu()
         ##delta for avoid problems in 0 and pi/2 theta limits
-        self.delta = kwargs.get('delta', 1.0e-5)
-        #ns for the brute force optimizer
-        self.ns = kwargs.get('ns', 1000)
+        self.delta = kwargs.get("delta", 1.0e-5)
+        # ns for the brute force optimizer
+        self.ns = kwargs.get("ns", 1000)
 
         # The schedule of the method
         self.m_k = None
         self.n_k = None
-        schedule = kwargs.get('schedule', None)
+        schedule = kwargs.get("schedule", None)
         if schedule is None:
             self.set_linear_schedule(10, 100)
         else:
             self.schedule = schedule
 
         # Optimization
-        #For avoiding problem with 0 and 0.5*pi
-        self.theta_domain = [(0+self.delta, 0.5*np.pi-self.delta)]
-        self.brute_force = lambda x: so.brute(func=x, ranges=self.theta_domain, Ns=self.ns)
-        self.optimizer = kwargs.get(
-            'optimizer',
-            self.brute_force
+        # For avoiding problem with 0 and 0.5*pi
+        self.theta_domain = [(0 + self.delta, 0.5 * np.pi - self.delta)]
+        self.brute_force = lambda x: so.brute(
+            func=x, ranges=self.theta_domain, Ns=self.ns
         )
-        #For storing results
+        self.optimizer = kwargs.get("optimizer", self.brute_force)
+        # For storing results
         self.h_k = None
         self.partial_cost_function = None
         self.theta = None
-        self.a = None
+        self.ae = None
 
     #####################################################################
     @property
     def oracle(self):
+        """
+        creating oracle property
+        """
         return self._oracle
 
     @oracle.setter
     def oracle(self, value):
+        """
+        setter of the oracle property
+        """
         self._oracle = deepcopy(value)
         self._grover_oracle = grover(self.oracle, self.target, self.index)
 
     @property
     def target(self):
+        """
+        creating target property
+        """
         return self._target
 
     @target.setter
     def target(self, value):
+        """
+        setter of the target property
+        """
         self._target = check_list_type(value, int)
         self._grover_oracle = grover(self.oracle, self.target, self.index)
 
     @property
     def index(self):
+        """
+        creating index property
+        """
         return self._index
 
     @index.setter
     def index(self, value):
+        """
+        setter of the index property
+        """
         self._index = check_list_type(value, int)
         self._grover_oracle = grover(self.oracle, self.target, self.index)
 
     @property
     def schedule(self):
+        """
+        creating schedule property
+        """
         return self._schedule
 
     @schedule.setter
     def schedule(self, value):
+        """
+        setter of the schedule property
+        """
         x_ = check_list_type(value, int)
         if x_.shape[0] != 2:
             raise Exception("The shape of the schedule must be (2,n)")
         self._schedule = x_
         self.m_k = self.schedule[0]
         self.n_k = self.schedule[1]
+
     #####################################################################
 
-    def set_linear_schedule(self, n: int, n_k: int):
-        x_ = np.arange(n)
-        y_ = [n_k]*n
+    def set_linear_schedule(self, n_t: int, n_s: int):
+        """
+        Creates a scheduler of linear increasing of m_ks.
+
+        Parameters
+        ----------
+        n_t : int
+            number of maximum applications of the grover operator
+        n_s : int
+            number of shots for each m_k grover applications
+        """
+        x_ = np.arange(n_t)
+        y_ = [n_s] * n_t
         self.schedule = [x_, y_]
 
-    def set_exponential_schedule(self, n: int, n_k: int):
-        x_ = 2**np.arange(n)
-        y_ = [n_k]*n
+    def set_exponential_schedule(self, n_t: int, n_s: int):
+        """
+        Creates a scheduler of exponential increasing of m_ks.
+
+        Parameters
+        ----------
+        n_t : int
+            number of maximum applications of the grover operator
+        n_s : int
+            number of shots for each m_k grover applications
+        """
+        x_ = 2 ** np.arange(n_t)
+        y_ = [n_s] * n_t
         self.schedule = [x_, y_]
 
     def run_step(self, m_k: int, n_k: int) -> int:
@@ -172,21 +214,17 @@ class MLAE:
         register = routine.new_wires(self.oracle.arity)
         routine.apply(self.oracle, register)
         routine.apply(load_qn_gate(self._grover_oracle, m_k), register)
-        #for i in range(m_k):
+        # for i in range(m_k):
         #    routine.apply(self._grover_oracle, register)
         result, circuit, _, job = get_results(
-            routine,
-            linalg_qpu=self.linalg_qpu,
-            shots=n_k,
-            qubits=self.index
+            routine, linalg_qpu=self.linalg_qpu, shots=n_k, qubits=self.index
         )
-        h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)]*n_k)
+        h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)] * n_k)
 
         return h_k, circuit
 
-
     @staticmethod
-    def likelihood(theta: float, m_k: int, n_k: int, h_k: int)->float:
+    def likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
         r"""
         Calculates Likelihood from Suzuki papper. For h_k positive events
         of n_k total events, this function calculates the probability of
@@ -221,14 +259,14 @@ class MLAE:
             Gives the Likelihood p(h_k with m_k amplifications|theta)
 
         """
-        theta_ = (2*m_k+1)*theta
-        p_0 = np.sin(theta_)**2
-        p_1 = np.cos(theta_)**2
-        l_k = (p_0**h_k)*(p_1**(n_k-h_k))
+        theta_ = (2 * m_k + 1) * theta
+        p_0 = np.sin(theta_) ** 2
+        p_1 = np.cos(theta_) ** 2
+        l_k = (p_0**h_k) * (p_1 ** (n_k - h_k))
         return l_k
 
     @staticmethod
-    def log_likelihood(theta: float, m_k: int, n_k: int, h_k: int)->float:
+    def log_likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
         r"""
         Calculates log of the likelihood from Suzuki papper.
 
@@ -258,15 +296,14 @@ class MLAE:
             Gives the log Likelihood p(h_k with m_k amplifications|theta)
 
         """
-        theta_ = (2*m_k+1)*theta
-        p_0 = np.sin(theta_)**2
-        p_1 = np.cos(theta_)**2
-        l_k = h_k*np.log(p_0) + (n_k-h_k)*np.log(p_1)
+        theta_ = (2 * m_k + 1) * theta
+        p_0 = np.sin(theta_) ** 2
+        p_1 = np.cos(theta_) ** 2
+        l_k = h_k * np.log(p_0) + (n_k - h_k) * np.log(p_1)
         return l_k
 
-
     @staticmethod
-    def cost_function(angle: float, m_k: list, n_k: list, h_k: list)->float:
+    def cost_function(angle: float, m_k: list, n_k: list, h_k: list) -> float:
         r"""
         This method calculates the -Likelihood of angle theta
         for a given schedule m_k,n_k
@@ -296,14 +333,10 @@ class MLAE:
             the aggregation of the individual likelihoods
         """
         log_cost = 0
-        for i in range(len(m_k)):
-            log_l_k = MLAE.log_likelihood(
-                angle,
-                m_k[i],
-                n_k[i],
-                h_k[i]
-            )
-            log_cost = log_cost+log_l_k
+        #for i in range(len(m_k)):
+        for i, _ in enumerate(m_k):
+            log_l_k = MLAE.log_likelihood(angle, m_k[i], n_k[i], h_k[i])
+            log_cost = log_cost + log_l_k
         return -log_cost
 
     def run_schedule(self, schedule):
@@ -330,7 +363,8 @@ class MLAE:
         m_k = schedule_[0]
         n_k = schedule_[1]
         h_k = np.zeros(len(m_k), dtype=int)
-        for i in range(len(m_k)):
+        #for i in range(len(m_k)):
+        for i, _ in enumerate(m_k):
             h_k[i], _ = self.run_step(m_k[i], n_k[i])
         return h_k
 
@@ -365,14 +399,11 @@ class MLAE:
         h_k = self.run_schedule(schedule)
         m_k = schedule[0]
         n_k = schedule[1]
-        cost_function_partial = partial(
-            self.cost_function,
-            m_k = m_k, n_k=n_k, h_k=h_k
-        )
+        cost_function_partial = partial(self.cost_function, m_k=m_k, n_k=n_k, h_k=h_k)
         result = optimizer(cost_function_partial)
         return result, h_k, cost_function_partial
 
-    def run(self)->float:
+    def run(self) -> float:
         r"""
         run method for the class.
 
@@ -394,11 +425,11 @@ class MLAE:
 
         """
 
-        #overwrite of the different propeties of the class
+        # overwrite of the different propeties of the class
         self.theta, self.h_k, self.partial_cost_function = self.mlae(
             self.schedule, self.brute_force
         )
         self.theta = self.theta[0]
-        self.a = np.sin(self.theta)**2
-        result = self.a
+        self.ae = np.sin(self.theta) ** 2
+        result = self.ae
         return result

@@ -6,10 +6,13 @@ Test for this module
 
 
 from . import some_function, MyClass
+
+
 class TestMyClass:
     """
     Testing MyClass
     """
+
     def test_instantiation(self):
         # pylint: disable=no-self-use
         """
@@ -17,6 +20,7 @@ class TestMyClass:
         """
         MyClass(1, 1, 2)
         MyClass()
+
 
 def test_some_fucntion():
     """

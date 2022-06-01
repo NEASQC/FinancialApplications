@@ -10,6 +10,7 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
 
 from qat.qpus import PyLinalg
 
+
 def get_qpu(qlmass=False):
     """
     Function for selecting solver. User can chose between:
@@ -31,12 +32,15 @@ def get_qpu(qlmass=False):
     if qlmass:
         try:
             from qlmaas.qpus import LinAlg
+
             linalg_qpu = LinAlg()
-            print('Using: LinAlg')
+            print("Using: LinAlg")
         except (ImportError, OSError) as exception:
-            raise ImportError("""Problem Using QLMaaS.
-            Please create config file or use mylm solver""")
+            raise ImportError(
+                """Problem Using QLMaaS.
+            Please create config file or use mylm solver"""
+            ) from exception
     else:
-        print('Using PyLinalg')
+        print("Using PyLinalg")
         linalg_qpu = PyLinalg()
     return linalg_qpu

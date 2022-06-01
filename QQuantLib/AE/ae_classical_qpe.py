@@ -20,11 +20,12 @@ from copy import deepcopy
 import numpy as np
 import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
-from QQuantLib.PE.classical_qpe import cQPE
+from QQuantLib.PE.classical_qpe import CQPE
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.utils import check_list_type
 
-class cQPE_AE:
+
+class CQPEAE:
     """
     Class for doing Amplitude Estimation (AE) using classical Quantum
     Amplitude Estimation (with QFT) algorithm
@@ -52,53 +53,72 @@ class cQPE_AE:
         qpu : QLM solver
             solver for simulating the resulting circutis
         """
-        #Setting attributes
+        # Setting attributes
         self._oracle = deepcopy(oracle)
         self._target = check_list_type(target, int)
         self._index = check_list_type(index, int)
-        #First thing is create the grover operator from the oracle
+        # First thing is create the grover operator from the oracle
         self._grover_oracle = grover(self.oracle, self.target, self.index)
 
-        #Set the QPU to use
-        self.linalg_qpu = kwargs.get('qpu', None)#, get_qpu())
+        # Set the QPU to use
+        self.linalg_qpu = kwargs.get("qpu", None)  # , get_qpu())
         if self.linalg_qpu is None:
-            print('Not QPU was provide. Default QPU will be used')
+            print("Not QPU was provide. Default QPU will be used")
             self.linalg_qpu = get_default_qpu()
-        self.auxiliar_qbits_number = kwargs.get(
-            'auxiliar_qbits_number', 8)
-        self.shots = kwargs.get('shots', 100)
+        self.auxiliar_qbits_number = kwargs.get("auxiliar_qbits_number", 8)
+        self.shots = kwargs.get("shots", 100)
 
-        #For storing results
+        # For storing results
         self.theta = None
-        self.a = None
+        self.ae = None
         self.cqpe = None
         self.final_results = None
+
     #####################################################################
     @property
     def oracle(self):
+        """
+        creating oracle property
+        """
         return self._oracle
 
     @oracle.setter
     def oracle(self, value):
+        """
+        setter of the oracle property
+        """
         self._oracle = deepcopy(value)
 
     @property
     def target(self):
+        """
+        creating target property
+        """
         return self._target
 
     @target.setter
     def target(self, value):
+        """
+        setter of the target property
+        """
         self._target = check_list_type(value, int)
         self._grover_oracle = grover(self.oracle, self.target, self.index)
 
     @property
     def index(self):
+        """
+        creating index property
+        """
         return self._index
 
     @index.setter
     def index(self, value):
+        """
+        setter of the index property
+        """
         self._index = check_list_type(value, int)
         self._grover_oracle = grover(self.oracle, self.target, self.index)
+
     #####################################################################
 
     def run(self):
@@ -125,22 +145,21 @@ class cQPE_AE:
 
         """
         dict_pe_qft = {
-            'initial_state': self.oracle,
-            'unitary_operator': self._grover_oracle,
-            'auxiliar_qbits_number': self.auxiliar_qbits_number,
-            'shots': self.shots,
-            'qpu' : self.linalg_qpu,
+            "initial_state": self.oracle,
+            "unitary_operator": self._grover_oracle,
+            "auxiliar_qbits_number": self.auxiliar_qbits_number,
+            "shots": self.shots,
+            "qpu": self.linalg_qpu,
         }
 
-        self.cqpe = cQPE(**dict_pe_qft)
+        self.cqpe = CQPE(**dict_pe_qft)
         self.cqpe.pe_qft()
         self.final_results = self.cqpe.final_results
         self.final_results.sort_values(
-            'Probability',
+            "Probability",
             ascending=False,
             inplace=True,
         )
-        self.theta = self.final_results['theta_90'].iloc[0]
-        self.a = np.cos(self.theta)**2
-        return self.a
-
+        self.theta = self.final_results["theta_90"].iloc[0]
+        self.ae = np.cos(self.theta) ** 2
+        return self.ae

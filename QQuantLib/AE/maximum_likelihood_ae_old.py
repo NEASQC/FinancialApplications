@@ -21,7 +21,6 @@ from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.utils.utils import bitfield_to_int, check_list_type, load_qn_gate
 
 
-
 class MLAE:
     """
     Class for using Maximum Likelihood Quantum Amplitude Estimation (ML-AE)
@@ -57,39 +56,38 @@ class MLAE:
         delta : float
             tolerance to avoid division by zero warnings
         """
-        #Setting attributes
+        # Setting attributes
         self._oracle = deepcopy(oracle)
         self._target = check_list_type(target, int)
         self._index = check_list_type(index, int)
         self._grover_oracle = grover(self._oracle, self.target, self.index)
 
-        #Set the QPU to use
-        self.linalg_qpu = kwargs.get('qpu')
+        # Set the QPU to use
+        self.linalg_qpu = kwargs.get("qpu")
         if self.linalg_qpu is None:
             self.linalg_qpu = get_default_qpu()
         ##delta for avoid problems in 0 and pi/2 theta limits
-        self.delta = kwargs.get('delta', 1.0e-5)
+        self.delta = kwargs.get("delta", 1.0e-5)
 
         # The schedule of the method
         self.m_k = None
         self.n_k = None
         self.h_k = None
-        schedule = kwargs.get('schedule', None)
+        schedule = kwargs.get("schedule", None)
         if schedule is None:
             self.set_linear_schedule(10, 100)
         else:
             self.schedule = schedule
 
         # Optimization
-        #For avoiding problem with 0 and 0.5*pi
-        self.theta_domain = [(0+self.delta, 0.5*np.pi-self.delta)]
+        # For avoiding problem with 0 and 0.5*pi
+        self.theta_domain = [(0 + self.delta, 0.5 * np.pi - self.delta)]
         self.optimizer = kwargs.get(
-            'optimizer',
-            lambda x: so.brute(func=x, ranges=self.theta_domain)
+            "optimizer", lambda x: so.brute(func=x, ranges=self.theta_domain)
         )
-        #For storing results
+        # For storing results
         self.theta = None
-        self.a = None        
+        self.a = None
 
     #####################################################################
     @property
@@ -131,16 +129,17 @@ class MLAE:
         self._schedule = x_
         self.m_k = self.schedule[0]
         self.n_k = self.schedule[1]
+
     #####################################################################
 
     def set_linear_schedule(self, n: int, n_k: int):
         x_ = np.arange(n)
-        y_ = [n_k]*n
+        y_ = [n_k] * n
         self.schedule = [x_, y_]
 
     def set_exponential_schedule(self, n: int, n_k: int):
-        x_ = 2**np.arange(n)
-        y_ = [n_k]*n
+        x_ = 2 ** np.arange(n)
+        y_ = [n_k] * n
         self.schedule = [x_, y_]
 
     def run_step(self, m_k: int, n_k: int) -> int:
@@ -163,21 +162,17 @@ class MLAE:
         register = routine.new_wires(self.oracle.arity)
         routine.apply(self.oracle, register)
         routine.apply(load_qn_gate(self._grover_oracle, m_k), register)
-        #for i in range(m_k):
+        # for i in range(m_k):
         #    routine.apply(self._grover_oracle, register)
         result, circuit, _, job = get_results(
-            routine,
-            linalg_qpu=self.linalg_qpu,
-            shots=n_k,
-            qubits=self.index
+            routine, linalg_qpu=self.linalg_qpu, shots=n_k, qubits=self.index
         )
-        h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)]*n_k)
+        h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)] * n_k)
 
         return h_k, circuit
 
-
     @staticmethod
-    def likelihood(theta: float, m_k: int, n_k: int, h_k: int)->float:
+    def likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
         r"""
         Calculates Likelihood from Suzuki papper. For h_k positive events
         of n_k total events, this function calculates the probability of
@@ -212,14 +207,14 @@ class MLAE:
             Gives the Likelihood p(h_k with m_k amplifications|theta)
 
         """
-        theta_ = (2*m_k+1)*theta
-        p_0 = np.sin(theta_)**2
-        p_1 = np.cos(theta_)**2
-        l_k = (p_0**h_k)*(p_1**(n_k-h_k))
+        theta_ = (2 * m_k + 1) * theta
+        p_0 = np.sin(theta_) ** 2
+        p_1 = np.cos(theta_) ** 2
+        l_k = (p_0**h_k) * (p_1 ** (n_k - h_k))
         return l_k
 
     @staticmethod
-    def log_likelihood(theta: float, m_k: int, n_k: int, h_k: int)->float:
+    def log_likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
         r"""
         Calculates log of the likelihood from Suzuki papper.
 
@@ -249,14 +244,13 @@ class MLAE:
             Gives the log Likelihood p(h_k with m_k amplifications|theta)
 
         """
-        theta_ = (2*m_k+1)*theta
-        p_0 = np.sin(theta_)**2
-        p_1 = np.cos(theta_)**2
-        l_k = h_k*np.log(p_0) + (n_k-h_k)*np.log(p_1)
+        theta_ = (2 * m_k + 1) * theta
+        p_0 = np.sin(theta_) ** 2
+        p_1 = np.cos(theta_) ** 2
+        l_k = h_k * np.log(p_0) + (n_k - h_k) * np.log(p_1)
         return l_k
 
-
-    def cost_function(self, angle: float)->float:
+    def cost_function(self, angle: float) -> float:
         r"""
         This method calculates the -Likelihood of angle theta
         for a given schedule m_k,n_k
@@ -280,16 +274,11 @@ class MLAE:
         """
         log_cost = 0
         for i in range(len(self.m_k)):
-            log_l_k = MLAE.log_likelihood(
-                angle,
-                self.m_k[i],
-                self.n_k[i],
-                self.h_k[i]
-            )
-            log_cost = log_cost+log_l_k
+            log_l_k = MLAE.log_likelihood(angle, self.m_k[i], self.n_k[i], self.h_k[i])
+            log_cost = log_cost + log_l_k
         return -log_cost
 
-    def optimize(self)->float:
+    def optimize(self) -> float:
         """
         This functions optimizes the cost_function
 
@@ -308,8 +297,8 @@ class MLAE:
             self.h_k[i], _ = self.run_step(self.m_k[i], self.n_k[i])
         result = self.optimizer(self.cost_function)
         return result
-    
-    def run(self)->float:
+
+    def run(self) -> float:
         r"""
         run method for the class.
 
@@ -330,9 +319,9 @@ class MLAE:
 
 
         """
-        
+
         theta = self.optimize()
         self.theta = theta[0]
-        self.a = np.sin(self.theta)**2
+        self.a = np.sin(self.theta) ** 2
         result = self.a
         return result

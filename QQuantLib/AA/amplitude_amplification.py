@@ -41,24 +41,25 @@ def reflection(lista: np.ndarray):
     reflection_gate : QLM gate
     """
     number_qubits = len(lista)
-    @qlm.build_gate("R_{"+str(lista)+"}", [], arity=number_qubits)
+
+    @qlm.build_gate("R_{" + str(lista) + "}", [], arity=number_qubits)
     def reflection_gate():
         routine = qlm.QRoutine()
         register = routine.new_wires(number_qubits)
 
         for i in range(number_qubits):
             if lista[i] == 0:
-                routine.apply(qlm.X, register[-i-1])
-        routine.apply(qlm.Z.ctrl(len(lista)-1), register)
+                routine.apply(qlm.X, register[-i - 1])
+        routine.apply(qlm.Z.ctrl(len(lista) - 1), register)
         for i in range(number_qubits):
             if lista[i] == 0:
-                routine.apply(qlm.X, register[-i-1])
+                routine.apply(qlm.X, register[-i - 1])
         return routine
+
     return reflection_gate()
 
 
-
-def U0(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
+def create_u0_gate(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
     r"""
     This function creates a QLM AbstractGate that implements an oracle:
     a reflection around the perpendicular state to a given state.
@@ -81,20 +82,22 @@ def U0(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
         index for the qubits that define the register
     Returns
     ----------
-    U0_gate : QLM gate
+    u0_gate : QLM gate
     """
 
     number_qubits = oracle.arity
-    @qlm.build_gate("U_0_"+str(time.time_ns()), [], arity=number_qubits)
-    def U0_gate():
+
+    @qlm.build_gate("U_0_" + str(time.time_ns()), [], arity=number_qubits)
+    def u0_gate():
         routine = qlm.QRoutine()
         register = routine.new_wires(number_qubits)
         routine.apply(reflection(target), [register[i] for i in index])
         return routine
-    return U0_gate()
+
+    return u0_gate()
 
 
-def U(oracle: qlm.QRoutine):
+def create_u_gate(oracle: qlm.QRoutine):
     r"""
     This function creates a QLM AbstractGate that implements a grover Diffusor
     from an input state.
@@ -111,19 +114,21 @@ def U(oracle: qlm.QRoutine):
 
     Returns
     ----------
-    U_gate : QLM gate
+    u_gate : QLM gate
     """
     oracle_cp = deepcopy(oracle)
     number_qubits = oracle.arity
-    @qlm.build_gate("U_"+str(time.time_ns()), [], arity=number_qubits)
-    def U_gate():
+
+    @qlm.build_gate("U_" + str(time.time_ns()), [], arity=number_qubits)
+    def u_gate():
         routine = qlm.QRoutine()
         register = routine.new_wires(number_qubits)
         routine.apply(oracle.dag(), register)
         routine.apply(reflection(np.zeros(number_qubits, dtype=int)), register)
         routine.apply(oracle, register)
         return routine
-    return U_gate()
+
+    return u_gate()
 
 
 def grover(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
@@ -151,12 +156,13 @@ def grover(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
     """
     oracle_cp = deepcopy(oracle)
     number_qubits = oracle_cp.arity
-    @qlm.build_gate("G_"+str(time.time_ns()), [], arity=number_qubits)
+
+    @qlm.build_gate("G_" + str(time.time_ns()), [], arity=number_qubits)
     def grover_gate():
         routine = qlm.QRoutine()
         register = routine.new_wires(number_qubits)
-        routine.apply(U0(oracle_cp, target, index), register)
-        routine.apply(U(oracle_cp), register)
+        routine.apply(create_u0_gate(oracle_cp, target, index), register)
+        routine.apply(create_u_gate(oracle_cp), register)
         return routine
-    return grover_gate()
 
+    return grover_gate()

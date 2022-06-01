@@ -45,11 +45,12 @@ def uniform_distribution(number_qubits: int):
         routine.apply(qlm.H, quantum_register[i])
     return routine
 
+
 @qlm.build_gate("LP", [int, int, float], arity=lambda x, y, z: x)
 def load_angle(number_qubits: int, index: int, angle: float):
     r"""
     Creates an QLM Abstract Gate that apply a rotation of a given angle
-    into a auxiliar qbit controlled by a given state of the measurement basis. 
+    into a auxiliar qbit controlled by a given state of the measurement basis.
     Direct QLM multicontrolled rotations were used for the implementation.
 
     Notes
@@ -74,21 +75,16 @@ def load_angle(number_qubits: int, index: int, angle: float):
     routine = qlm.QRoutine()
     quantum_register = routine.new_wires(number_qubits)
 
+    routine.apply(mask(number_qubits - 1, index), quantum_register[: number_qubits - 1])
     routine.apply(
-        mask(number_qubits-1, index),
-        quantum_register[:number_qubits-1]
+        qlm.RY(angle).ctrl(number_qubits - 1),
+        quantum_register[: number_qubits - 1],
+        quantum_register[number_qubits - 1],
     )
-    routine.apply(
-        qlm.RY(angle).ctrl(number_qubits-1),
-        quantum_register[:number_qubits-1],
-        quantum_register[number_qubits-1]
-    )
-    routine.apply(
-        mask(number_qubits-1, index),
-        quantum_register[:number_qubits-1]
-    )
+    routine.apply(mask(number_qubits - 1, index), quantum_register[: number_qubits - 1])
 
     return routine
+
 
 def load_angles_brute_force(angles: np.array):
     r"""
@@ -112,19 +108,20 @@ def load_angles_brute_force(angles: np.array):
         Angles to load in the circuit. The arity of the gate is:
         int(np.log2(len(angle)))+1.
     """
-    number_qubits = int(np.log2(angles.size))+1
+    number_qubits = int(np.log2(angles.size)) + 1
     routine = qlm.QRoutine()
     quantum_register = routine.new_wires(number_qubits)
     for i in range(angles.size):
         routine.apply(load_angle(number_qubits, i, angles[i]), quantum_register)
     return routine
 
-def multiplexor_RY(angles: np.array, ordering: str = "sequency"):
+
+def multiplexor_ry(angles: np.array, ordering: str = "sequency"):
     r"""
     Given a list of angles this functions creates a QLM routine that applies
     rotations of each angle of the list, over an auxiliar qbit, controlled
     by the different states of the measurement basis.
-    The multi-controlled rotations were implemented using Quantum Multiplexors. 
+    The multi-controlled rotations were implemented using Quantum Multiplexors.
 
     Notes
     -----
@@ -142,21 +139,20 @@ def multiplexor_RY(angles: np.array, ordering: str = "sequency"):
     """
     number_qubits = int(np.log2(angles.size))
     angles = fwht(angles, ordering=ordering)
-    angles = angles/2**number_qubits
+    angles = angles / 2**number_qubits
     routine = qlm.QRoutine()
-    quantum_register = routine.new_wires(number_qubits+1)
+    quantum_register = routine.new_wires(number_qubits + 1)
     control = np.zeros(2**number_qubits, dtype=int)
     for i in range(number_qubits):
-        for j in range(2**i-1, 2**number_qubits, 2**i):
-            control[j] = number_qubits-i-1
+        for j in range(2**i - 1, 2**number_qubits, 2**i):
+            control[j] = number_qubits - i - 1
     for i in range(2**number_qubits):
         routine.apply(qlm.RY(angles[i]), quantum_register[number_qubits])
         routine.apply(
-            qlm.CNOT,
-            quantum_register[control[i]],
-            quantum_register[number_qubits]
+            qlm.CNOT, quantum_register[control[i]], quantum_register[number_qubits]
         )
     return routine
+
 
 def load_angles(angles: np.array, method: str = "multiplexor"):
     r"""
@@ -179,20 +175,21 @@ def load_angles(angles: np.array, method: str = "multiplexor"):
     method : string
         Method used in the loading. Default method.
     """
-    number_qubits = int(np.log2(angles.size))+1
-    if np.max(angles) > 2*np.pi:
-        print("ERROR: function f not properly normalised")
-        return
-    if angles.size != 2**(number_qubits-1):
+    number_qubits = int(np.log2(angles.size)) + 1
+    if np.max(angles) > 2 * np.pi:
+        raise ValueError("ERROR: function f not properly normalised")
+    if angles.size != 2 ** (number_qubits - 1):
         print("ERROR: size of function f is not a factor of 2")
     if method == "brute_force":
         routine = load_angles_brute_force(angles)
     else:
-        routine = multiplexor_RY(angles)
+        routine = multiplexor_ry(angles)
     return routine
 
-def load_array(function_array: np.array, method: str = "multiplexor",\
-id_name: str = '1'):
+
+def load_array(
+    function_array: np.array, method: str = "multiplexor", id_name: str = "1"
+):
     """
     Creates a QLM AbstractGate for loading a normalised array into a quantum
     state.
@@ -213,18 +210,21 @@ id_name: str = '1'):
     f_gate: AbstractGate
         AbstractGate customized for loading a normalised array
     """
-    number_qubits = int(np.log2(function_array.size))+1
-    @qlm.build_gate("F_{"+id_name+"}", [], arity=number_qubits)
+    number_qubits = int(np.log2(function_array.size)) + 1
+
+    @qlm.build_gate("F_{" + id_name + "}", [], arity=number_qubits)
     def load_array_gate():
         """
         QLM Routine generation.
         """
         routine = qlm.QRoutine()
         register = routine.new_wires(number_qubits)
-        angles = 2*np.arccos(function_array)
+        angles = 2 * np.arccos(function_array)
         routine.apply(load_angles(angles, method=method), register)
         return routine
+
     return load_array_gate()
+
 
 def load_probability(probability_array: np.array):
     """
@@ -254,34 +254,34 @@ def load_probability(probability_array: np.array):
         routine = qlm.QRoutine()
         register = routine.new_wires(number_qubits)
         # Now go iteratively trough each qubit computing the
-        #probabilities and adding the corresponding multiplexor
-        for m in range(number_qubits):
-            #print(m)
-            #Calculates Conditional Probability
-            conditional_probability = left_conditional_probability(m,\
-            probability_array)
-            #Rotation angles: length: 2^(i-1)-1 and i the number of
-            #qbits of the step
-            thetas = 2.0*(np.arccos(np.sqrt(conditional_probability)))
-            if m == 0:
+        # probabilities and adding the corresponding multiplexor
+        for m_qbit in range(number_qubits):
+            # print(m)
+            # Calculates Conditional Probability
+            conditional_probability = left_conditional_probability(m_qbit, probability_array)
+            # Rotation angles: length: 2^(i-1)-1 and i the number of
+            # qbits of the step
+            thetas = 2.0 * (np.arccos(np.sqrt(conditional_probability)))
+            if m_qbit == 0:
                 # In the first iteration it is only needed a RY gate
-                routine.apply(qlm.RY(thetas[0]), register[number_qubits-1])
+                routine.apply(qlm.RY(thetas[0]), register[number_qubits - 1])
             else:
                 # In the following iterations we have to apply
-                # multiplexors controlled by m qubits
+                # multiplexors controlled by m_qbit qubits
                 # We call a function to construct the multiplexor,
                 # whose action is a block diagonal matrix of Ry gates
                 # with angles theta
                 routine.apply(
-                    multiplexor_RY(thetas),
-                    register[number_qubits-m:number_qubits],
-                    register[number_qubits-m-1]
+                    multiplexor_ry(thetas),
+                    register[number_qubits - m_qbit : number_qubits],
+                    register[number_qubits - m_qbit - 1],
                 )
         return routine
+
     return load_probability_gate()
 
 
-def step_array(index: int,size: int):
+def step_array(index: int, size: int):
     """
     Creates are routine which loads an array of size "size".
     This array has ones up to but not included
@@ -301,20 +301,23 @@ def step_array(index: int,size: int):
         gate which loads the corresponding array. Note that
         the arity is: np.log2(size)+1
     """
-    (power,remainder) = expmod(size,2)
-    assert (remainder==0), "ERROR: size must be a power of 2"
+    (power, remainder) = expmod(size, 2)
+    assert remainder == 0, "ERROR: size must be a power of 2"
 
-    arity = power+1
-    @qlm.build_gate("Step["+str(index)+","+str(size)+"]",[],arity = arity)
+    arity = power + 1
+
+    @qlm.build_gate("Step[" + str(index) + "," + str(size) + "]", [], arity=arity)
     def step_function_gate():
         ones = np.ones(index)
-        zeros = np.zeros(size-index)
-        array = np.concatenate((ones,zeros))
+        zeros = np.zeros(size - index)
+        array = np.concatenate((ones, zeros))
         routine = qlm.QRoutine()
         register = routine.new_wires(arity)
-        routine.apply(load_array(array),register)
+        routine.apply(load_array(array), register)
         return routine
+
     return step_function_gate()
+
 
 def load_pf(p_gate, f_gate):
     """
@@ -332,6 +335,7 @@ def load_pf(p_gate, f_gate):
     pf_gate : AbstractGate
     """
     nqbits = f_gate.arity
+
     @qlm.build_gate("PF", [], arity=nqbits)
     def load_pf_gate():
         """
@@ -342,4 +346,5 @@ def load_pf(p_gate, f_gate):
         q_rout.apply(p_gate, qbits[:-1])
         q_rout.apply(f_gate, qbits)
         return q_rout
+
     return load_pf_gate()

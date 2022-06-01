@@ -13,8 +13,9 @@ import qat.lang.AQASM as qlm
 from qat.core import Result
 from QQuantLib.utils.utils import check_list_type
 
-pd.options.display.float_format = '{:.6f}'.format
+pd.options.display.float_format = "{:.6f}".format
 np.set_printoptions(suppress=True)
+
 
 def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None):
     """
@@ -43,24 +44,24 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
 
     """
 
-    #if type(quantum_object) == qlm.Program:
+    # if type(quantum_object) == qlm.Program:
     if isinstance(quantum_object, qlm.Program):
         q_prog = deepcopy(quantum_object)
         arity = q_prog.qbit_count
     else:
         q_prog = create_qprogram(quantum_object)
-        #q_prog = qlm.Program()
-        #qbits = q_prog.qalloc(arity)
-        #q_prog.apply(quantum_object, qbits)
+        # q_prog = qlm.Program()
+        # qbits = q_prog.qalloc(arity)
+        # q_prog.apply(quantum_object, qbits)
         arity = quantum_object.arity
 
     if qubits is None:
         qubits = np.arange(arity, dtype=int)
     else:
         qubits = check_list_type(qubits, int)
-    #circuit = q_prog.to_circ(submatrices_only=True)
+    # circuit = q_prog.to_circ(submatrices_only=True)
     circuit = create_qcircuit(q_prog)
-    #job = circuit.to_job(nbshots=shots, qubits=qubits)
+    # job = circuit.to_job(nbshots=shots, qubits=qubits)
     job = create_qjob(circuit, shots=shots, qubits=qubits)
 
     result = linalg_qpu.submit(job)
@@ -69,30 +70,31 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
     # Process the results
     pdf = proccess_qresults(result, qubits)
 
-    #states = []
-    #list_int = []
-    #list_int_lsb = []
-    #for i in range(2**qubits.size):
+    # states = []
+    # list_int = []
+    # list_int_lsb = []
+    # for i in range(2**qubits.size):
     #    reversed_i = int('{:0{width}b}'.format(i, width=qubits.size)[::-1], 2)
     #    list_int.append(reversed_i)
     #    list_int_lsb.append(i)
     #    states.append("|"+ bin(i)[2:].zfill(qubits.size)+">")
 
-    #probability = np.zeros(2**qubits.size)
-    #amplitude = np.zeros(2**qubits.size, dtype=np.complex_)
-    #for samples in result:
+    # probability = np.zeros(2**qubits.size)
+    # amplitude = np.zeros(2**qubits.size, dtype=np.complex_)
+    # for samples in result:
     #    probability[samples.state.lsb_int] = samples.probability
     #    amplitude[samples.state.lsb_int] = samples.amplitude
 
-    #pdf = pd.DataFrame({
+    # pdf = pd.DataFrame({
     #    'States': states,
     #    'Int_lsb': list_int_lsb,
     #    'Probability': probability,
     #    'Amplitude': amplitude,
     #    'Int': list_int
-    #})
+    # })
 
     return pdf, circuit, q_prog, job
+
 
 def create_qprogram(quantum_gate):
     """
@@ -113,6 +115,7 @@ def create_qprogram(quantum_gate):
     q_prog.apply(quantum_gate, qbits)
     return q_prog
 
+
 def create_qcircuit(prog_q):
     """
     Given a QLM program creates a QLM circuit
@@ -121,21 +124,21 @@ def create_qcircuit(prog_q):
     circuit = q_prog.to_circ(submatrices_only=True)
     return circuit
 
+
 def create_qjob(circuit, shots=0, qubits=None):
     """
     Given a QLM circuit creates a QLM job
     """
-    dict_job = {
-        'amp_threshold': 0.0
-    }
+    dict_job = {"amp_threshold": 0.0}
     if qubits is None:
         job = circuit.to_job(nbshots=shots, **dict_job)
     else:
         if isinstance(qubits, (np.ndarray, list)):
             job = circuit.to_job(nbshots=shots, qubits=qubits, **dict_job)
         else:
-            raise ValueError('qbits: sould be a list!!!')
+            raise ValueError("qbits: sould be a list!!!")
     return job
+
 
 def proccess_qresults(result, qubits):
     """
@@ -147,10 +150,10 @@ def proccess_qresults(result, qubits):
     list_int = []
     list_int_lsb = []
     for i in range(2**qubits.size):
-        reversed_i = int('{:0{width}b}'.format(i, width=qubits.size)[::-1], 2)
+        reversed_i = int("{:0{width}b}".format(i, width=qubits.size)[::-1], 2)
         list_int.append(reversed_i)
         list_int_lsb.append(i)
-        states.append("|"+ bin(i)[2:].zfill(qubits.size)+">")
+        states.append("|" + bin(i)[2:].zfill(qubits.size) + ">")
 
     probability = np.zeros(2**qubits.size)
     amplitude = np.zeros(2**qubits.size, dtype=np.complex_)
@@ -158,11 +161,13 @@ def proccess_qresults(result, qubits):
         probability[samples.state.lsb_int] = samples.probability
         amplitude[samples.state.lsb_int] = samples.amplitude
 
-    pdf = pd.DataFrame({
-        'States': states,
-        'Int_lsb': list_int_lsb,
-        'Probability': probability,
-        'Amplitude': amplitude,
-        'Int': list_int
-    })
+    pdf = pd.DataFrame(
+        {
+            "States": states,
+            "Int_lsb": list_int_lsb,
+            "Probability": probability,
+            "Amplitude": amplitude,
+            "Int": list_int,
+        }
+    )
     return pdf
