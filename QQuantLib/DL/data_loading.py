@@ -19,6 +19,7 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 """
 
 import numpy as np
+import time
 import qat.lang.AQASM as qlm
 from QQuantLib.utils.utils import mask, fwht, left_conditional_probability, expmod
 
@@ -188,7 +189,7 @@ def load_angles(angles: np.array, method: str = "multiplexor"):
 
 
 def load_array(
-    function_array: np.array, method: str = "multiplexor", id_name: str = "1"
+    function_array: np.array, method: str = "multiplexor", id_name: str = str(time.time_ns())
 ):
     """
     Creates a QLM AbstractGate for loading a normalised array into a quantum
@@ -203,6 +204,8 @@ def load_array(
         type of loading method used:
             multiplexor : with quantum Multiplexors
             brute_force : using multicontrolled rotations by state
+    id_name : str
+        name for the Abstract Gate
 
     Return
     ----------
@@ -226,7 +229,7 @@ def load_array(
     return load_array_gate()
 
 
-def load_probability(probability_array: np.array):
+def load_probability(probability_array: np.array, id_name: str = str(time.time_ns())):
     """
     Creates a QLM Abstract gate for loading a given discretized probability
     distribution using Quantum Multiplexors.
@@ -236,6 +239,8 @@ def load_probability(probability_array: np.array):
     probability_array : numpy array
         Numpy array with the discretized probability to load. The arity of
         of the gate is int(np.log2(len(probability_array))).
+    id_name : str
+        name for the Abstract Gate
 
     Returns
     ----------
@@ -246,7 +251,7 @@ def load_probability(probability_array: np.array):
     """
     number_qubits = int(np.log2(probability_array.size))
 
-    @qlm.build_gate("P", [], arity=number_qubits)
+    @qlm.build_gate("P_{" + id_name + "}", [], arity=number_qubits)
     def load_probability_gate():
         """
         QLM Routine generation.
