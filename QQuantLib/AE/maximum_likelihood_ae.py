@@ -11,9 +11,11 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
 """
 
+import time
 from copy import deepcopy
 from functools import partial
 import numpy as np
+import pandas as pd
 import scipy.optimize as so
 import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
@@ -96,6 +98,10 @@ class MLAE:
         self.partial_cost_function = None
         self.theta = None
         self.ae = None
+        self.circuit_statistics = None
+        self.time_pdf = None
+        self.optimizer_time = None
+        self.run_time = None
 
     #####################################################################
     @property
@@ -204,6 +210,8 @@ class MLAE:
             number of times to apply the self.q_gate to the quantum circuit
         n_k : int
             number of shots
+        time_pdf : pandas DataFrame
+            DataFrame with different times of the simulation
 
         Returns
         ----------
@@ -216,12 +224,12 @@ class MLAE:
         routine.apply(load_qn_gate(self._grover_oracle, m_k), register)
         # for i in range(m_k):
         #    routine.apply(self._grover_oracle, register)
-        result, circuit, _, job = get_results(
+        result, circuit, _, job, time_pdf = get_results(
             routine, linalg_qpu=self.linalg_qpu, shots=n_k, qubits=self.index
         )
         h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)] * n_k)
 
-        return h_k, circuit
+        return h_k, circuit, time_pdf
 
     @staticmethod
     def likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
@@ -356,6 +364,7 @@ class MLAE:
             list with the h_k result of each pair of the input schedule
 
         """
+        self.circuit_statistics = {}
         x_ = check_list_type(schedule, int)
         if x_.shape[0] != 2:
             raise Exception("The shape of the schedule must be (2,n)")
@@ -364,8 +373,14 @@ class MLAE:
         n_k = schedule_[1]
         h_k = np.zeros(len(m_k), dtype=int)
         #for i in range(len(m_k)):
+        time_list = []
         for i, _ in enumerate(m_k):
-            h_k[i], _ = self.run_step(m_k[i], n_k[i])
+            h_k[i], circuit, time_pdf = self.run_step(m_k[i], n_k[i])
+            self.circuit_statistics.update({m_k[i]: circuit.statistics()})
+            time_list.append(time_pdf)
+        self.time_pdf = pd.concat(time_list)
+        self.time_pdf["m_k"] = m_k
+        self.time_pdf.reset_index(drop=True, inplace=True)
         return h_k
 
     def mlae(self, schedule, optimizer):
@@ -400,7 +415,10 @@ class MLAE:
         m_k = schedule[0]
         n_k = schedule[1]
         cost_function_partial = partial(self.cost_function, m_k=m_k, n_k=n_k, h_k=h_k)
+        start = time.time()
         result = optimizer(cost_function_partial)
+        end = time.time()
+        self.optimizer_time = end - start
         return result, h_k, cost_function_partial
 
     def run(self) -> float:
@@ -426,10 +444,13 @@ class MLAE:
         """
 
         # overwrite of the different propeties of the class
+        start = time.time()
         self.theta, self.h_k, self.partial_cost_function = self.mlae(
             self.schedule, self.brute_force
         )
         self.theta = self.theta[0]
         self.ae = np.sin(self.theta) ** 2
         result = self.ae
+        end = time.time()
+        self.run_time = end - start
         return result

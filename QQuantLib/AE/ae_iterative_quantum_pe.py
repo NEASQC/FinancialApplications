@@ -14,6 +14,7 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
 """
 
+import time
 from copy import deepcopy
 import numpy as np
 import qat.lang.AQASM as qlm
@@ -72,6 +73,8 @@ class IQPEAE:
         self.ae = None
         self.iqpe_object = None
         self.final_results = None
+        self.circuit_statistics = None
+        self.run_time = None
 
     #####################################################################
     @property
@@ -142,6 +145,8 @@ class IQPEAE:
             \; and \; \mathcal{Q} \; the \; Grover \; Operator
         """
 
+        start = time.time()
+        self.circuit_statistics = {}
         dict_ae_iqpe = {
             "initial_state": self.oracle,
             "unitary_operator": self._grover_oracle,
@@ -154,7 +159,10 @@ class IQPEAE:
         self.iqpe_object = IQPE(**dict_ae_iqpe)
         # Execute IQPE algorithm
         self.iqpe_object.iqpe()
+        self.circuit_statistics = {'IQPEAE': self.iqpe_object.circuit.statistics()}
         self.final_results = self.iqpe_object.final_results
         self.theta = self.final_results["theta_90"].iloc[0]
         self.ae = np.cos(self.theta) ** 2
+        end = time.time()
+        self.run_time = end - start
         return self.ae

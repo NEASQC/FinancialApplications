@@ -11,8 +11,10 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
 """
 
+import time
 from copy import deepcopy
 import numpy as np
+import pandas as pd
 import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
@@ -75,6 +77,9 @@ class IQAE:
         self.theta_u = None
         self.theta = None
         self.ae = None
+        self.circuit_statistics = None
+        self.time_pdf = None
+        self.run_time = None
 
     #####################################################################
     @property
@@ -320,6 +325,7 @@ class IQAE:
 
         """
 
+        self.circuit_statistics = {}
         #####################################################
         i = 0
         k = int(0)
@@ -332,12 +338,16 @@ class IQAE:
         #####################################################
         h_k = 0
         n_effective = 0
+        time_list = []
 
         while theta_u - theta_l > 2 * epsilon:
+            start = time.time()
             i = i + 1
             k_old = k
             [k, flag] = self.find_next_k(k_old, theta_l, theta_u, flag)
             big_k = 4 * k + 2
+            end = time.time()
+            finding_time = end - start
 
             #####################################################
             routine = qlm.QRoutine()
@@ -345,9 +355,12 @@ class IQAE:
             routine.apply(self.oracle, wires)
             for j in range(k):
                 routine.apply(self._grover_oracle, wires)
-            results, _, _, _ = get_results(
+            results, circuit, _, _, time_pdf = get_results(
                 routine, linalg_qpu=self.linalg_qpu, shots=shots, qubits=self.index
             )
+            start = time.time()
+            time_pdf["m_k"] = k
+            self.circuit_statistics.update({k: circuit.statistics()})
             a_ = results["Probability"].iloc[bitfield_to_int(self.target)]
             #####################################################
             # Agregate results from different iterations
@@ -369,9 +382,15 @@ class IQAE:
             theta_l_ = (2 * np.pi * np.floor(big_k * theta_l / (2 * np.pi)) + theta_min) / big_k
             theta_u_ = (2 * np.pi * np.floor(big_k * theta_u / (2 * np.pi)) + theta_max) / big_k
             # If bounded limits are worse than step before limits use these ones
-            theta_l =np.maximum(theta_l, theta_l_)
-            theta_u =np.minimum(theta_u, theta_u_)
+            theta_l = np.maximum(theta_l, theta_l_)
+            theta_u = np.minimum(theta_u, theta_u_)
+            end = time.time()
+            time_pdf["iqae_overheating"] = (end - start) + finding_time
+            time_list.append(time_pdf)
 
+        self.time_pdf = pd.concat(time_list)
+        #self.time_pdf["m_k"] = m_k
+        self.time_pdf.reset_index(drop=True, inplace=True)
         [a_l, a_u] = [np.sin(theta_l) ** 2, np.sin(theta_u) ** 2]
         return [a_l, a_u]
 
@@ -386,6 +405,7 @@ class IQAE:
             amplitude estimation parameter
 
         """
+        start = time.time()
         [self.ae_l, self.ae_u] = self.iqae(
             epsilon=self.epsilon, shots=self.shots, alpha=self.alpha
         )
@@ -393,4 +413,6 @@ class IQAE:
         self.theta_u = np.arcsin(np.sqrt(self.ae_u))
         self.theta = (self.theta_u + self.theta_l) / 2.0
         self.ae = (self.ae_u + self.ae_l) / 2.0
+        end = time.time()
+        self.run_time = end - start
         return self.ae

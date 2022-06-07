@@ -14,7 +14,7 @@ Quantum Fourier Transform. Following references were used:
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
 """
-
+import time
 from copy import deepcopy
 import numpy as np
 import qat.lang.AQASM as qlm
@@ -83,6 +83,8 @@ class CQPE:
 
         self.circuit = None
         self.results = None
+        self.time_pdf = None
+        self.time_qpe_post_procces = None
 
     def restart(self):
         """
@@ -117,11 +119,14 @@ class CQPE:
         # Create algorithm
         self.q_prog = self.apply_pe_wqft(self.q_prog, self.q_gate, self.q_aux)
         # Execute algorithm
-        self.results, self.circuit = self.run_qprogram(
+        self.results, self.circuit, self.time_pdf = self.run_qprogram(
             self.q_prog, self.q_aux, self.shots, self.linalg_qpu
         )
         # Post-Proccess results
+        start = time.time()
         self.final_results = self.post_proccess(self.results)
+        end = time.time()
+        self.time_qpe_post_procces = end - start
 
     @staticmethod
     def apply_controlled_operations(q_prog_, q_gate, q_aux):
@@ -232,13 +237,16 @@ class CQPE:
         Returns
         ----------
 
-        result : QLM results
+        result : pandas DataFrame
+            DataFrame with the results
         circuit : QLM circuit
+        time_pdf : pandas DataFrame
+            DataFrame with time of different procces of the simulation
 
         """
         start = q_aux.start
         lenght = q_aux.length
-        result, circuit, q_prog, job = get_results(
+        result, circuit, q_prog, job, time_pdf = get_results(
             q_prog,
             linalg_qpu=linalg_qpu,
             shots=shots,
@@ -246,7 +254,7 @@ class CQPE:
         )
         del result["Amplitude"]
         result["Phi"] = result["Int"] / (2**lenght)
-        return result, circuit
+        return result, circuit, time_pdf
 
     @staticmethod
     def post_proccess(input_pdf):

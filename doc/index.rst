@@ -27,7 +27,6 @@
     5. **QQuantLib/utils**: This package contains auxiliar modules used for all the beforementioned pacakges.
 
 
-
     NEASQC project has received funding from the European Union’s Horizon 2020 research and innovation programme under Grant Agreement No. 951821. https://www.neasqc.eu/
 
     Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro

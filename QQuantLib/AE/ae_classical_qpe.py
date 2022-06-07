@@ -16,6 +16,7 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
 """
 
+import time
 from copy import deepcopy
 import numpy as np
 import qat.lang.AQASM as qlm
@@ -73,6 +74,8 @@ class CQPEAE:
         self.ae = None
         self.cqpe = None
         self.final_results = None
+        self.circuit_statistics = None
+        self.run_time = None
 
     #####################################################################
     @property
@@ -144,6 +147,8 @@ class CQPEAE:
 
 
         """
+        start = time.time()
+        self.circuit_statistics = {}
         dict_pe_qft = {
             "initial_state": self.oracle,
             "unitary_operator": self._grover_oracle,
@@ -154,6 +159,8 @@ class CQPEAE:
 
         self.cqpe = CQPE(**dict_pe_qft)
         self.cqpe.pe_qft()
+        self.circuit_statistics = {'CQPEAE': self.cqpe.circuit.statistics()}
+
         self.final_results = self.cqpe.final_results
         self.final_results.sort_values(
             "Probability",
@@ -162,4 +169,6 @@ class CQPEAE:
         )
         self.theta = self.final_results["theta_90"].iloc[0]
         self.ae = np.cos(self.theta) ** 2
+        end = time.time()
+        self.run_time = end - start
         return self.ae

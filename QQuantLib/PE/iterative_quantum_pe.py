@@ -14,6 +14,7 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
 """
 
+import time
 from copy import deepcopy
 import numpy as np
 import pandas as pd
@@ -25,8 +26,7 @@ from QQuantLib.utils.data_extracting import (
     create_qjob,
     create_qcircuit,
 )
-from QQuantLib.utils.utils import load_qn_gate, check_list_type
-from QQuantLib.AA.amplitude_amplification import grover
+from QQuantLib.utils.utils import load_qn_gate
 
 
 class IQPE:
@@ -94,6 +94,7 @@ class IQPE:
 
         self.circuit = None
         self.job = None
+        self.time_pdf = None
 
     def restart(self):
         """
@@ -111,10 +112,16 @@ class IQPE:
 
     @property
     def cbits_number(self):
+        """
+        creating cbits_number property
+        """
         return self.cbits_number_
 
     @cbits_number.setter
     def cbits_number(self, value):
+        """
+        setter of the cbits_number property
+        """
         print(
             "The number of classical bits for phase estimation will be:"
             "{}".format(value)
@@ -136,18 +143,18 @@ class IQPE:
         """
         Apply a complete IQPE algorithm
         """
-        for l in range(len(self.c_bits)):
+        for step_l in range(len(self.c_bits)):
             # if self.zalo:
             #    self.q_prog = self.step_iqpe_zalo(
             #        self.q_prog,
             #        self.q_gate,
             #        self.q_aux,
             #        self.c_bits,
-            #        l
+            #        step_l
             #    )
             # else:
             self.q_prog = self.step_iqpe(
-                self.q_prog, self.q_gate, self.q_aux, self.c_bits, l
+                self.q_prog, self.q_gate, self.q_aux, self.c_bits, step_l
             )
 
     def iqpe(self, number_of_cbits=None, shots=None):
@@ -173,14 +180,24 @@ class IQPE:
         self.init_iqpe()
         # Create the complete algorithm
         self.apply_iqpe()
+
         # Execute quantum algorithm
-        results, self.circuit = self.run_qprogram(
+        results, self.circuit, pdf_time_ = self.run_qprogram(
             self.q_prog, self.q_aux, self.shots, self.linalg_qpu
         )
+        self.time_pdf = pdf_time_
+        start = time.time()
         # Extract information of the classical bits measurements
         self.classical_bits = IQPE.measure_classical_bits(results)
         # Aggregating classical bits measurements
         self.final_results = IQPE.post_proccess(self.classical_bits)
+        end = time.time()
+        time_post_proccess = end - start
+        qpu_type = self.time_pdf["qpu_type"]
+        self.time_pdf.drop("qpu_type", axis=1, inplace=True)
+        self.time_pdf["time_post_proccess"] = time_post_proccess
+        self.time_pdf["time_total"] = self.time_pdf.sum(axis=1)
+        self.time_pdf["qpu_type"] = qpu_type
 
     # @staticmethod
     # def step_iqpe_zalo(q_prog, q_gate, q_aux, c_bits, l):
@@ -267,11 +284,11 @@ class IQPE:
         # First apply a Haddamard Gate to auxiliar qbit
         q_prog.apply(qlm.H, q_aux)
         # number of bits for codify phase
-        m = len(c_bits)
+        number_cbits = len(c_bits)
 
         # Number of controlled application of the unitary operator by auxiliar
         # qbit over the principal qbits
-        unitary_applications = int(2 ** (m - l - 1))
+        unitary_applications = int(2 ** (number_cbits - l - 1))
         step_q_gate = load_qn_gate(q_gate, unitary_applications)
         q_prog.apply(step_q_gate.ctrl(), q_aux, q_bits)
         for j in range(l):
@@ -280,9 +297,9 @@ class IQPE:
             q_prog.cc_apply(c_bits[j], qlm.PH(-(np.pi / 2.0) * theta), q_aux)
             # q_prog.cc_apply(c_bits[j], qlm.PH((np.pi/2.0)*theta), q_aux)
 
-        # print('m: {}. l: {}'.format(m, l))
+        # print('number_cbits: {}. l: {}'.format(number_cbits, l))
         q_prog.apply(qlm.H, q_aux)
-        # print(m-l-1)
+        # print(number_cbits-l-1)
         q_prog.measure(q_aux, c_bits[l])
         return q_prog
 
@@ -301,18 +318,46 @@ class IQPE:
             number of shots for simulation
         linalg_qpu : QLM solver
 
+
+        Returns
+        _______
+
+        result : QLM result object
+        circuit : QLM circuit
+        pdf_time : pandas DataFrame
+            DataFrame with elapsed time of different parts of the simulation
         """
+        start = time.time()
         circuit = create_qcircuit(q_prog)
+        end = time.time()
+        time_q_circuit = end-start
         if shots == 0:
             shots = 10
             print("Number of shots can not be 0. It will be used: ", shots)
 
+        start = time.time()
         job = create_qjob(circuit, shots=shots, qubits=[q_aux])
+        end = time.time()
+        time_q_job = end-start
+
         job.aggregate_data = False
+        start = time.time()
         result = linalg_qpu.submit(job)
         if not isinstance(result, Result):
             result = result.join()
-        return result, circuit
+            qpu_type = "QLM_QPU"
+        else:
+            qpu_type = "No QLM_QPU"
+        end = time.time()
+        time_q_run = end-start
+        time_dict = {
+            "time_q_circuit": time_q_circuit,
+            "time_q_job": time_q_job,
+            "time_q_run": time_q_run,
+        }
+        pdf_time = pd.DataFrame([time_dict])
+        pdf_time["qpu_type"] = qpu_type
+        return result, circuit, pdf_time
 
     @staticmethod
     def measure_classical_bits(result):
@@ -338,9 +383,9 @@ class IQPE:
         """
         list_of_results = []
 
-        for r in result:
+        for step_result in result:
             bit_list = []
-            for i, im in enumerate(r.intermediate_measurements):
+            for i, im in enumerate(step_result.intermediate_measurements):
                 if i % 2 == 1:
                     bit_list.append(str(int(im.cbits[0])))
 

@@ -6,6 +6,7 @@ qpu executions
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
 """
 
+import time
 from copy import deepcopy
 import numpy as np
 import pandas as pd
@@ -41,9 +42,10 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
     circuit : QLM circuit
     q_prog : QLM Program.
     job : QLM job
+    pdf_time : pandas DataFrame
+        DataFrame with different times of the simulation proccess
 
     """
-
     # if type(quantum_object) == qlm.Program:
     if isinstance(quantum_object, qlm.Program):
         q_prog = deepcopy(quantum_object)
@@ -60,15 +62,42 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
     else:
         qubits = check_list_type(qubits, int)
     # circuit = q_prog.to_circ(submatrices_only=True)
+    start = time.time()
     circuit = create_qcircuit(q_prog)
+    end = time.time()
+    time_q_circuit = end-start
+
+    start = time.time()
     # job = circuit.to_job(nbshots=shots, qubits=qubits)
     job = create_qjob(circuit, shots=shots, qubits=qubits)
+    end = time.time()
+    time_q_job = end-start
 
+    start = time.time()
     result = linalg_qpu.submit(job)
     if not isinstance(result, Result):
         result = result.join()
+        #time_q_run = float(result.meta_data["simulation_time"])
+        qpu_type = "QLM_QPU"
+    else:
+        qpu_type = "No QLM_QPU"
+    end = time.time()
+    time_q_run = end - start
     # Process the results
+    start = time.time()
     pdf = proccess_qresults(result, qubits)
+    end = time.time()
+    time_post_proccess = end - start
+
+    time_dict = {
+        "time_q_circuit": time_q_circuit,
+        "time_q_job": time_q_job,
+        "time_q_run": time_q_run,
+        "time_post_proccess" : time_post_proccess
+    }
+    pdf_time = pd.DataFrame([time_dict])
+    pdf_time["time_total"] = pdf_time.sum(axis=1)
+    pdf_time["qpu_type"] = qpu_type
 
     # states = []
     # list_int = []
@@ -93,7 +122,7 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
     #    'Int': list_int
     # })
 
-    return pdf, circuit, q_prog, job
+    return pdf, circuit, q_prog, job, pdf_time
 
 
 def create_qprogram(quantum_gate):

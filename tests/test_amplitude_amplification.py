@@ -49,10 +49,10 @@ def GetAngle(Array):
 
 
 def get_initial_state(pf_gate):
-    phi_state, circuit, q_prog, job = get_results(
+    phi_state, circuit, q_prog, job, time_pdf = get_results(
         pf_gate, linalg_qpu=linalg_qpu, shots=0
     )
-    initial_state, circuit, q_p, job = get_results(
+    initial_state, circuit, q_p, job, time_pdf = get_results(
         pf_gate, linalg_qpu=linalg_qpu, shots=0, qubits=[pf_gate.arity - 1]
     )
     return phi_state, initial_state, q_prog
@@ -69,7 +69,7 @@ def test_U0():
     register_U0 = routine_U0.new_wires(pf_gate.arity)
     routine_U0.apply(pf_gate, register_U0)
     routine_U0.apply(u_phi0_gate, register_U0)
-    u0_phi_state, circuit, _, _ = get_results(
+    u0_phi_state, circuit, _, _, time_pdf = get_results(
         routine_U0, linalg_qpu=linalg_qpu, shots=0
     )
     state_0 = np.array(
@@ -117,7 +117,7 @@ def test_D0():
     routine_D0.apply(pf_gate, register_D0)
     d0_gate = reflection([0 for i in range(pf_gate.arity)])
     routine_D0.apply(d0_gate, register_D0)
-    u_d0_state, circuit, _, _ = get_results(routine_D0, linalg_qpu=linalg_qpu, shots=0)
+    u_d0_state, circuit, _, _, time_pdf = get_results(routine_D0, linalg_qpu=linalg_qpu, shots=0)
 
     # Testing: state |0> should change sign
     state_0 = np.isclose(phi_state["Amplitude"].loc[0], -u_d0_state["Amplitude"].loc[0])
@@ -143,7 +143,7 @@ def test_difusor():
     diffusor_gate = create_u_gate(pf_gate)
     routine_U.apply(diffusor_gate, register_U)
 
-    diffusor_state, circuit, _, _ = get_results(
+    diffusor_state, circuit, _, _, time_pdf = get_results(
         routine_U, linalg_qpu=linalg_qpu, shots=0
     )
 
@@ -164,7 +164,7 @@ def test_grover():
     grover_gate = grover(pf_gate, [0], [pf_gate.arity - 1])
     routine_grover.apply(grover_gate, register_grover)
 
-    grover_state, circuit, _, _ = get_results(
+    grover_state, circuit, _, _, time_pdf = get_results(
         routine_grover, linalg_qpu=linalg_qpu, shots=0, qubits=[grover_gate.arity - 1]
     )
 

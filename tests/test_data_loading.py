@@ -22,7 +22,7 @@ def test_load_probability():
     x = np.arange(array_lenght)
     probability = x / np.sum(x)
     q_rout = load_probability(probability)
-    results, _, _, _ = get_results(q_rout, linalg_qpu=linalg_qpu)
+    results, _, _, _, time_pdf = get_results(q_rout, linalg_qpu=linalg_qpu)
     test_result = np.isclose(
         results.sort_values("Int_lsb")["Probability"].values, probability
     )
@@ -44,7 +44,7 @@ def test_load_array():
     register = q_rout.new_wires(n_qbits + 1)
     q_rout.apply(uniform_distribution(n_qbits), register[:n_qbits])
     q_rout.apply(load_array(f_normalised), register)
-    results, _, _, _ = get_results(q_rout, linalg_qpu=linalg_qpu)
+    results, _, _, _, time_pdf = get_results(q_rout, linalg_qpu=linalg_qpu)
     quantum_probabilities = results.sort_values("Int_lsb")["Probability"].values
     quantum_f = (
         np.sqrt(quantum_probabilities) * np.sqrt(array_lenght) * normalization_constant
@@ -71,7 +71,7 @@ def test_complete_load():
     q_rout.apply(load_probability(probability), register[:n_qbits])
     f_root = np.sqrt(f_normalised)
     q_rout.apply(load_array(f_root), register)
-    results, _, _, _ = get_results(q_rout, linalg_qpu=linalg_qpu)
+    results, _, _, _, time_pdf = get_results(q_rout, linalg_qpu=linalg_qpu)
     quantum_probabilities = results.sort_values("Int_lsb")["Probability"].values
     quantum_result = quantum_probabilities * normalization_constant
     test_result = np.isclose(quantum_result[0:array_lenght], probability * f)

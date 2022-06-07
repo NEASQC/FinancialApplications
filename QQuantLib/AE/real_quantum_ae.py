@@ -10,8 +10,10 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
 """
 
+import time
 from copy import deepcopy
 import numpy as np
+import pandas as pd
 import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
@@ -73,6 +75,9 @@ class RQAE:
         self.ae_l = None
         self.ae_u = None
         self.ae = None
+        self.circuit_statistics = None
+        self.time_pdf = None
+        self.run_time = None
 
     #####################################################################
     @property
@@ -179,11 +184,15 @@ class RQAE:
            lower bound for the amplitude to be estimated
         amplitude_max : float
            upper bound for the amplitude to be estimated
+        time_pdf : pandas DataFrame
+            DataFrame with time information of the proccess
 
         """
 
         self.shifted_oracle = 2 * shift
-        results, _, _, _ = get_results(self._shifted_oracle, self.linalg_qpu, shots=shots)
+        results, circuit, _, _, time_pdf = get_results(self._shifted_oracle, self.linalg_qpu, shots=shots)
+        start = time.time()
+        self.circuit_statistics.update({'first_step': circuit.statistics()})
         probability_sum = results["Probability"].iloc[
             bitfield_to_int([0] + list(self.target))
         ]
@@ -202,8 +211,12 @@ class RQAE:
             - epsilon_probability / (2 * np.abs(shift)),
             -1.0,
         )
+        end = time.time()
+        first_step_time = end - start
+        time_pdf["m_k"] = 0
+        time_pdf["rqae_overheating"] = first_step_time
 
-        return [amplitude_min, amplitude_max]
+        return [amplitude_min, amplitude_max], time_pdf
 
     def run_step(self, shift: float, shots: int, gamma: float, k: int):
         """
@@ -227,6 +240,8 @@ class RQAE:
            lower bound for the amplitude to be estimated
         amplitude_max : float
            upper bound for the amplitude to be estimated
+        time_pdf : pandas DataFrame
+            DataFrame with time information of the proccess
 
         """
         self.shifted_oracle = 2 * shift
@@ -239,7 +254,9 @@ class RQAE:
         routine.apply(self.shifted_oracle, wires)
         for i in range(k):
             routine.apply(grover_oracle, wires)
-        results, _, _, _ = get_results(routine, self.linalg_qpu, shots=shots)
+        results, circuit, _, _, time_pdf = get_results(routine, self.linalg_qpu, shots=shots)
+        start = time.time()
+        self.circuit_statistics.update({k: circuit.statistics()})
         probability_sum = results["Probability"].iloc[
             bitfield_to_int([0] + list(self.target))
         ]
@@ -251,8 +268,12 @@ class RQAE:
         angle_min = np.arcsin(np.sqrt(probability_min)) / (2 * k + 1)
         amplitude_max = np.sin(angle_max) - shift
         amplitude_min = np.sin(angle_min) - shift
+        end = time.time()
+        first_step_time = end - start
+        time_pdf["m_k"] = k
+        time_pdf["rqae_overheating"] = first_step_time
 
-        return [amplitude_min, amplitude_max]
+        return [amplitude_min, amplitude_max], time_pdf
 
     @staticmethod
     def display_information(ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05):
@@ -343,6 +364,9 @@ class RQAE:
         """
         ######################################
 
+        #Always need to clean the cirucit statistics property
+        self.circuit_statistics = {}
+        time_list = []
         theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
         k_max = int(
             np.ceil(
@@ -366,21 +390,24 @@ class RQAE:
         shift = theoretical_epsilon / np.sin(np.pi / (2 * (ratio + 2)))
         #####################################
         # First step
-        [amplitude_min, amplitude_max] = self.first_step(
+        [amplitude_min, amplitude_max], time_pdf = self.first_step(
             shift=shift, shots=n_i, gamma=gamma_i
         )
         epsilon_amplitude = (amplitude_max - amplitude_min) / 2
-
+        time_list.append(time_pdf)
         # Consecutive steps
         while epsilon_amplitude > epsilon:
             k = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
             k = min(k, k_max)
             shift = -amplitude_min
-            [amplitude_min, amplitude_max] = self.run_step(
+            [amplitude_min, amplitude_max], time_pdf = self.run_step(
                 shift=shift, shots=n_i, gamma=gamma_i, k=k
             )
+            time_list.append(time_pdf)
             epsilon_amplitude = (amplitude_max - amplitude_min) / 2
 
+        self.time_pdf = pd.concat(time_list)
+        self.time_pdf.reset_index(drop=True, inplace=True)
         return [2 * amplitude_min, 2 * amplitude_max]
 
     def run(self):
@@ -394,8 +421,11 @@ class RQAE:
             amplitude estimation parameter
 
         """
+        start = time.time()
         [self.ae_l, self.ae_u] = self.rqae(
             ratio=self.ratio, epsilon=self.epsilon, gamma=self.gamma
         )
         self.ae = (self.ae_u + self.ae_l) / 2.0
+        end = time.time()
+        self.run_time = end - start
         return self.ae
