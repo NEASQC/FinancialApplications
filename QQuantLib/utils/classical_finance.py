@@ -631,3 +631,36 @@ def geometric_sum(base: float, exponent: int, coeficient: float = 1.0, **kwargs)
         = a\big(\frac{1-base^{exponent+1}}{1-base}\big)
     """
     return coeficient * (base ** (exponent + 1) - 1) / (base - 1)
+
+def bs_forward_price(
+    s_0: float,
+    risk_free_rate: float,
+    maturity: float,
+    strike: float,
+    **kwargs
+):
+    r"""Computes the price for a forward contract.
+    Note that it doesn't assume that we are
+    at the begining of the lifetime of the contract
+    The formula is:
+    Notes
+    -----
+    .. math::
+        V(S, T) = S-Ke^{-r(T-t)}
+    Parameters
+    ----------
+    s_0 : float
+        current price of the underlying
+    risk_free_rate : float
+        risk free rate
+    maturity : float
+        time to expiration of the contract
+    strike : float
+        the strike
+    Returns
+    -------
+    price : float
+        price of the forward
+    """
+    price = s_0-strike*np.exp(-risk_free_rate*maturity)
+    return price

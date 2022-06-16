@@ -73,7 +73,7 @@ class MLAE:
             print("Not QPU was provide. Default QPU will be used")
             self.linalg_qpu = get_default_qpu()
         ##delta for avoid problems in 0 and pi/2 theta limits
-        self.delta = kwargs.get("delta", 1.0e-5)
+        self.delta = kwargs.get("delta", 1.0e-6)
         # ns for the brute force optimizer
         self.ns = kwargs.get("ns", 1000)
 

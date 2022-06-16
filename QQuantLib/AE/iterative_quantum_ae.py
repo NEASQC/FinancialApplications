@@ -350,11 +350,12 @@ class IQAE:
             finding_time = end - start
 
             #####################################################
-            routine = qlm.QRoutine()
-            wires = routine.new_wires(self.oracle.arity)
-            routine.apply(self.oracle, wires)
-            for j in range(k):
-                routine.apply(self._grover_oracle, wires)
+            # routine = qlm.QRoutine()
+            # wires = routine.new_wires(self.oracle.arity)
+            # routine.apply(self.oracle, wires)
+            # for j in range(k):
+            #     routine.apply(self._grover_oracle, wires)
+            routine = self.quantum_step(k)
             results, circuit, _, _, time_pdf = get_results(
                 routine, linalg_qpu=self.linalg_qpu, shots=shots, qubits=self.index
             )
@@ -393,6 +394,28 @@ class IQAE:
         self.time_pdf.reset_index(drop=True, inplace=True)
         [a_l, a_u] = [np.sin(theta_l) ** 2, np.sin(theta_u) ** 2]
         return [a_l, a_u]
+
+    def quantum_step(self, k):
+        r"""
+        Create the quantum routine needed for the iqae step
+
+        Parameters
+        ----------
+        k : int
+            number of Grover operator applications
+
+        Returns
+        ----------
+        routine : qlm routine
+            qlm routine for the iqae step
+        """
+
+        routine = qlm.QRoutine()
+        wires = routine.new_wires(self.oracle.arity)
+        routine.apply(self.oracle, wires)
+        for j in range(k):
+            routine.apply(self._grover_oracle, wires)
+        return routine
 
     def run(self):
         r"""

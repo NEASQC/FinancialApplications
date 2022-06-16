@@ -192,7 +192,7 @@ class RQAE:
         self.shifted_oracle = 2 * shift
         results, circuit, _, _, time_pdf = get_results(self._shifted_oracle, self.linalg_qpu, shots=shots)
         start = time.time()
-        self.circuit_statistics.update({'first_step': circuit.statistics()})
+        self.circuit_statistics.update({0: circuit.statistics()})
         probability_sum = results["Probability"].iloc[
             bitfield_to_int([0] + list(self.target))
         ]
