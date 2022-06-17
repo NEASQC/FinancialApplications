@@ -192,7 +192,9 @@ class RQAE:
         self.shifted_oracle = 2 * shift
         results, circuit, _, _, time_pdf = get_results(self._shifted_oracle, self.linalg_qpu, shots=shots)
         start = time.time()
-        self.circuit_statistics.update({0: circuit.statistics()})
+        step_circuit_stats = circuit.statistics()
+        step_circuit_stats.update({"n_shots": shots})
+        self.circuit_statistics.update({0: step_circuit_stats})
         probability_sum = results["Probability"].iloc[
             bitfield_to_int([0] + list(self.target))
         ]
@@ -256,7 +258,9 @@ class RQAE:
             routine.apply(grover_oracle, wires)
         results, circuit, _, _, time_pdf = get_results(routine, self.linalg_qpu, shots=shots)
         start = time.time()
-        self.circuit_statistics.update({k: circuit.statistics()})
+        step_circuit_stats = circuit.statistics()
+        step_circuit_stats.update({"n_shots": shots})
+        self.circuit_statistics.update({k: step_circuit_stats})
         probability_sum = results["Probability"].iloc[
             bitfield_to_int([0] + list(self.target))
         ]

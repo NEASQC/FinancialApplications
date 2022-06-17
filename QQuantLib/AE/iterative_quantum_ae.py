@@ -361,7 +361,9 @@ class IQAE:
             )
             start = time.time()
             time_pdf["m_k"] = k
-            self.circuit_statistics.update({k: circuit.statistics()})
+            step_circuit_stats = circuit.statistics()
+            step_circuit_stats.update({"n_shots": shots})
+            self.circuit_statistics.update({k: step_circuit_stats})
             a_ = results["Probability"].iloc[bitfield_to_int(self.target)]
             #####################################################
             # Agregate results from different iterations

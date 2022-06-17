@@ -159,7 +159,9 @@ class IQPEAE:
         self.iqpe_object = IQPE(**dict_ae_iqpe)
         # Execute IQPE algorithm
         self.iqpe_object.iqpe()
-        self.circuit_statistics = {'IQPEAE': self.iqpe_object.circuit.statistics()}
+        step_circuit_stats = self.iqpe_object.circuit.statistics()
+        step_circuit_stats.update({"n_shots": self.shots})
+        self.circuit_statistics = {'IQPEAE': step_circuit_stats}
         self.final_results = self.iqpe_object.final_results
         self.theta = self.final_results["theta_90"].iloc[0]
         self.ae = np.cos(self.theta) ** 2

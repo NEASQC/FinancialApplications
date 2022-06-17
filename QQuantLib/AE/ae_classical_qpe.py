@@ -159,7 +159,9 @@ class CQPEAE:
 
         self.cqpe = CQPE(**dict_pe_qft)
         self.cqpe.pe_qft()
-        self.circuit_statistics = {'CQPEAE': self.cqpe.circuit.statistics()}
+        step_circuit_stats = self.cqpe.circuit.statistics()
+        step_circuit_stats.update({"n_shots": self.shots})
+        self.circuit_statistics = {'CQPEAE': step_circuit_stats}
 
         self.final_results = self.cqpe.final_results
         self.final_results.sort_values(
