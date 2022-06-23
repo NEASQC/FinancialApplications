@@ -58,8 +58,6 @@ class CQPEAE:
         self._oracle = deepcopy(oracle)
         self._target = check_list_type(target, int)
         self._index = check_list_type(index, int)
-        # First thing is create the grover operator from the oracle
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
 
         # Set the QPU to use
         self.linalg_qpu = kwargs.get("qpu", None)  # , get_qpu())
@@ -68,6 +66,15 @@ class CQPEAE:
             self.linalg_qpu = get_default_qpu()
         self.auxiliar_qbits_number = kwargs.get("auxiliar_qbits_number", 8)
         self.shots = kwargs.get("shots", 100)
+
+        self.mcz_qlm = kwargs.get("mcz_qlm", True)
+        # First thing is create the grover operator from the oracle
+        self._grover_oracle = grover(
+            self.oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
         # For storing results
         self.theta = None
@@ -91,6 +98,12 @@ class CQPEAE:
         setter of the oracle property
         """
         self._oracle = deepcopy(value)
+        self._grover_oracle = grover(
+            self.oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
     @property
     def target(self):
@@ -105,7 +118,12 @@ class CQPEAE:
         setter of the target property
         """
         self._target = check_list_type(value, int)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
+        self._grover_oracle = grover(
+            self.oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
     @property
     def index(self):
@@ -120,7 +138,12 @@ class CQPEAE:
         setter of the index property
         """
         self._index = check_list_type(value, int)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
+        self._grover_oracle = grover(
+            self.oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
     #####################################################################
 

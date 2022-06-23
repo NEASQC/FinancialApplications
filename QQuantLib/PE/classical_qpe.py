@@ -119,7 +119,7 @@ class CQPE:
         # Create algorithm
         self.q_prog = self.apply_pe_wqft(self.q_prog, self.q_gate, self.q_aux)
         # Execute algorithm
-        self.results, self.circuit, self.time_pdf = self.run_qprogram(
+        self.results, self.circuit = self.run_qprogram(
             self.q_prog, self.q_aux, self.shots, self.linalg_qpu
         )
         # Post-Proccess results
@@ -246,7 +246,7 @@ class CQPE:
         """
         start = q_aux.start
         lenght = q_aux.length
-        result, circuit, q_prog, job, time_pdf = get_results(
+        result, circuit, q_prog, job = get_results(
             q_prog,
             linalg_qpu=linalg_qpu,
             shots=shots,
@@ -254,7 +254,7 @@ class CQPE:
         )
         del result["Amplitude"]
         result["Phi"] = result["Int"] / (2**lenght)
-        return result, circuit, time_pdf
+        return result, circuit
 
     @staticmethod
     def post_proccess(input_pdf):

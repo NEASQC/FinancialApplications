@@ -60,7 +60,6 @@ class RQAE:
         self._oracle = deepcopy(oracle)
         self._target = check_list_type(target, int)
         self._index = check_list_type(index, int)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
 
         # Set the QPU to use
         self.linalg_qpu = kwargs.get("qpu")
@@ -71,6 +70,15 @@ class RQAE:
         self.gamma = kwargs.get("gamma", 0.05)
         # Amplification Ratio: q in the papper
         self.ratio = kwargs.get("q", 2)
+        self.mcz_qlm = kwargs.get("mcz_qlm", True)
+
+        # Creating the grover operator
+        self._grover_oracle = grover(
+            self._oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
         self.ae_l = None
         self.ae_u = None
@@ -93,6 +101,12 @@ class RQAE:
         setter of the oracle property
         """
         self._oracle = deepcopy(value)
+        self._grover_oracle = grover(
+            self._oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
     @property
     def target(self):
@@ -107,7 +121,12 @@ class RQAE:
         setter of the target property
         """
         self._target = check_list_type(value, int)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
+        self._grover_oracle = grover(
+            self._oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
     @property
     def index(self):
@@ -122,7 +141,12 @@ class RQAE:
         setter of the index property
         """
         self._index = check_list_type(value, int)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
+        self._grover_oracle = grover(
+            self._oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
     @property
     def shifted_oracle(self):
@@ -190,7 +214,7 @@ class RQAE:
         """
 
         self.shifted_oracle = 2 * shift
-        results, circuit, _, _, time_pdf = get_results(self._shifted_oracle, self.linalg_qpu, shots=shots)
+        results, circuit, _, _ = get_results(self._shifted_oracle, self.linalg_qpu, shots=shots)
         start = time.time()
         step_circuit_stats = circuit.statistics()
         step_circuit_stats.update({"n_shots": shots})
@@ -215,10 +239,10 @@ class RQAE:
         )
         end = time.time()
         first_step_time = end - start
-        time_pdf["m_k"] = 0
-        time_pdf["rqae_overheating"] = first_step_time
+        # time_pdf["m_k"] = 0
+        # time_pdf["rqae_overheating"] = first_step_time
 
-        return [amplitude_min, amplitude_max], time_pdf
+        return [amplitude_min, amplitude_max]
 
     def run_step(self, shift: float, shots: int, gamma: float, k: int):
         """
@@ -249,14 +273,21 @@ class RQAE:
         self.shifted_oracle = 2 * shift
 
         grover_oracle = grover(
-            self.shifted_oracle, [0] + list(self.target), np.arange(len(self.index) + 1)
+            self.shifted_oracle,
+            [0] + list(self.target),
+            np.arange(len(self.index) + 1),
+            mcz_qlm=self.mcz_qlm
         )
         routine = qlm.QRoutine()
         wires = routine.new_wires(self.shifted_oracle.arity)
         routine.apply(self.shifted_oracle, wires)
         for i in range(k):
             routine.apply(grover_oracle, wires)
-        results, circuit, _, _, time_pdf = get_results(routine, self.linalg_qpu, shots=shots)
+        results, circuit, _, _ = get_results(
+            routine,
+            self.linalg_qpu,
+            shots=shots
+        )
         start = time.time()
         step_circuit_stats = circuit.statistics()
         step_circuit_stats.update({"n_shots": shots})
@@ -274,10 +305,10 @@ class RQAE:
         amplitude_min = np.sin(angle_min) - shift
         end = time.time()
         first_step_time = end - start
-        time_pdf["m_k"] = k
-        time_pdf["rqae_overheating"] = first_step_time
+        # time_pdf["m_k"] = k
+        # time_pdf["rqae_overheating"] = first_step_time
 
-        return [amplitude_min, amplitude_max], time_pdf
+        return [amplitude_min, amplitude_max]
 
     @staticmethod
     def display_information(ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05):
@@ -370,7 +401,7 @@ class RQAE:
 
         #Always need to clean the cirucit statistics property
         self.circuit_statistics = {}
-        time_list = []
+        # time_list = []
         theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
         k_max = int(
             np.ceil(
@@ -394,24 +425,24 @@ class RQAE:
         shift = theoretical_epsilon / np.sin(np.pi / (2 * (ratio + 2)))
         #####################################
         # First step
-        [amplitude_min, amplitude_max], time_pdf = self.first_step(
+        [amplitude_min, amplitude_max] = self.first_step(
             shift=shift, shots=n_i, gamma=gamma_i
         )
         epsilon_amplitude = (amplitude_max - amplitude_min) / 2
-        time_list.append(time_pdf)
+        # time_list.append(time_pdf)
         # Consecutive steps
         while epsilon_amplitude > epsilon:
             k = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
             k = min(k, k_max)
             shift = -amplitude_min
-            [amplitude_min, amplitude_max], time_pdf = self.run_step(
+            [amplitude_min, amplitude_max] = self.run_step(
                 shift=shift, shots=n_i, gamma=gamma_i, k=k
             )
-            time_list.append(time_pdf)
+            # time_list.append(time_pdf)
             epsilon_amplitude = (amplitude_max - amplitude_min) / 2
 
-        self.time_pdf = pd.concat(time_list)
-        self.time_pdf.reset_index(drop=True, inplace=True)
+        # self.time_pdf = pd.concat(time_list)
+        # self.time_pdf.reset_index(drop=True, inplace=True)
         return [2 * amplitude_min, 2 * amplitude_max]
 
     def run(self):

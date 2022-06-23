@@ -17,8 +17,132 @@ from copy import deepcopy
 import numpy as np
 import qat.lang.AQASM as qlm
 
+@qlm.build_gate("PH_Multiplexor", [float], arity=2)
+def phase_multiplexor_base(theta):
+    """
+    Implement an initial multiplexor for a controlled phase gate.
 
-def reflection(lista: np.ndarray):
+    Parameters
+    ----------
+
+    angle : float
+        Phase angle to apply
+
+    Returns
+    _______
+
+    routine : QLM routine
+        QLM routine wiht the implementation of the basis multiplexor
+        for the controlled phase gate
+
+    """
+    routine = qlm.QRoutine()
+    # This will be a 2-qbits gate
+    register = routine.new_wires(2)
+    #routine.apply(qlm.CNOT, register[0], register[1])
+    routine.apply(qlm.PH(-theta), register[1])
+    # Apply the CNOT
+    routine.apply(qlm.CNOT, register[0], register[1])
+    #Apply the Phase gate (+)
+    routine.apply(qlm.PH(theta), register[1])
+    return routine
+
+def recursive_multiplexor(input_gate):
+    """
+    Create a new multiplexor from an input gate.
+    In this case takes the input gate adds a new qbit and creates a new
+    multiplexor by applying the input gate, a cnot and the input gate again
+
+    Parameters
+    ----------
+
+    input_gate : QLM routine
+        QLM routine with the gate we want for multiplexion
+
+    Returns
+    _______
+
+    routine : QLM routine
+        QLM routine with a multiplexion of the input_gate
+
+    """
+    routine = qlm.QRoutine()
+    input_arity = input_gate.arity
+    # Create the qbits for the input gate
+    old_qbits = routine.new_wires(input_arity)
+    # Add a new qbit for multiplexion
+    new_qbit = routine.new_wires(1)
+    # routine.apply(qlm.CNOT, old_qbits[input_arity-1], new_qbit)
+    routine.apply(input_gate, [old_qbits[:input_arity-1], new_qbit])
+    routine.apply(qlm.CNOT, old_qbits[input_arity-1], new_qbit)
+    routine.apply(input_gate, [old_qbits[:input_arity-1], new_qbit])
+    return routine
+
+#@qlm.build_gate("Multiplexor_C_PH", [float, int], arity=lambda x, y: y)
+def multiplexor_controlled_ph(angle, number_qubits):
+    """
+    Multiplexor implementation for a Multi-Controlled-phase gate
+
+    Parameters
+    ----------
+
+    angle : float
+        Desired angle for Controlled-Phase application
+    number_qubits : int
+        Number of qbits for the multi-controlled phase gate
+
+    Returns
+    _______
+
+    routine : QLM routine
+        QLM routine wiht the implementation of a multi-controlled phase gate
+
+    """
+    routine = qlm.QRoutine()
+    register = routine.new_wires(number_qubits)
+    # Angle for each Phase gate
+    angle = angle / (2**(number_qubits-1))
+    for i, _ in enumerate(register):
+        # print('i:', i)
+        if i == 0:
+            # In the first qbit we need a Phase rotation
+            routine.apply(qlm.PH(angle), register[i])
+        elif i == 1:
+            # In the second qbit we need the base gate for the multiplexor
+            routine.apply(qlm.CNOT, register[i-1], register[i])
+            multiplexor = phase_multiplexor_base(angle)
+            # print(register[:i])
+            routine.apply(multiplexor, register[:i+1])
+        else:
+            # For other qbits we need to create the new multiplexor
+            # from the before step multiplexor
+            routine.apply(qlm.CNOT, register[i-1], register[i])
+            multiplexor = recursive_multiplexor(multiplexor)
+            routine.apply(multiplexor, register[:i+1])
+    return routine
+
+@qlm.build_gate("Multiplexor_C_Z", [int], arity=lambda x: x)
+def multiplexor_controlled_z(number_qubits):
+    """
+    Multiplexor implementation for a multi-controlled-Z gate
+
+    Parameters
+    ----------
+
+
+    number_qubits : int
+        Number of qbits for the multi-controlled phase gate gate
+
+    Returns
+    _______
+
+    routine : QLM routine
+        QLM routine wiht the implementation of a multi-controlled Z gate
+    """
+    gate = multiplexor_controlled_ph(np.pi, number_qubits)
+    return gate
+
+def reflection(lista: np.ndarray, mcz_qlm=True):
     r"""
     This function returns a QLM AbstractGate that implement a reflection
     around the perpendicular state of a given state.
@@ -35,6 +159,8 @@ def reflection(lista: np.ndarray):
     lista: list of ints
         binary representation of the
         State that we want to rotate pi
+    mcz_qlm: bool
+        If True QLM construction for multi-controlled Z will be used.
 
     Returns
     ----------
@@ -50,7 +176,11 @@ def reflection(lista: np.ndarray):
         for i in range(number_qubits):
             if lista[i] == 0:
                 routine.apply(qlm.X, register[-i - 1])
-        routine.apply(qlm.Z.ctrl(len(lista) - 1), register)
+        if mcz_qlm:
+            routine.apply(qlm.Z.ctrl(len(lista) - 1), register)
+        else:
+            mcz_multiplexor = multiplexor_controlled_z(len(lista))
+            routine.apply(mcz_multiplexor, register)
         for i in range(number_qubits):
             if lista[i] == 0:
                 routine.apply(qlm.X, register[-i - 1])
@@ -59,7 +189,7 @@ def reflection(lista: np.ndarray):
     return reflection_gate()
 
 
-def create_u0_gate(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
+def create_u0_gate(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray, mcz_qlm=True):
     r"""
     This function creates a QLM AbstractGate that implements an oracle:
     a reflection around the perpendicular state to a given state.
@@ -80,6 +210,8 @@ def create_u0_gate(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
         target state
     index: list of ints
         index for the qubits that define the register
+    mcz_qlm: bool
+        If True QLM construction for multi-controlled Z will be used.
     Returns
     ----------
     u0_gate : QLM gate
@@ -91,13 +223,16 @@ def create_u0_gate(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
     def u0_gate():
         routine = qlm.QRoutine()
         register = routine.new_wires(number_qubits)
-        routine.apply(reflection(target), [register[i] for i in index])
+        routine.apply(
+            reflection(target, mcz_qlm),
+            [register[i] for i in index]
+        )
         return routine
 
     return u0_gate()
 
 
-def create_u_gate(oracle: qlm.QRoutine):
+def create_u_gate(oracle: qlm.QRoutine, mcz_qlm=True):
     r"""
     This function creates a QLM AbstractGate that implements a grover Diffusor
     from an input state.
@@ -111,6 +246,8 @@ def create_u_gate(oracle: qlm.QRoutine):
     ----------
     oracle: QLM routine/gate
         operator O
+    mcz_qlm: bool
+        If True QLM construction for multi-controlled Z will be used.
 
     Returns
     ----------
@@ -124,14 +261,17 @@ def create_u_gate(oracle: qlm.QRoutine):
         routine = qlm.QRoutine()
         register = routine.new_wires(number_qubits)
         routine.apply(oracle.dag(), register)
-        routine.apply(reflection(np.zeros(number_qubits, dtype=int)), register)
+        routine.apply(
+            reflection(np.zeros(number_qubits, dtype=int), mcz_qlm),
+            register
+        )
         routine.apply(oracle, register)
         return routine
 
     return u_gate()
 
 
-def grover(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
+def grover(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray, mcz_qlm=True):
     r"""
     This function creates a QLM AbstractGate that returns the grover
     operator associated to a given oracle. This function is a composition
@@ -149,6 +289,8 @@ def grover(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
         the state that we want to amplify
     index : list of ints
         index for the qubits that define the register
+    mcz_qlm: bool
+        If True QLM construction for multi-controlled Z will be used.
 
     Returns
     ----------
@@ -161,8 +303,14 @@ def grover(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray):
     def grover_gate():
         routine = qlm.QRoutine()
         register = routine.new_wires(number_qubits)
-        routine.apply(create_u0_gate(oracle_cp, target, index), register)
-        routine.apply(create_u_gate(oracle_cp), register)
+        routine.apply(
+            create_u0_gate(oracle_cp, target, index, mcz_qlm),
+            register
+        )
+        routine.apply(
+            create_u_gate(oracle_cp, mcz_qlm),
+            register
+        )
         return routine
 
     return grover_gate()

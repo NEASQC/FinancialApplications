@@ -182,10 +182,9 @@ class IQPE:
         self.apply_iqpe()
 
         # Execute quantum algorithm
-        results, self.circuit, pdf_time_ = self.run_qprogram(
+        results, self.circuit = self.run_qprogram(
             self.q_prog, self.q_aux, self.shots, self.linalg_qpu
         )
-        self.time_pdf = pdf_time_
         start = time.time()
         # Extract information of the classical bits measurements
         self.classical_bits = IQPE.measure_classical_bits(results)
@@ -193,11 +192,11 @@ class IQPE:
         self.final_results = IQPE.post_proccess(self.classical_bits)
         end = time.time()
         time_post_proccess = end - start
-        qpu_type = self.time_pdf["qpu_type"]
-        self.time_pdf.drop("qpu_type", axis=1, inplace=True)
-        self.time_pdf["time_post_proccess"] = time_post_proccess
-        self.time_pdf["time_total"] = self.time_pdf.sum(axis=1)
-        self.time_pdf["qpu_type"] = qpu_type
+        # qpu_type = self.time_pdf["qpu_type"]
+        # self.time_pdf.drop("qpu_type", axis=1, inplace=True)
+        # self.time_pdf["time_post_proccess"] = time_post_proccess
+        # self.time_pdf["time_total"] = self.time_pdf.sum(axis=1)
+        # self.time_pdf["qpu_type"] = qpu_type
 
     # @staticmethod
     # def step_iqpe_zalo(q_prog, q_gate, q_aux, c_bits, l):
@@ -350,14 +349,14 @@ class IQPE:
             qpu_type = "No QLM_QPU"
         end = time.time()
         time_q_run = end-start
-        time_dict = {
-            "time_q_circuit": time_q_circuit,
-            "time_q_job": time_q_job,
-            "time_q_run": time_q_run,
-        }
-        pdf_time = pd.DataFrame([time_dict])
-        pdf_time["qpu_type"] = qpu_type
-        return result, circuit, pdf_time
+        # time_dict = {
+        #     "time_q_circuit": time_q_circuit,
+        #     "time_q_job": time_q_job,
+        #     "time_q_run": time_q_run,
+        # }
+        # pdf_time = pd.DataFrame([time_dict])
+        # pdf_time["qpu_type"] = qpu_type
+        return result, circuit
 
     @staticmethod
     def measure_classical_bits(result):

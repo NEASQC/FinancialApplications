@@ -15,7 +15,6 @@ import time
 from copy import deepcopy
 from functools import partial
 import numpy as np
-import pandas as pd
 import scipy.optimize as so
 import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
@@ -65,7 +64,6 @@ class MLAE:
         self._oracle = deepcopy(oracle)
         self._target = check_list_type(target, int)
         self._index = check_list_type(index, int)
-        self._grover_oracle = grover(self._oracle, self.target, self.index)
 
         # Set the QPU to use
         self.linalg_qpu = kwargs.get("qpu", None)
@@ -86,6 +84,15 @@ class MLAE:
         else:
             self.schedule = schedule
 
+        self.mcz_qlm = kwargs.get("mcz_qlm", True)
+
+        # Creating the grover operator
+        self._grover_oracle = grover(
+            self._oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
         # Optimization
         # For avoiding problem with 0 and 0.5*pi
         self.theta_domain = [(0 + self.delta, 0.5 * np.pi - self.delta)]
@@ -117,7 +124,12 @@ class MLAE:
         setter of the oracle property
         """
         self._oracle = deepcopy(value)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
+        self._grover_oracle = grover(
+            self.oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
     @property
     def target(self):
@@ -132,7 +144,12 @@ class MLAE:
         setter of the target property
         """
         self._target = check_list_type(value, int)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
+        self._grover_oracle = grover(
+            self.oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
     @property
     def index(self):
@@ -147,7 +164,12 @@ class MLAE:
         setter of the index property
         """
         self._index = check_list_type(value, int)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
+        self._grover_oracle = grover(
+            self.oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
     @property
     def schedule(self):
@@ -224,12 +246,12 @@ class MLAE:
         routine.apply(load_qn_gate(self._grover_oracle, m_k), register)
         # for i in range(m_k):
         #    routine.apply(self._grover_oracle, register)
-        result, circuit, _, job, time_pdf = get_results(
+        result, circuit, _, job = get_results(
             routine, linalg_qpu=self.linalg_qpu, shots=n_k, qubits=self.index
         )
         h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)] * n_k)
 
-        return h_k, circuit, time_pdf
+        return h_k, circuit
 
     @staticmethod
     def likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
@@ -373,16 +395,15 @@ class MLAE:
         n_k = schedule_[1]
         h_k = np.zeros(len(m_k), dtype=int)
         #for i in range(len(m_k)):
-        time_list = []
         for i, _ in enumerate(m_k):
-            h_k[i], circuit, time_pdf = self.run_step(m_k[i], n_k[i])
+            h_k[i], circuit = self.run_step(m_k[i], n_k[i])
             step_circuit_stats = circuit.statistics()
             step_circuit_stats.update({"n_shots": n_k[i]})
             self.circuit_statistics.update({m_k[i]: step_circuit_stats})
-            time_list.append(time_pdf)
-        self.time_pdf = pd.concat(time_list)
-        self.time_pdf["m_k"] = m_k
-        self.time_pdf.reset_index(drop=True, inplace=True)
+        #   time_list.append(time_pdf)
+        # self.time_pdf = pd.concat(time_list)
+        # self.time_pdf["m_k"] = m_k
+        # self.time_pdf.reset_index(drop=True, inplace=True)
         return h_k
 
     def mlae(self, schedule, optimizer):

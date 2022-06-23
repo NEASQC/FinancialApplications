@@ -122,7 +122,7 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
     #    'Int': list_int
     # })
 
-    return pdf, circuit, q_prog, job, pdf_time
+    return pdf, circuit, q_prog, job
 
 
 def create_qprogram(quantum_gate):

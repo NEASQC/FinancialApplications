@@ -60,7 +60,6 @@ class IQAE:
         self._oracle = deepcopy(oracle)
         self._target = check_list_type(target, int)
         self._index = check_list_type(index, int)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
 
         # Set the QPU to use
         self.linalg_qpu = kwargs.get("qpu", None)
@@ -70,6 +69,15 @@ class IQAE:
         self.epsilon = kwargs.get("epsilon", 0.01)
         self.alpha = kwargs.get("alpha", 0.05)
         self.shots = kwargs.get("shots", 100)
+        self.mcz_qlm = kwargs.get("mcz_qlm", True)
+
+        # Creating the grover operator
+        self._grover_oracle = grover(
+            self._oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
         self.ae_l = None
         self.ae_u = None
@@ -95,6 +103,12 @@ class IQAE:
         setter of the oracle property
         """
         self._oracle = deepcopy(value)
+        self._grover_oracle = grover(
+            self._oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
     @property
     def target(self):
@@ -109,7 +123,12 @@ class IQAE:
         setter of the target property
         """
         self._target = check_list_type(value, int)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
+        self._grover_oracle = grover(
+            self._oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
     @property
     def index(self):
@@ -124,7 +143,12 @@ class IQAE:
         setter of the index property
         """
         self._index = check_list_type(value, int)
-        self._grover_oracle = grover(self.oracle, self.target, self.index)
+        self._grover_oracle = grover(
+            self._oracle,
+            self.target,
+            self.index,
+            mcz_qlm=self.mcz_qlm
+        )
 
     #####################################################################
 
@@ -338,7 +362,7 @@ class IQAE:
         #####################################################
         h_k = 0
         n_effective = 0
-        time_list = []
+        # time_list = []
 
         while theta_u - theta_l > 2 * epsilon:
             start = time.time()
@@ -356,11 +380,11 @@ class IQAE:
             # for j in range(k):
             #     routine.apply(self._grover_oracle, wires)
             routine = self.quantum_step(k)
-            results, circuit, _, _, time_pdf = get_results(
+            results, circuit, _, _ = get_results(
                 routine, linalg_qpu=self.linalg_qpu, shots=shots, qubits=self.index
             )
             start = time.time()
-            time_pdf["m_k"] = k
+            # time_pdf["m_k"] = k
             step_circuit_stats = circuit.statistics()
             step_circuit_stats.update({"n_shots": shots})
             self.circuit_statistics.update({k: step_circuit_stats})
@@ -388,12 +412,12 @@ class IQAE:
             theta_l = np.maximum(theta_l, theta_l_)
             theta_u = np.minimum(theta_u, theta_u_)
             end = time.time()
-            time_pdf["iqae_overheating"] = (end - start) + finding_time
-            time_list.append(time_pdf)
+            #time_pdf["iqae_overheating"] = (end - start) + finding_time
+            #time_list.append(time_pdf)
 
-        self.time_pdf = pd.concat(time_list)
+        #self.time_pdf = pd.concat(time_list)
         #self.time_pdf["m_k"] = m_k
-        self.time_pdf.reset_index(drop=True, inplace=True)
+        #self.time_pdf.reset_index(drop=True, inplace=True)
         [a_l, a_u] = [np.sin(theta_l) ** 2, np.sin(theta_u) ** 2]
         return [a_l, a_u]
 
