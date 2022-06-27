@@ -17,7 +17,7 @@ from copy import deepcopy
 import numpy as np
 import qat.lang.AQASM as qlm
 
-@qlm.build_gate("PH_Multiplexor", [float], arity=2)
+@qlm.build_gate("m_ph_" + str(time.time_ns()), [float], arity=2)
 def phase_multiplexor_base(theta):
     """
     Implement an initial multiplexor for a controlled phase gate.
@@ -78,7 +78,7 @@ def recursive_multiplexor(input_gate):
     routine.apply(input_gate, [old_qbits[:input_arity-1], new_qbit])
     return routine
 
-#@qlm.build_gate("Multiplexor_C_PH", [float, int], arity=lambda x, y: y)
+@qlm.build_gate("m_mcph_" + str(time.time_ns()), [float, int], arity=lambda x, y: y)
 def multiplexor_controlled_ph(angle, number_qubits):
     """
     Multiplexor implementation for a Multi-Controlled-phase gate
@@ -121,7 +121,7 @@ def multiplexor_controlled_ph(angle, number_qubits):
             routine.apply(multiplexor, register[:i+1])
     return routine
 
-@qlm.build_gate("Multiplexor_C_Z", [int], arity=lambda x: x)
+@qlm.build_gate("m_mcz_" + str(time.time_ns()), [int], arity=lambda x: x)
 def multiplexor_controlled_z(number_qubits):
     """
     Multiplexor implementation for a multi-controlled-Z gate
@@ -139,8 +139,11 @@ def multiplexor_controlled_z(number_qubits):
     routine : QLM routine
         QLM routine wiht the implementation of a multi-controlled Z gate
     """
+    routine = qlm.QRoutine()
+    register = routine.new_wires(number_qubits)
     gate = multiplexor_controlled_ph(np.pi, number_qubits)
-    return gate
+    routine.apply(gate, register)
+    return routine
 
 def reflection(lista: np.ndarray, mcz_qlm=True):
     r"""
