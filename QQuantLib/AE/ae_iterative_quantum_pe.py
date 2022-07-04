@@ -75,6 +75,8 @@ class IQPEAE:
         )
 
         # For storing results
+        self.ae_l = None
+        self.ae_u = None
         self.theta = None
         self.ae = None
         self.iqpe_object = None

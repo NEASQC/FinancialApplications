@@ -109,6 +109,8 @@ class MLAE:
         self.time_pdf = None
         self.optimizer_time = None
         self.run_time = None
+        self.ae_l = None
+        self.ae_u = None
 
     #####################################################################
     @property

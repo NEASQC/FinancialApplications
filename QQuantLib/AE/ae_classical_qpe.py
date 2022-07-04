@@ -79,6 +79,8 @@ class CQPEAE:
         # For storing results
         self.theta = None
         self.ae = None
+        self.ae_l = None
+        self.ae_u = None
         self.cqpe = None
         self.final_results = None
         self.circuit_statistics = None
