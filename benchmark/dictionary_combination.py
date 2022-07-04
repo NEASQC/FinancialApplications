@@ -198,6 +198,12 @@ def create_ae_pricep_list_fromjsons(ae_json_list, **kwargs):
     ae_pricep_list = create_ae_pricep_list(ae_list, problem_list)
     return ae_pricep_list
 
+def create_ae_pricep_list_fromjson(json_file):
+    with open(json_file) as json_pointer:
+        ae_list = json.load(json_pointer)
+    ae_pricep_list = combination_for_list(ae_list)
+    return ae_pricep_list
+
 def run_staff(ae_pricep_list, folder_name=None, qlmaas=False, save=False):
     """
     This function executes sequentially a list of different AE_PriceP
@@ -307,39 +313,11 @@ if __name__ == "__main__":
         default="./"
     )
     parser.add_argument(
-        "--MLAE",
-        dest="mlae_var",
-        default=False,
-        action="store_true",
-        help="For adding MLAE staff"
-    )
-    parser.add_argument(
-        "--IQAE",
-        dest="iqae_var",
-        default=False,
-        action="store_true",
-        help="For adding IQAE staff"
-    )
-    parser.add_argument(
-        "--RQAE",
-        dest="rqae_var",
-        default=False,
-        action="store_true",
-        help="For adding RQAE staff"
-    )
-    parser.add_argument(
-        "--CQPEAE",
-        dest="cqpeae_var",
-        default=False,
-        action="store_true",
-        help="For adding CQPEAE staff"
-    )
-    parser.add_argument(
-        "--IQPEAE",
-        dest="iqpeae_var",
-        default=False,
-        action="store_true",
-        help="For adding IQPEAE staff"
+        "-json",
+        dest="json",
+        type=str,
+        help="json file with complete ae configuration.",
+        default=None
     )
     parser.add_argument(
         "--count",
@@ -390,22 +368,61 @@ if __name__ == "__main__":
         help="For executing only one element of the list",
         default=None
     )
+    parser.add_argument(
+        "--MLAE",
+        dest="mlae_var",
+        default=False,
+        action="store_true",
+        help="For adding MLAE staff"
+    )
+    parser.add_argument(
+        "--IQAE",
+        dest="iqae_var",
+        default=False,
+        action="store_true",
+        help="For adding IQAE staff"
+    )
+    parser.add_argument(
+        "--RQAE",
+        dest="rqae_var",
+        default=False,
+        action="store_true",
+        help="For adding RQAE staff"
+    )
+    parser.add_argument(
+        "--CQPEAE",
+        dest="cqpeae_var",
+        default=False,
+        action="store_true",
+        help="For adding CQPEAE staff"
+    )
+    parser.add_argument(
+        "--IQPEAE",
+        dest="iqpeae_var",
+        default=False,
+        action="store_true",
+        help="For adding IQPEAE staff"
+    )
     args = parser.parse_args()
     print(args)
 
-    lista_ae = []
-    if args.mlae_var:
-        lista_ae.append("jsons/mlae_configuration.json")
-    if args.iqae_var:
-        lista_ae.append("jsons/iqae_configuration.json")
-    if args.rqae_var:
-        lista_ae.append("jsons/rqae_configuration.json")
-    if args.cqpeae_var:
-        lista_ae.append("jsons/cqpeae_configuration.json")
-    if args.iqpeae_var:
-        lista_ae.append("jsons/iqpeae_configuration.json")
+    if args.json is not None:
+        final_list = create_ae_pricep_list_fromjson(args.json)
 
-    final_list = create_ae_pricep_list_fromjsons(lista_ae)
+    else:
+        lista_ae = []
+        if args.mlae_var:
+            lista_ae.append("jsons/mlae_configuration.json")
+        if args.iqae_var:
+            lista_ae.append("jsons/iqae_configuration.json")
+        if args.rqae_var:
+            lista_ae.append("jsons/rqae_configuration.json")
+        if args.cqpeae_var:
+            lista_ae.append("jsons/cqpeae_configuration.json")
+        if args.iqpeae_var:
+            lista_ae.append("jsons/iqpeae_configuration.json")
+
+        final_list = create_ae_pricep_list_fromjsons(lista_ae)
 
     if args.count:
         print(len(final_list))
@@ -418,16 +435,17 @@ if __name__ == "__main__":
         if args.all:
             run_staff(
                 final_list,
-                args.folder_path,
-                args.qlmass,
-                args.save
+                folder_name=args.folder_path,
+                qlmaas=args.qlmass,
+                save=args.save
             )
         else:
             if args.id is not None:
                 run_id(
                     final_list[args.id],
                     args.id,
-                    args.folder_path,
-                    args.qlmass,
-                    args.save
+                    file_name=None,
+                    folder_name=args.folder_path,
+                    qlmaas=args.qlmass,
+                    save=args.save
                 )
