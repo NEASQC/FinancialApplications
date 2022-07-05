@@ -204,7 +204,7 @@ def create_ae_pricep_list_fromjson(json_file):
     ae_pricep_list = combination_for_list(ae_list)
     return ae_pricep_list
 
-def run_staff(ae_pricep_list, folder_name=None, qlmaas=False, save=False):
+def run_staff(ae_pricep_list, file_name="Todo.csv", folder_name=None, qlmaas=False, save=False):
     """
     This function executes sequentially a list of different AE_PriceP
     dictionaries.
@@ -216,6 +216,9 @@ def run_staff(ae_pricep_list, folder_name=None, qlmaas=False, save=False):
         list with AE_PriceP python dictionaries. The dictionaries haves
         to contain all the complete configuration for given to the
         PriceEstimation class.
+    file_name: string
+        name for the file where results will be stored. If not given will
+        be created using id_name and ae_type string.
     folder_name: string
         folder name for saving the results of the solution of the
         price estimation problem
@@ -235,7 +238,7 @@ def run_staff(ae_pricep_list, folder_name=None, qlmaas=False, save=False):
     """
     list_of_pdfs = []
     for i, step in enumerate(ae_pricep_list):
-        step_clas = run_id(step, i, "Todo.csv", folder_name, qlmaas, save)
+        step_clas = run_id(step, i, file_name, folder_name, qlmaas, save)
         list_of_pdfs.append(step_clas.pdf)
     price_pdf = pd.concat(list_of_pdfs)
     # if save:
@@ -305,12 +308,18 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-p",
-        "--path",
+        "--folder",
         dest="folder_path",
         type=str,
         help="Path for storing folder",
         default="./"
+    )
+    parser.add_argument(
+        "--name",
+        dest="file_name",
+        type=str,
+        help="Name for storing csv. Only applies for --all",
+        default=None
     )
     parser.add_argument(
         "-json",
@@ -435,6 +444,7 @@ if __name__ == "__main__":
         if args.all:
             run_staff(
                 final_list,
+                file_name=args.file_name,
                 folder_name=args.folder_path,
                 qlmaas=args.qlmass,
                 save=args.save

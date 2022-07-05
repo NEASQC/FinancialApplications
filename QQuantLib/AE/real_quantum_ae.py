@@ -399,6 +399,7 @@ class RQAE:
         """
         ######################################
 
+        epsilon = 0.5 * epsilon
         #Always need to clean the cirucit statistics property
         self.circuit_statistics = {}
         # time_list = []

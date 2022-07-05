@@ -1,0 +1,32 @@
+
+[
+    {
+        "x0": [0.01],
+        "xf": [5.0],
+        "n_qbits": [5],
+
+        "probability_type": ["Black-Scholes"],
+        "s_0": [1],
+        "risk_free_rate": [0.05],
+        "maturity": [1.0],
+        "volatility": [0.5],
+
+        "pay_off_type": ["European_Call_Option"],
+        "strike": [0.5],
+        "coupon": [null],
+
+        "ae_type": ["IQAE"],
+        "mcz_qlm": [false],
+        "probability_loading": [false],
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+        "auxiliar_qbits_number": [null],
+        "cbits_number": [null],
+        "alpha": [0.05],
+        "gamma": [null],
+        "epsilon": [0.0005],
+        "shots": [100],
+        "number_of_tests": [1]
+    }
+]
