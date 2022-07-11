@@ -1,12 +1,13 @@
 """
 Price Estimation class for benchmarking
 """
-#pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-position
 
 import sys
 import numpy as np
 import pandas as pd
 import qat.lang.AQASM as qlm
+
 sys.path.append("../")
 import benchmark.payoff_class as po
 import benchmark.probability_class as pc
@@ -17,10 +18,17 @@ from QQuantLib.AE.ae_iterative_quantum_pe import IQPEAE
 from QQuantLib.AE.iterative_quantum_ae import IQAE
 from QQuantLib.AE.real_quantum_ae import RQAE
 
+
 def text_is_none(variable, variable_name, variable_type=float):
     if variable is None:
-        message = variable_name+' argument is None. Some '+str(variable_type)+' should be  provided'
+        message = (
+            variable_name
+            + " argument is None. Some "
+            + str(variable_type)
+            + " should be  provided"
+        )
         raise ValueError(message)
+
 
 class PriceEstimation:
 
@@ -32,27 +40,27 @@ class PriceEstimation:
     def __init__(self, **kwargs):
 
         self.kwargs = kwargs
-        self.n_qbits = self.kwargs.get('n_qbits', None)
-        self.ae_type = self.kwargs.get('ae_type', None)
-        text_is_none(self.ae_type, 'ae_type', variable_type=str)
+        self.n_qbits = self.kwargs.get("n_qbits", None)
+        self.ae_type = self.kwargs.get("ae_type", None)
+        text_is_none(self.ae_type, "ae_type", variable_type=str)
 
-        self.x0 = self.kwargs.get('x0', 1.0)
-        self.xf = self.kwargs.get('xf', 3.0)
+        self.x0 = self.kwargs.get("x0", 1.0)
+        self.xf = self.kwargs.get("xf", 3.0)
 
         self.domain = np.linspace(self.x0, self.xf, 2**self.n_qbits)
 
         self.pc = pc.DensityProbability(**self.kwargs)
         self.probability = self.pc.probability(self.domain)
         if np.sum(self.probability) > 1.0:
-            raise ValueError('Probability not properly normalised')
+            raise ValueError("Probability not properly normalised")
 
         self.po = po.PayOff(**self.kwargs)
         self.pay_off = self.po.pay_off(self.domain)
         self.payoff_normalisation = 1.0
         if np.max(self.pay_off) > 1.00:
-            print('Be aware Pay Off is not properly normalised')
+            print("Be aware Pay Off is not properly normalised")
             self.payoff_normalisation = np.max(self.pay_off)
-        self.pay_off_normalised = self.pay_off/self.payoff_normalisation
+        self.pay_off_normalised = self.pay_off / self.payoff_normalisation
         self.p_gate = None
         self.derivative_oracle = None
         self.registers = None
@@ -65,7 +73,7 @@ class PriceEstimation:
         self.co_target = None
         self.co_index = None
         self.ae_pdf = None
-        self.normalised_classical_price = None 
+        self.normalised_classical_price = None
         # self.run()
 
     def oracle_loading_m01(self):
@@ -77,27 +85,16 @@ class PriceEstimation:
 
         self.derivative_oracle = qlm.QRoutine()
         # Creation of probability loading gate
-        self.p_gate = dl.load_probability(
-            self.probability
-        )
+        self.p_gate = dl.load_probability(self.probability)
         # Creation of function loading gate
         self.pay_off_gate = dl.load_array(
-            np.sqrt(self.pay_off_normalised),
-            id_name='PayOff'
+            np.sqrt(self.pay_off_normalised), id_name="PayOff"
         )
-        self.registers = self.derivative_oracle.new_wires(
-            self.pay_off_gate.arity
-        )
-        #Step 1 of Procedure: apply loading probabilty gate
-        self.derivative_oracle.apply(
-            self.p_gate,
-            self.registers[:self.p_gate.arity]
-        )
-        #Step 2 of Procedure: apply loading function gate
-        self.derivative_oracle.apply(
-            self.pay_off_gate,
-            self.registers
-        )
+        self.registers = self.derivative_oracle.new_wires(self.pay_off_gate.arity)
+        # Step 1 of Procedure: apply loading probabilty gate
+        self.derivative_oracle.apply(self.p_gate, self.registers[: self.p_gate.arity])
+        # Step 2 of Procedure: apply loading function gate
+        self.derivative_oracle.apply(self.pay_off_gate, self.registers)
         self.co_target = [0]
         self.co_index = [self.derivative_oracle.arity - 1]
 
@@ -108,35 +105,26 @@ class PriceEstimation:
         """
 
         self.derivative_oracle = qlm.QRoutine()
-        #For new data loading procedure we need n+2 qbits
-        self.registers = self.derivative_oracle.new_wires(self.n_qbits+2)
-        #Step 2 of Procedure: apply Uniform distribution
+        # For new data loading procedure we need n+2 qbits
+        self.registers = self.derivative_oracle.new_wires(self.n_qbits + 2)
+        # Step 2 of Procedure: apply Uniform distribution
         self.derivative_oracle.apply(
-            dl.uniform_distribution(self.n_qbits),
-            self.registers[:self.n_qbits]
+            dl.uniform_distribution(self.n_qbits), self.registers[: self.n_qbits]
         )
-        #Step 3 of Procedure: apply loading function operator for loading p(x)
-        self.p_gate = dl.load_array(
-            self.probability,
-            id_name='Probability'
-        )
+        # Step 3 of Procedure: apply loading function operator for loading p(x)
+        self.p_gate = dl.load_array(self.probability, id_name="Probability")
         self.derivative_oracle.apply(
-            self.p_gate,
-            [self.registers[:self.n_qbits], self.registers[self.n_qbits]]
+            self.p_gate, [self.registers[: self.n_qbits], self.registers[self.n_qbits]]
         )
-        #Step 5 of Procedure: apply loading function operator for loading f(x)
-        self.pay_off_gate = dl.load_array(
-            self.pay_off_normalised,
-            id_name='PayOff'
-        )
+        # Step 5 of Procedure: apply loading function operator for loading f(x)
+        self.pay_off_gate = dl.load_array(self.pay_off_normalised, id_name="PayOff")
         self.derivative_oracle.apply(
             self.pay_off_gate,
-            [self.registers[:self.n_qbits], self.registers[self.n_qbits+1]]
+            [self.registers[: self.n_qbits], self.registers[self.n_qbits + 1]],
         )
-        #Step 7 of Procedure: apply Uniform distribution
+        # Step 7 of Procedure: apply Uniform distribution
         self.derivative_oracle.apply(
-            dl.uniform_distribution(self.n_qbits),
-            self.registers[:self.n_qbits]
+            dl.uniform_distribution(self.n_qbits), self.registers[: self.n_qbits]
         )
         self.co_target = [0 for i in range(self.derivative_oracle.arity)]
         self.co_index = [i for i in range(self.derivative_oracle.arity)]
@@ -163,28 +151,28 @@ class PriceEstimation:
         epsilon = self.kwargs.get("epsilon", None)
         self.kwargs.update({"delta_price": None})
 
-        if self.ae_type == 'MLAE':
+        if self.ae_type == "MLAE":
             self.solver_ae = MLAE(
                 self.derivative_oracle,
                 target=self.co_target,
                 index=self.co_index,
                 **self.kwargs
             )
-        elif self.ae_type == 'CQPEAE':
+        elif self.ae_type == "CQPEAE":
             self.solver_ae = CQPEAE(
                 self.derivative_oracle,
                 target=self.co_target,
                 index=self.co_index,
                 **self.kwargs
             )
-        elif self.ae_type == 'IQPEAE':
+        elif self.ae_type == "IQPEAE":
             self.solver_ae = IQPEAE(
                 self.derivative_oracle,
                 target=self.co_target,
                 index=self.co_index,
                 **self.kwargs
             )
-        elif self.ae_type == 'IQAE':
+        elif self.ae_type == "IQAE":
             # if delta_price is None:
             #    raise ValueError("For IQAE epsilon can not be None")
 
@@ -194,7 +182,6 @@ class PriceEstimation:
             # delta_price = epsilon * self.payoff_normalisation * np.exp(
             #     -self.kwargs["risk_free_rate"] * self.kwargs["maturity"])
 
-
             # if not self.kwargs["probability_loading"]:
             #     # In this case we need to know the value of the estimation.
             #     # We are going to use the classical result:
@@ -203,14 +190,14 @@ class PriceEstimation:
             #     epsilon = epsilon * 2 * sqrt_a / (2**self.n_qbits)
             # print("IQAE_epsilon: ", epsilon)
 
-            #self.kwargs.update({"delta_price": delta_price})
+            # self.kwargs.update({"delta_price": delta_price})
             self.solver_ae = IQAE(
                 self.derivative_oracle,
                 target=self.co_target,
                 index=self.co_index,
                 **self.kwargs
             )
-        elif self.ae_type == 'RQAE':
+        elif self.ae_type == "RQAE":
             # if delta_price is None:
             #     raise ValueError("For RQAE epsilon can not be None")
 
@@ -244,76 +231,99 @@ class PriceEstimation:
         # run the amplitude estimation algorithm
         self.solver_ae.run()
         # classical derivative price
-        self.classical_price = np.sum(self.pay_off*self.probability)
+        self.classical_price = np.sum(self.pay_off * self.probability)
         # black scholes derivative price
         if self.po.pay_off_bs is not None:
             self.exact_solution = self.po.pay_off_bs(**self.kwargs)
 
-        #Recover amplitude estimation from ae_solver
+        # Recover amplitude estimation from ae_solver
         self.ae_pdf = pd.DataFrame(
             [self.solver_ae.ae, self.solver_ae.ae_l, self.solver_ae.ae_u],
-            index=["ae", "ae_l", "ae_u"]).T
+            index=["ae", "ae_l", "ae_u"],
+        ).T
 
         # Using classical price undo the payoff normalisation
-        self.normalised_classical_price =  self.classical_price / self.payoff_normalisation
+        self.normalised_classical_price = (
+            self.classical_price / self.payoff_normalisation
+        )
 
         if self.kwargs["probability_loading"]:
             # For density loaded as a density
             a_estimation = self.ae_pdf
-            if self.ae_type == 'IQAE':
+            if self.ae_type == "IQAE":
                 # Epsilon propagation for IQAE
-                delta_price = epsilon * self.payoff_normalisation * np.exp(
-                    -self.kwargs["risk_free_rate"] * self.kwargs["maturity"])
+                delta_price = (
+                    epsilon
+                    * self.payoff_normalisation
+                    * np.exp(-self.kwargs["risk_free_rate"] * self.kwargs["maturity"])
+                )
                 self.kwargs.update({"delta_price": delta_price})
         else:
             # For density loaded as a function
-            if self.ae_type == 'RQAE':
+            if self.ae_type == "RQAE":
                 # Estimation for RQAE
-                a_estimation = 2**self.n_qbits*self.ae_pdf
+                a_estimation = 2**self.n_qbits * self.ae_pdf
                 # Epsilon propagation for RQAE
-                delta_price = epsilon * self.payoff_normalisation * np.exp(
-                    -self.kwargs["risk_free_rate"]*self.kwargs["maturity"]
-                ) * 2**self.n_qbits
+                delta_price = (
+                    epsilon
+                    * self.payoff_normalisation
+                    * np.exp(-self.kwargs["risk_free_rate"] * self.kwargs["maturity"])
+                    * 2**self.n_qbits
+                )
                 self.kwargs.update({"delta_price": delta_price})
                 # For  getting the amplitude estimation True Result.
-                self.normalised_classical_price = self.normalised_classical_price / 2**self.n_qbits
+                self.normalised_classical_price = (
+                    self.normalised_classical_price / 2**self.n_qbits
+                )
             else:
                 # Estimation for other no RQAE
                 a_estimation = 2**self.n_qbits * np.sqrt(self.ae_pdf)
                 # For  getting the amplitude estimation True Result.
                 sign = 1.0
                 if self.normalised_classical_price < 0:
-                    #To keep the true sign of the classical price
+                    # To keep the true sign of the classical price
                     sign = -1.0
-                self.normalised_classical_price = sign*(self.normalised_classical_price / 2**self.n_qbits)**2
+                self.normalised_classical_price = (
+                    sign * (self.normalised_classical_price / 2**self.n_qbits) ** 2
+                )
 
-            if self.ae_type == 'IQAE':
-                delta_price = epsilon * 2**self.n_qbits * self.payoff_normalisation * \
-                    np.exp(-self.kwargs["risk_free_rate"] * self.kwargs["maturity"]) / \
-                    (2 * np.sqrt(self.solver_ae.ae))
+            if self.ae_type == "IQAE":
+                delta_price = (
+                    epsilon
+                    * 2**self.n_qbits
+                    * self.payoff_normalisation
+                    * np.exp(-self.kwargs["risk_free_rate"] * self.kwargs["maturity"])
+                    / (2 * np.sqrt(self.solver_ae.ae))
+                )
 
                 self.kwargs.update({"delta_price": delta_price})
 
         # Derivative price
         self.ae_derivative_price = a_estimation * self.payoff_normalisation
 
-        #Configure pandas DataFrame
+        # Configure pandas DataFrame
         pdf = pd.DataFrame([self.kwargs])
         pdf = pd.concat([pdf, self.ae_pdf], axis=1)
         pdf["payoff_normalisation"] = self.payoff_normalisation
         pdf["classical_price"] = self.classical_price
-        pdf[["derivative_price_" + col for col in a_estimation.columns]] = \
-            self.ae_derivative_price
-        pdf["classical_price_rfr"] = self.classical_price*np.exp(
-            -pdf["risk_free_rate"]*pdf["maturity"]
+        pdf[
+            ["derivative_price_" + col for col in a_estimation.columns]
+        ] = self.ae_derivative_price
+        pdf["classical_price_rfr"] = self.classical_price * np.exp(
+            -pdf["risk_free_rate"] * pdf["maturity"]
         )
-        pdf[["derivative_price_rfr_" + col for col in a_estimation.columns]] = \
-            self.ae_derivative_price * \
-            np.exp(-pdf["risk_free_rate"]*pdf["maturity"]).iloc[0]
+        pdf[["derivative_price_rfr_" + col for col in a_estimation.columns]] = (
+            self.ae_derivative_price
+            * np.exp(-pdf["risk_free_rate"] * pdf["maturity"]).iloc[0]
+        )
 
         pdf["exact_solution"] = self.exact_solution
-        pdf["error_classical"] = abs(pdf["derivative_price_rfr_ae"] - pdf["classical_price_rfr"])
-        pdf["relative_error_classical"] = pdf["error_classical"] / pdf["classical_price_rfr"]
+        pdf["error_classical"] = abs(
+            pdf["derivative_price_rfr_ae"] - pdf["classical_price_rfr"]
+        )
+        pdf["relative_error_classical"] = (
+            pdf["error_classical"] / pdf["classical_price_rfr"]
+        )
         pdf["error_exact"] = abs(pdf["derivative_price_rfr_ae"] - pdf["exact_solution"])
         pdf["relative_error_exact"] = pdf["error_classical"] / pdf["exact_solution"]
         pdf["normalised_classical_price"] = self.normalised_classical_price
@@ -322,10 +332,9 @@ class PriceEstimation:
         pdf["run_time"] = self.solver_ae.run_time
 
         if self.kwargs["save"]:
-            with open(self.kwargs["file_name"], 'a') as f_pointer:
+            with open(self.kwargs["file_name"], "a") as f_pointer:
                 pdf.to_csv(f_pointer, mode="a", header=f_pointer.tell() == 0)
         return pdf
-
 
     def run(self):
         """
@@ -337,4 +346,4 @@ class PriceEstimation:
             lista.append(self.run_ae())
 
         self.pdf = pd.concat(lista)
-        #self.pdf.to_csv(self.kwargs["file_name"])
+        # self.pdf.to_csv(self.kwargs["file_name"])

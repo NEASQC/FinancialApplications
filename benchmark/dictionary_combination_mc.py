@@ -27,9 +27,11 @@ def combination_for_dictionary(input_dict):
         input dictionary
     """
 
-    list_of_dictionaries = [dict(zip(input_dict, x)) for x in it.product(
-        *input_dict.values())]
+    list_of_dictionaries = [
+        dict(zip(input_dict, x)) for x in it.product(*input_dict.values())
+    ]
     return list_of_dictionaries
+
 
 def combination_for_list(input_list):
     """
@@ -49,9 +51,11 @@ def combination_for_list(input_list):
     """
     list_of_combinations = []
     for step_dict in input_list:
-        list_of_combinations = list_of_combinations + \
-        combination_for_dictionary(step_dict)
+        list_of_combinations = list_of_combinations + combination_for_dictionary(
+            step_dict
+        )
     return list_of_combinations
+
 
 def create_pricep_list(probability_list, payoff_list, domain_list):
     """
@@ -77,19 +81,20 @@ def create_pricep_list(probability_list, payoff_list, domain_list):
     dp_list = combination_for_list(probability_list)
     # List for pay offs
     po_list = combination_for_list(payoff_list)
-    #list of domain dictionaries
+    # list of domain dictionaries
     do_list = combination_for_list(domain_list)
     # List of problems dictionaries
     # A problem will be defined as pay off under a densitiy probabiliy for
     # a especified domain
     pricep_list = [
-        dict(ChainMap(*list(x))) for x in it.product(
-            dp_list, do_list, po_list
-        )
+        dict(ChainMap(*list(x))) for x in it.product(dp_list, do_list, po_list)
     ]
     return pricep_list
 
-def create_pricep_list_fromjsons(json_density=None, json_payoffs=None, json_domain=None):
+
+def create_pricep_list_fromjsons(
+    json_density=None, json_payoffs=None, json_domain=None
+):
     """
     Create a list of PriceP dictionaries using jsons.
 
@@ -121,11 +126,10 @@ def create_pricep_list_fromjsons(json_density=None, json_payoffs=None, json_doma
     with open(json_domain) as json_file:
         domain_dictionary = json.load(json_file)
     pricep_list = create_pricep_list(
-        probability_dictionary,
-        payoff_dictionary,
-        domain_dictionary
+        probability_dictionary, payoff_dictionary, domain_dictionary
     )
     return pricep_list
+
 
 def create_ae_pricep_list(ae_list, problem_list):
     """
@@ -154,13 +158,10 @@ def create_ae_pricep_list(ae_list, problem_list):
     """
     ae_pricep_list = []
     for ae in ae_list:
-        step_list = [
-            dict(ChainMap(*list(x))) for x in it.product(
-                problem_list, [ae]
-            )
-        ]
+        step_list = [dict(ChainMap(*list(x))) for x in it.product(problem_list, [ae])]
         ae_pricep_list = ae_pricep_list + step_list
     return ae_pricep_list
+
 
 # def ae_combination(json_name):
 #     with open(complete_path+json_name) as json_file:
@@ -198,13 +199,17 @@ def create_ae_pricep_list_fromjsons(ae_json_list, **kwargs):
     ae_pricep_list = create_ae_pricep_list(ae_list, problem_list)
     return ae_pricep_list
 
+
 def create_ae_pricep_list_fromjson(json_file):
     with open(json_file) as json_pointer:
         ae_list = json.load(json_pointer)
     ae_pricep_list = combination_for_list(ae_list)
     return ae_pricep_list
 
-def run_staff(ae_pricep_list, file_name="Todo.csv", folder_name=None, qlmaas=False, save=False):
+
+def run_staff(
+    ae_pricep_list, file_name="Todo.csv", folder_name=None, qlmaas=False, save=False
+):
     """
     This function executes sequentially a list of different AE_PriceP
     dictionaries.
@@ -247,7 +252,10 @@ def run_staff(ae_pricep_list, file_name="Todo.csv", folder_name=None, qlmaas=Fal
     #     price_pdf.to_csv(file_name)
     return price_pdf
 
-def run_id(ae_pricep, id_name, file_name=None, folder_name=None, qlmaas=False, save=False):
+
+def run_id(
+    ae_pricep, id_name, file_name=None, folder_name=None, qlmaas=False, save=False
+):
     """
     This function solves a complete AE_PriceP input dictionary. This
     function calculates the price for a given payoff, under a given
@@ -304,71 +312,69 @@ def run_id(ae_pricep, id_name, file_name=None, folder_name=None, qlmaas=False, s
     #     pe_object.pdf.to_csv(file_name)
     return pe_object
 
+
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--folder",
         dest="folder_path",
         type=str,
         help="Path for storing folder",
-        default="./"
+        default="./",
     )
     parser.add_argument(
         "--name",
         dest="file_name",
         type=str,
         help="Name for storing csv. Only applies for --all",
-        default=None
+        default=None,
     )
     parser.add_argument(
         "-json",
         dest="json",
         type=str,
         help="json file with complete ae configuration.",
-        default=None
+        default=None,
     )
     parser.add_argument(
         "--count",
         dest="count",
         default=False,
         action="store_true",
-        help="For counting elements on the list"
+        help="For counting elements on the list",
     )
     parser.add_argument(
-        "--list",
-        dest="list",
-        default=False,
-        action="store_true",
-        help="For listing "
+        "--list", dest="list", default=False, action="store_true", help="For listing "
     )
     parser.add_argument(
         "--all",
         dest="all",
         default=False,
         action="store_true",
-        help="For executing complete list"
+        help="For executing complete list",
     )
     parser.add_argument(
         "--save",
         dest="save",
         default=False,
         action="store_true",
-        help="For saving results"
+        help="For saving results",
     )
     parser.add_argument(
         "--exe",
         dest="execution",
         default=False,
         action="store_true",
-        help="For executing program"
+        help="For executing program",
     )
     parser.add_argument(
         "-id",
         dest="id",
         type=int,
         help="For executing only one element of the list",
-        default=None
+        default=None,
     )
     args = parser.parse_args()
     print(args)
@@ -377,9 +383,7 @@ if __name__ == "__main__":
         final_list = create_ae_pricep_list_fromjson(args.json)
 
     else:
-        final_list = create_ae_pricep_list_fromjsons(
-            ["jsons/mc_configuration.json"]
-        )
+        final_list = create_ae_pricep_list_fromjsons(["jsons/mc_configuration.json"])
 
     if args.count:
         print(len(final_list))
@@ -394,7 +398,7 @@ if __name__ == "__main__":
                 final_list,
                 file_name=args.file_name,
                 folder_name=args.folder_path,
-                save=args.save
+                save=args.save,
             )
         else:
             if args.id is not None:
@@ -403,5 +407,5 @@ if __name__ == "__main__":
                     args.id,
                     file_name=None,
                     folder_name=args.folder_path,
-                    save=args.save
+                    save=args.save,
                 )
