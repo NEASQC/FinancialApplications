@@ -1,8 +1,14 @@
-import QQuantLib.utils.classical_finance as cf
+"""
+Class definition for the PayOff
+"""
 from functools import partial
+import QQuantLib.utils.classical_finance as cf
 
 
 def text_is_none(variable, variable_name, variable_type=float):
+    """
+    Raise an exception if variable is None
+    """
     if variable is None:
         message = (
             variable_name
@@ -43,6 +49,9 @@ class PayOff:
         self.get_pay_off()
 
     def get_pay_off(self):
+        """
+        Select of a PayOff
+        """
 
         if self.pay_off_type == "European_Call_Option":
             text_is_none(self.strike, "strike", variable_type=float)

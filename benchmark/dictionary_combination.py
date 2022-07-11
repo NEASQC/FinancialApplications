@@ -201,6 +201,10 @@ def create_ae_pricep_list_fromjsons(ae_json_list, **kwargs):
 
 
 def create_ae_pricep_list_fromjson(json_file):
+    """
+    Creates a list of diferent Amplitude Estimation Price Problem
+    (ae_pricep) from a json file
+    """
     with open(json_file) as json_pointer:
         ae_list = json.load(json_pointer)
     ae_pricep_list = combination_for_list(ae_list)

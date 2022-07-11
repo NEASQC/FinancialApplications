@@ -6,20 +6,16 @@ Price Estimation class for benchmarking
 import sys
 import numpy as np
 import pandas as pd
-import qat.lang.AQASM as qlm
 
 sys.path.append("../")
 import benchmark.payoff_class as po
 import benchmark.probability_class as pc
-import QQuantLib.DL.data_loading as dl
-from QQuantLib.AE.maximum_likelihood_ae import MLAE
-from QQuantLib.AE.ae_classical_qpe import CQPEAE
-from QQuantLib.AE.ae_iterative_quantum_pe import IQPEAE
-from QQuantLib.AE.iterative_quantum_ae import IQAE
-from QQuantLib.AE.real_quantum_ae import RQAE
 
 
 def text_is_none(variable, variable_name, variable_type=float):
+    """
+    Raise an exception if variable is None
+    """
     if variable is None:
         message = (
             variable_name

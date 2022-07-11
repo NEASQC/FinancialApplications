@@ -20,6 +20,9 @@ from QQuantLib.AE.real_quantum_ae import RQAE
 
 
 def text_is_none(variable, variable_name, variable_type=float):
+    """
+    Raise an exception if variable is None
+    """
     if variable is None:
         message = (
             variable_name

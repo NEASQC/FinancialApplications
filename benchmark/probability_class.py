@@ -1,8 +1,14 @@
-import QQuantLib.utils.classical_finance as cf
+"""
+Definition for DensityProbability Class
+"""
 from functools import partial
+import QQuantLib.utils.classical_finance as cf
 
 
 def text_is_none(variable, variable_name, variable_type=float):
+    """
+    Raise an exception if variable is None
+    """
     if variable is None:
         message = (
             variable_name
@@ -40,6 +46,9 @@ class DensityProbability:
         self.get_density_prob(**kwargs)
 
     def get_density(self, **kwargs):
+        """
+        Create the probability function
+        """
 
         if self.probability_type == "Black-Scholes":
 
@@ -63,6 +72,9 @@ class DensityProbability:
             raise ValueError()
 
     def get_density_prob(self, **kwargs):
+        """
+        Configures a probabiliy density
+        """
 
         if self.probability_type == "Black-Scholes":
 
