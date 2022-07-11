@@ -281,7 +281,11 @@ class PriceEstimation:
                 # Estimation for other no RQAE
                 a_estimation = 2**self.n_qbits * np.sqrt(self.ae_pdf)
                 # For  getting the amplitude estimation True Result.
-                self.normalised_classical_price = (self.normalised_classical_price / 2**self.n_qbits)**2
+                sign = 1.0
+                if self.normalised_classical_price < 0:
+                    #To keep the true sign of the classical price
+                    sign = -1.0
+                self.normalised_classical_price = sign*(self.normalised_classical_price / 2**self.n_qbits)**2
 
             if self.ae_type == 'IQAE':
                 delta_price = epsilon * 2**self.n_qbits * self.payoff_normalisation * \
