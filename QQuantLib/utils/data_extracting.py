@@ -65,19 +65,19 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
     start = time.time()
     circuit = create_qcircuit(q_prog)
     end = time.time()
-    time_q_circuit = end-start
+    time_q_circuit = end - start
 
     start = time.time()
     # job = circuit.to_job(nbshots=shots, qubits=qubits)
     job = create_qjob(circuit, shots=shots, qubits=qubits)
     end = time.time()
-    time_q_job = end-start
+    time_q_job = end - start
 
     start = time.time()
     result = linalg_qpu.submit(job)
     if not isinstance(result, Result):
         result = result.join()
-        #time_q_run = float(result.meta_data["simulation_time"])
+        # time_q_run = float(result.meta_data["simulation_time"])
         qpu_type = "QLM_QPU"
     else:
         qpu_type = "No QLM_QPU"
@@ -93,7 +93,7 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
         "time_q_circuit": time_q_circuit,
         "time_q_job": time_q_job,
         "time_q_run": time_q_run,
-        "time_post_proccess" : time_post_proccess
+        "time_post_proccess": time_post_proccess,
     }
     pdf_time = pd.DataFrame([time_dict])
     pdf_time["time_total"] = pdf_time.sum(axis=1)

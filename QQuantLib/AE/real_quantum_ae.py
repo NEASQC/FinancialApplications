@@ -74,10 +74,7 @@ class RQAE:
 
         # Creating the grover operator
         self._grover_oracle = grover(
-            self._oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self._oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
         self.ae_l = None
@@ -102,10 +99,7 @@ class RQAE:
         """
         self._oracle = deepcopy(value)
         self._grover_oracle = grover(
-            self._oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self._oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     @property
@@ -122,10 +116,7 @@ class RQAE:
         """
         self._target = check_list_type(value, int)
         self._grover_oracle = grover(
-            self._oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self._oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     @property
@@ -142,10 +133,7 @@ class RQAE:
         """
         self._index = check_list_type(value, int)
         self._grover_oracle = grover(
-            self._oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self._oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     @property
@@ -174,7 +162,7 @@ class RQAE:
         self._shifted_oracle.apply(
             mask(
                 self.oracle.arity,
-                2 ** self.oracle.arity - 1 - bitfield_to_int(self.target),
+                2**self.oracle.arity - 1 - bitfield_to_int(self.target),
             ).ctrl(),
             wires[-1],
             wires[: self.oracle.arity],
@@ -214,7 +202,9 @@ class RQAE:
         """
 
         self.shifted_oracle = 2 * shift
-        results, circuit, _, _ = get_results(self._shifted_oracle, self.linalg_qpu, shots=shots)
+        results, circuit, _, _ = get_results(
+            self._shifted_oracle, self.linalg_qpu, shots=shots
+        )
         start = time.time()
         step_circuit_stats = circuit.statistics()
         step_circuit_stats.update({"n_shots": shots})
@@ -276,18 +266,14 @@ class RQAE:
             self.shifted_oracle,
             [0] + list(self.target),
             np.arange(len(self.index) + 1),
-            mcz_qlm=self.mcz_qlm
+            mcz_qlm=self.mcz_qlm,
         )
         routine = qlm.QRoutine()
         wires = routine.new_wires(self.shifted_oracle.arity)
         routine.apply(self.shifted_oracle, wires)
         for i in range(k):
             routine.apply(grover_oracle, wires)
-        results, circuit, _, _ = get_results(
-            routine,
-            self.linalg_qpu,
-            shots=shots
-        )
+        results, circuit, _, _ = get_results(routine, self.linalg_qpu, shots=shots)
         start = time.time()
         step_circuit_stats = circuit.statistics()
         step_circuit_stats.update({"n_shots": shots})
@@ -311,7 +297,9 @@ class RQAE:
         return [amplitude_min, amplitude_max]
 
     @staticmethod
-    def display_information(ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05):
+    def display_information(
+        ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05
+    ):
         """
         This function displays information of the propoerties of the method for a given
         set of parameters
@@ -346,7 +334,9 @@ class RQAE:
         ) / np.log(ratio)
         gamma_i = gamma / big_t
         # This is shots for each iteration: Ni in the papper
-        n_i = int(np.ceil(1 / (2 * theoretical_epsilon ** 2) * np.log(2 * big_t / gamma)))
+        n_i = int(
+            np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
+        )
         n_oracle = int(n_i / 2 * bigk_max * (1 + ratio / (ratio - 1)))
         print("-------------------------------------------------------------")
         print("Maximum number of amplifications: ", k_max)
@@ -400,7 +390,7 @@ class RQAE:
         ######################################
 
         epsilon = 0.5 * epsilon
-        #Always need to clean the cirucit statistics property
+        # Always need to clean the cirucit statistics property
         self.circuit_statistics = {}
         # time_list = []
         theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
@@ -421,7 +411,9 @@ class RQAE:
         ) / np.log(ratio)
         gamma_i = gamma / big_t
         # This is shots for each iteration: Ni in the papper
-        n_i = int(np.ceil(1 / (2 * theoretical_epsilon ** 2) * np.log(2 * big_t / gamma)))
+        n_i = int(
+            np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
+        )
         epsilon_probability = np.sqrt(1 / (2 * n_i) * np.log(2 / gamma_i))
         shift = theoretical_epsilon / np.sin(np.pi / (2 * (ratio + 2)))
         #####################################

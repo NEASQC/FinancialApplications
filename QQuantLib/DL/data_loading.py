@@ -18,8 +18,8 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
 """
 
-import numpy as np
 import time
+import numpy as np
 import qat.lang.AQASM as qlm
 from QQuantLib.utils.utils import mask, fwht, left_conditional_probability, expmod
 
@@ -189,7 +189,9 @@ def load_angles(angles: np.array, method: str = "multiplexor"):
 
 
 def load_array(
-    function_array: np.array, method: str = "multiplexor", id_name: str = str(time.time_ns())
+    function_array: np.array,
+    method: str = "multiplexor",
+    id_name: str = str(time.time_ns()),
 ):
     """
     Creates a QLM AbstractGate for loading a normalised array into a quantum
@@ -263,7 +265,9 @@ def load_probability(probability_array: np.array, id_name: str = str(time.time_n
         for m_qbit in range(number_qubits):
             # print(m)
             # Calculates Conditional Probability
-            conditional_probability = left_conditional_probability(m_qbit, probability_array)
+            conditional_probability = left_conditional_probability(
+                m_qbit, probability_array
+            )
             # Rotation angles: length: 2^(i-1)-1 and i the number of
             # qbits of the step
             thetas = 2.0 * (np.arccos(np.sqrt(conditional_probability)))

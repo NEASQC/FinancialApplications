@@ -329,7 +329,7 @@ class IQPE:
         start = time.time()
         circuit = create_qcircuit(q_prog)
         end = time.time()
-        time_q_circuit = end-start
+        time_q_circuit = end - start
         if shots == 0:
             shots = 10
             print("Number of shots can not be 0. It will be used: ", shots)
@@ -337,7 +337,7 @@ class IQPE:
         start = time.time()
         job = create_qjob(circuit, shots=shots, qubits=[q_aux])
         end = time.time()
-        time_q_job = end-start
+        time_q_job = end - start
 
         job.aggregate_data = False
         start = time.time()
@@ -348,7 +348,7 @@ class IQPE:
         else:
             qpu_type = "No QLM_QPU"
         end = time.time()
-        time_q_run = end-start
+        time_q_run = end - start
         # time_dict = {
         #     "time_q_circuit": time_q_circuit,
         #     "time_q_job": time_q_job,

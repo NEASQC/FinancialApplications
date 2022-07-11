@@ -68,10 +68,7 @@ class IQPEAE:
         self.mcz_qlm = kwargs.get("mcz_qlm", True)
         # First thing is create the grover operator from the oracle
         self._grover_oracle = grover(
-            self.oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self.oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
         # For storing results
@@ -99,10 +96,7 @@ class IQPEAE:
         """
         self._oracle = deepcopy(value)
         self._grover_oracle = grover(
-            self.oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self.oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     @property
@@ -119,10 +113,7 @@ class IQPEAE:
         """
         self._target = check_list_type(value, int)
         self._grover_oracle = grover(
-            self.oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self.oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     @property
@@ -139,10 +130,7 @@ class IQPEAE:
         """
         self._index = check_list_type(value, int)
         self._grover_oracle = grover(
-            self.oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self.oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     #####################################################################
@@ -185,7 +173,7 @@ class IQPEAE:
         self.iqpe_object.iqpe()
         step_circuit_stats = self.iqpe_object.circuit.statistics()
         step_circuit_stats.update({"n_shots": self.shots})
-        self.circuit_statistics = {'IQPEAE': step_circuit_stats}
+        self.circuit_statistics = {"IQPEAE": step_circuit_stats}
         self.final_results = self.iqpe_object.final_results
         self.theta = self.final_results["theta_90"].iloc[0]
         self.ae = np.cos(self.theta) ** 2

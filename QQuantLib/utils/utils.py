@@ -179,14 +179,18 @@ def fwht_sequency(x_input: np.array):
     # Second and further stage
     for n_stage in range(2, int(np.log2(n_)) + 1):
         y_ = np.zeros((int(n_groups / 2), m_in_g * 2))
-        y_[0 : int(n_groups / 2), 0 : m_in_g * 2 : 4] = \
+        y_[0 : int(n_groups / 2), 0 : m_in_g * 2 : 4] = (
             x_output[0:n_groups:2, 0:m_in_g:2] + x_output[1:n_groups:2, 0:m_in_g:2]
-        y_[0 : int(n_groups / 2), 1 : m_in_g * 2 : 4] = \
+        )
+        y_[0 : int(n_groups / 2), 1 : m_in_g * 2 : 4] = (
             x_output[0:n_groups:2, 0:m_in_g:2] - x_output[1:n_groups:2, 0:m_in_g:2]
-        y_[0 : int(n_groups / 2), 2 : m_in_g * 2 : 4] = \
+        )
+        y_[0 : int(n_groups / 2), 2 : m_in_g * 2 : 4] = (
             x_output[0:n_groups:2, 1:m_in_g:2] - x_output[1:n_groups:2, 1:m_in_g:2]
-        y_[0 : int(n_groups / 2), 3 : m_in_g * 2 : 4] = \
+        )
+        y_[0 : int(n_groups / 2), 3 : m_in_g * 2 : 4] = (
             x_output[0:n_groups:2, 1:m_in_g:2] + x_output[1:n_groups:2, 1:m_in_g:2]
+        )
         x_output = y_.copy()
         n_groups = int(n_groups / 2)
         m_in_g = m_in_g * 2
@@ -223,14 +227,18 @@ def fwht_dyadic(x_input: np.array):
     # Second and further stage
     for n_stage in range(2, int(np.log2(n_)) + 1):
         y_ = np.zeros((int(n_groups / 2), m_in_g * 2))
-        y_[0 : int(n_groups / 2), 0 : m_in_g * 2 : 4] = \
+        y_[0 : int(n_groups / 2), 0 : m_in_g * 2 : 4] = (
             x_output[0:n_groups:2, 0:m_in_g:2] + x_output[1:n_groups:2, 0:m_in_g:2]
-        y_[0 : int(n_groups / 2), 1 : m_in_g * 2 : 4] = \
+        )
+        y_[0 : int(n_groups / 2), 1 : m_in_g * 2 : 4] = (
             x_output[0:n_groups:2, 0:m_in_g:2] - x_output[1:n_groups:2, 0:m_in_g:2]
-        y_[0 : int(n_groups / 2), 2 : m_in_g * 2 : 4] = \
+        )
+        y_[0 : int(n_groups / 2), 2 : m_in_g * 2 : 4] = (
             x_output[0:n_groups:2, 1:m_in_g:2] + x_output[1:n_groups:2, 1:m_in_g:2]
-        y_[0 : int(n_groups / 2), 3 : m_in_g * 2 : 4] = \
+        )
+        y_[0 : int(n_groups / 2), 3 : m_in_g * 2 : 4] = (
             x_output[0:n_groups:2, 1:m_in_g:2] - x_output[1:n_groups:2, 1:m_in_g:2]
+        )
         x_output = y_.copy()
         n_groups = int(n_groups / 2)
         m_in_g = m_in_g * 2
@@ -290,10 +298,8 @@ def test_bins(array, text="probability"):
     """
     nqbits_ = np.log2(len(array))
     condition = (nqbits_ % 2 == 0) or (nqbits_ % 2 == 1)
-    condition_str = "Length of the {} Array must be of dimension 2^n with n \
-        an int. In this case is: {}.".format(
-        text, nqbits_
-    )
+    condition_str = f"Length of the {text} array must be of dimension 2^n with \
+        n an int. In this case is: {nqbits_}."
     assert condition, condition_str
     nqbits = int(nqbits_)
     return nqbits
@@ -426,7 +432,7 @@ def load_qn_gate(qlm_gate, n_times):
 
     """
 
-    @qlm.build_gate("Q^{}_{}".format(n_times, time.time_ns()), [], arity=qlm_gate.arity)
+    @qlm.build_gate(f"Q^{n_times}_{time.time_ns()}", [], arity=qlm_gate.arity)
     def q_n_gate():
         """
         Function generator for creating an AbstractGate for apply

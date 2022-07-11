@@ -14,7 +14,6 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 import time
 from copy import deepcopy
 import numpy as np
-import pandas as pd
 import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
@@ -73,10 +72,7 @@ class IQAE:
 
         # Creating the grover operator
         self._grover_oracle = grover(
-            self._oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self._oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
         self.ae_l = None
@@ -104,10 +100,7 @@ class IQAE:
         """
         self._oracle = deepcopy(value)
         self._grover_oracle = grover(
-            self._oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self._oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     @property
@@ -124,10 +117,7 @@ class IQAE:
         """
         self._target = check_list_type(value, int)
         self._grover_oracle = grover(
-            self._oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self._oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     @property
@@ -144,10 +134,7 @@ class IQAE:
         """
         self._index = check_list_type(value, int)
         self._grover_oracle = grover(
-            self._oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self._oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     #####################################################################
@@ -196,7 +183,7 @@ class IQAE:
             if (np.mod(q_ * theta_max, 2 * np.pi) <= np.pi) and (
                 np.mod(q_ * theta_min, 2 * np.pi) <= np.pi
             ):
-                #This K_next in the papper
+                # This K_next in the papper
                 bigk_next = big_k
                 flag = True
                 k_next = (bigk_next - 2) / 4
@@ -204,7 +191,7 @@ class IQAE:
             if (np.mod(q_ * theta_max, 2 * np.pi) >= np.pi) and (
                 np.mod(q_ * theta_min, 2 * np.pi) >= np.pi
             ):
-                #This K_next in the papper
+                # This K_next in the papper
                 bigk_next = big_k
                 flag = False
                 k_next = (bigk_next - 2) / 4
@@ -280,7 +267,7 @@ class IQAE:
         print("N: ", shots)
         print("-------------------------------------------------------------")
 
-        #This is T, number of rounds, in the papper
+        # This is T, number of rounds, in the papper
         big_t = np.ceil(np.log2(np.pi / (8 * epsilon)))
         n_max = (
             32
@@ -288,7 +275,7 @@ class IQAE:
             * np.log(2 / alpha * np.log2(np.pi / (4 * epsilon)))
         )
         n_oracle = 50 / epsilon * np.log(2 / alpha * np.log2(np.pi / (4 * epsilon)))
-        #This is L in the papper
+        # This is L in the papper
         big_l = (np.arcsin(2 / shots * np.log(2 * big_t / epsilon))) ** 0.25
         k_max = big_l / epsilon / 2
 
@@ -406,18 +393,22 @@ class IQAE:
             a_min = np.maximum(a_ - epsilon_a, 0.0)
             [theta_min, theta_max] = self.invert_sector(a_min, a_max, flag)
 
-            theta_l_ = (2 * np.pi * np.floor(big_k * theta_l / (2 * np.pi)) + theta_min) / big_k
-            theta_u_ = (2 * np.pi * np.floor(big_k * theta_u / (2 * np.pi)) + theta_max) / big_k
+            theta_l_ = (
+                2 * np.pi * np.floor(big_k * theta_l / (2 * np.pi)) + theta_min
+            ) / big_k
+            theta_u_ = (
+                2 * np.pi * np.floor(big_k * theta_u / (2 * np.pi)) + theta_max
+            ) / big_k
             # If bounded limits are worse than step before limits use these ones
             theta_l = np.maximum(theta_l, theta_l_)
             theta_u = np.minimum(theta_u, theta_u_)
             end = time.time()
-            #time_pdf["iqae_overheating"] = (end - start) + finding_time
-            #time_list.append(time_pdf)
+            # time_pdf["iqae_overheating"] = (end - start) + finding_time
+            # time_list.append(time_pdf)
 
-        #self.time_pdf = pd.concat(time_list)
-        #self.time_pdf["m_k"] = m_k
-        #self.time_pdf.reset_index(drop=True, inplace=True)
+        # self.time_pdf = pd.concat(time_list)
+        # self.time_pdf["m_k"] = m_k
+        # self.time_pdf.reset_index(drop=True, inplace=True)
         [a_l, a_u] = [np.sin(theta_l) ** 2, np.sin(theta_u) ** 2]
         return [a_l, a_u]
 

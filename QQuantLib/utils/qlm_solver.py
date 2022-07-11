@@ -8,7 +8,7 @@ This module contains functions for calling QLM solver
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
 """
 
-#from qat.qpus import PyLinalg
+# from qat.qpus import PyLinalg
 from qat.qpus import get_default_qpu
 
 
@@ -44,5 +44,5 @@ def get_qpu(qlmass=False):
     else:
         print("Using default qpu")
         linalg_qpu = get_default_qpu()
-        #linalg_qpu = PyLinalg()
+        # linalg_qpu = PyLinalg()
     return linalg_qpu

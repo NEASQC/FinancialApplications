@@ -88,10 +88,7 @@ class MLAE:
 
         # Creating the grover operator
         self._grover_oracle = grover(
-            self._oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self._oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
         # Optimization
         # For avoiding problem with 0 and 0.5*pi
@@ -127,10 +124,7 @@ class MLAE:
         """
         self._oracle = deepcopy(value)
         self._grover_oracle = grover(
-            self.oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self.oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     @property
@@ -147,10 +141,7 @@ class MLAE:
         """
         self._target = check_list_type(value, int)
         self._grover_oracle = grover(
-            self.oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self.oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     @property
@@ -167,10 +158,7 @@ class MLAE:
         """
         self._index = check_list_type(value, int)
         self._grover_oracle = grover(
-            self.oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self.oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     @property
@@ -365,7 +353,7 @@ class MLAE:
             the aggregation of the individual likelihoods
         """
         log_cost = 0
-        #for i in range(len(m_k)):
+        # for i in range(len(m_k)):
         for i, _ in enumerate(m_k):
             log_l_k = MLAE.log_likelihood(angle, m_k[i], n_k[i], h_k[i])
             log_cost = log_cost + log_l_k
@@ -396,7 +384,7 @@ class MLAE:
         m_k = schedule_[0]
         n_k = schedule_[1]
         h_k = np.zeros(len(m_k), dtype=int)
-        #for i in range(len(m_k)):
+        # for i in range(len(m_k)):
         for i, _ in enumerate(m_k):
             h_k[i], circuit = self.run_step(m_k[i], n_k[i])
             step_circuit_stats = circuit.statistics()

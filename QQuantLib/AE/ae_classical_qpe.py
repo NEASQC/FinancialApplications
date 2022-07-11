@@ -70,10 +70,7 @@ class CQPEAE:
         self.mcz_qlm = kwargs.get("mcz_qlm", True)
         # First thing is create the grover operator from the oracle
         self._grover_oracle = grover(
-            self.oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self.oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
         # For storing results
@@ -101,10 +98,7 @@ class CQPEAE:
         """
         self._oracle = deepcopy(value)
         self._grover_oracle = grover(
-            self.oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self.oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     @property
@@ -121,10 +115,7 @@ class CQPEAE:
         """
         self._target = check_list_type(value, int)
         self._grover_oracle = grover(
-            self.oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self.oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     @property
@@ -141,10 +132,7 @@ class CQPEAE:
         """
         self._index = check_list_type(value, int)
         self._grover_oracle = grover(
-            self.oracle,
-            self.target,
-            self.index,
-            mcz_qlm=self.mcz_qlm
+            self.oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )
 
     #####################################################################
@@ -186,7 +174,7 @@ class CQPEAE:
         self.cqpe.pe_qft()
         step_circuit_stats = self.cqpe.circuit.statistics()
         step_circuit_stats.update({"n_shots": self.shots})
-        self.circuit_statistics = {'CQPEAE': step_circuit_stats}
+        self.circuit_statistics = {"CQPEAE": step_circuit_stats}
 
         self.final_results = self.cqpe.final_results
         self.final_results.sort_values(

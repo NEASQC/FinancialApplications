@@ -632,12 +632,9 @@ def geometric_sum(base: float, exponent: int, coeficient: float = 1.0, **kwargs)
     """
     return coeficient * (base ** (exponent + 1) - 1) / (base - 1)
 
+
 def bs_forward_price(
-    s_0: float,
-    risk_free_rate: float,
-    maturity: float,
-    strike: float,
-    **kwargs
+    s_0: float, risk_free_rate: float, maturity: float, strike: float, **kwargs
 ):
     r"""Computes the price for a forward contract.
     Note that it doesn't assume that we are
@@ -662,5 +659,5 @@ def bs_forward_price(
     price : float
         price of the forward
     """
-    price = s_0-strike*np.exp(-risk_free_rate*maturity)
+    price = s_0 - strike * np.exp(-risk_free_rate * maturity)
     return price
