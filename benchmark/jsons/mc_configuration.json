@@ -1,0 +1,17 @@
+[
+    {
+        "ae_type": ["MC"],
+        "mcz_qlm": [null],
+        "probability_loading": [null],
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+        "auxiliar_qbits_number": [null],
+        "cbits_number": [null],
+        "alpha": [null],
+        "gamma": [null],
+        "epsilon": [null],
+        "shots": [10, 100, 1000, 10000, 100000],
+        "number_of_tests": [5]
+    }
+]

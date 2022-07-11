@@ -1,0 +1,35 @@
+[
+    {
+        "ae_type": ["MLAE"],
+        "mcz_qlm": [false],
+        "probability_loading": [true],
+        "schedule": [
+            [
+                [1, 100, 110, 120, 125, 130, 135, 140, 145, 150, 155],
+                [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
+            ]
+         ],
+        "delta": [1.0e-9, 1.0e-6],
+        "auxiliar_qbits_number": [null],
+        "cbits_number": [null],
+        "alpha": [null],
+        "gamma": [null],
+        "epsilon": [null],
+        "shots": [null],
+        "number_of_tests": [1]
+    },
+    {
+        "ae_type": ["IQAE"],
+        "mcz_qlm": [false],
+        "probability_loading": [true],
+        "schedule": [null],
+        "delta": [null],
+        "auxiliar_qbits_number": [null],
+        "cbits_number": [null],
+        "alpha": [0.05],
+        "gamma": [null],
+        "epsilon": [0.0001],
+        "shots": [100],
+        "number_of_tests": [1]
+    }
+]
