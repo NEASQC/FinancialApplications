@@ -9,7 +9,7 @@
         "cbits_number": [null],
         "alpha": [0.05],
         "gamma": [null],
-        "epsilon": [0.0005],
+        "epsilon": [0.1, 0.01, 0.001, 0.0001, 0.00001],
         "shots": [100],
         "number_of_tests": [5]
     },
@@ -23,7 +23,7 @@
         "cbits_number": [null],
         "alpha": [0.05],
         "gamma": [null],
-        "epsilon": [0.001],
+        "epsilon": [0.1, 0.01, 0.001],
         "shots": [100],
         "number_of_tests": [5]
     }

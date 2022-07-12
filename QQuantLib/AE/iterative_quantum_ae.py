@@ -350,6 +350,7 @@ class IQAE:
         h_k = 0
         n_effective = 0
         # time_list = []
+        j = 0 # pure counter
 
         while theta_u - theta_l > 2 * epsilon:
             start = time.time()
@@ -372,20 +373,31 @@ class IQAE:
             )
             start = time.time()
             # time_pdf["m_k"] = k
-            step_circuit_stats = circuit.statistics()
-            step_circuit_stats.update({"n_shots": shots})
-            self.circuit_statistics.update({k: step_circuit_stats})
             a_ = results["Probability"].iloc[bitfield_to_int(self.target)]
             #####################################################
             # Agregate results from different iterations
+            if j == 0:
+                # In the first step we need to store the circuit statistics
+                step_circuit_stats = circuit.statistics()
+                step_circuit_stats.update({"n_shots": shots})
+                self.circuit_statistics.update({k: step_circuit_stats})
+
             if k == k_old:
                 h_k = h_k + int(a_ * shots)
                 n_effective = n_effective + shots
                 a_ = h_k / n_effective
                 i = i - 1
+                # Only update shots for the k application
+                step_circuit_stats = self.circuit_statistics[k]
+                step_circuit_stats.update({"n_shots": n_effective})
+
             else:
                 h_k = int(a_ * shots)
                 n_effective = shots
+                # Store the circuit statistics for new k
+                step_circuit_stats = circuit.statistics()
+                step_circuit_stats.update({"n_shots": shots})
+            self.circuit_statistics.update({k: step_circuit_stats})
 
             # Compute the rest
             epsilon_a = IQAE.chebysev_bound(n_effective, alpha / big_t)
@@ -403,6 +415,7 @@ class IQAE:
             theta_l = np.maximum(theta_l, theta_l_)
             theta_u = np.minimum(theta_u, theta_u_)
             end = time.time()
+            j = j + 1
             # time_pdf["iqae_overheating"] = (end - start) + finding_time
             # time_list.append(time_pdf)
 
