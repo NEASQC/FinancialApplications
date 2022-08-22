@@ -389,6 +389,7 @@ class MLAE:
             h_k[i], circuit = self.run_step(m_k[i], n_k[i])
             step_circuit_stats = circuit.statistics()
             step_circuit_stats.update({"n_shots": n_k[i]})
+            step_circuit_stats.update({"h_k": h_k[i]})
             self.circuit_statistics.update({m_k[i]: step_circuit_stats})
         #   time_list.append(time_pdf)
         # self.time_pdf = pd.concat(time_list)
