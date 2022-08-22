@@ -464,7 +464,7 @@ if __name__ == "__main__":
                 run_id(
                     final_list[args.id],
                     args.id,
-                    file_name=None,
+                    file_name=args.file_name,
                     folder_name=args.folder_path,
                     qlmaas=args.qlmass,
                     save=args.save,
