@@ -231,7 +231,11 @@ def load_array(
     return load_array_gate()
 
 
-def load_probability(probability_array: np.array, id_name: str = str(time.time_ns())):
+def load_probability(
+    probability_array: np.array,
+    method: str = "multiplexor",
+    id_name: str = str(time.time_ns())
+):
     """
     Creates a QLM Abstract gate for loading a given discretized probability
     distribution using Quantum Multiplexors.
@@ -241,6 +245,10 @@ def load_probability(probability_array: np.array, id_name: str = str(time.time_n
     probability_array : numpy array
         Numpy array with the discretized probability to load. The arity of
         of the gate is int(np.log2(len(probability_array))).
+    method : str
+        type of loading method used:
+            multiplexor : with quantum Multiplexors
+            brute_force : using multicontrolled rotations by state
     id_name : str
         name for the Abstract Gate
 
@@ -281,7 +289,8 @@ def load_probability(probability_array: np.array, id_name: str = str(time.time_n
                 # whose action is a block diagonal matrix of Ry gates
                 # with angles theta
                 routine.apply(
-                    multiplexor_ry(thetas),
+                    #multiplexor_ry(thetas),
+                    load_angles(thetas, method),
                     register[number_qubits - m_qbit : number_qubits],
                     register[number_qubits - m_qbit - 1],
                 )
