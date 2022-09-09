@@ -10,6 +10,7 @@
         "alpha": [null],
         "gamma": [0.05],
         "epsilon": [0.0005],
+        "q": [1.2],
         "shots": [100],
         "number_of_tests": [5]
     }
