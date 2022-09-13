@@ -84,6 +84,7 @@ class IQAE:
         self.circuit_statistics = None
         self.time_pdf = None
         self.run_time = None
+        self.schedule = {}
 
     #####################################################################
     @property
@@ -381,6 +382,7 @@ class IQAE:
                 step_circuit_stats = circuit.statistics()
                 step_circuit_stats.update({"n_shots": shots})
                 self.circuit_statistics.update({k: step_circuit_stats})
+                self.schedule.update({k:shots})
 
             if k == k_old:
                 h_k = h_k + int(a_ * shots)
@@ -390,6 +392,7 @@ class IQAE:
                 # Only update shots for the k application
                 step_circuit_stats = self.circuit_statistics[k]
                 step_circuit_stats.update({"n_shots": n_effective})
+                self.schedule.update({k:n_effective})
 
             else:
                 h_k = int(a_ * shots)
@@ -397,6 +400,7 @@ class IQAE:
                 # Store the circuit statistics for new k
                 step_circuit_stats = circuit.statistics()
                 step_circuit_stats.update({"n_shots": shots})
+                self.schedule.update({k:shots})
             self.circuit_statistics.update({k: step_circuit_stats})
 
             # Compute the rest
