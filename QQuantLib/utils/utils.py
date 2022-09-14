@@ -449,3 +449,16 @@ def load_qn_gate(qlm_gate, n_times):
         return q_rout
 
     return q_n_gate()
+
+def text_is_none(variable, variable_name, variable_type=float):
+    """
+    Raise an exception if variable is None
+    """
+    if variable is None:
+        message = (
+            variable_name
+            + " argument is None. Some "
+            + str(variable_type)
+            + " should be  provided"
+        )
+        raise ValueError(message)

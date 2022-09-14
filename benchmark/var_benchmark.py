@@ -16,20 +16,7 @@ from QQuantLib.AE.ae_classical_qpe import CQPEAE
 from QQuantLib.AE.ae_iterative_quantum_pe import IQPEAE
 from QQuantLib.AE.iterative_quantum_ae import IQAE
 from QQuantLib.AE.real_quantum_ae import RQAE
-
-
-def text_is_none(variable, variable_name, variable_type=float):
-    """
-    Raise an exception if variable is None
-    """
-    if variable is None:
-        message = (
-            variable_name
-            + " argument is None. Some "
-            + str(variable_type)
-            + " should be  provided"
-        )
-        raise ValueError(message)
+from QQuantLib.utils.utils import text_is_none
 
 
 class CumulativeSumVaR:

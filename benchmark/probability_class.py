@@ -3,20 +3,8 @@ Definition for DensityProbability Class
 """
 from functools import partial
 import QQuantLib.utils.classical_finance as cf
+from QQuantLib.utils.utils import text_is_none
 
-
-def text_is_none(variable, variable_name, variable_type=float):
-    """
-    Raise an exception if variable is None
-    """
-    if variable is None:
-        message = (
-            variable_name
-            + " argument is None. Some "
-            + str(variable_type)
-            + " should be  provided"
-        )
-        raise ValueError(message)
 
 
 class DensityProbability:
