@@ -15,6 +15,7 @@ import time
 from copy import deepcopy
 from functools import partial
 import numpy as np
+import pandas as pd
 import scipy.optimize as so
 import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
@@ -108,6 +109,9 @@ class MLAE:
         self.run_time = None
         self.ae_l = None
         self.ae_u = None
+        self.summary_measurements = None
+        self.oracle_calls = None
+        self.max_oracle_depth = None
 
     #####################################################################
     @property
@@ -467,4 +471,12 @@ class MLAE:
         result = self.ae
         end = time.time()
         self.run_time = end - start
+        #Number of oracle call calculation
+        self.summary_measurements = pd.DataFrame(
+            [self.m_k, self.n_k, self.h_k],
+            index=['m_k', 'n_k', 'h_k']
+        ).T
+        self.oracle_calls = np.sum(
+            self.summary_measurements['n_k'] * (2 * self.summary_measurements['m_k'] + 1))
+        self.max_oracle_depth = np.max(2 *  self.summary_measurements['m_k']+ 1)
         return result

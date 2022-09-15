@@ -83,6 +83,10 @@ class RQAE:
         self.circuit_statistics = None
         self.time_pdf = None
         self.run_time = None
+        self.schedule = {}
+        self.oracle_calls = None
+        self.max_oracle_depth = None
+        self.schedule_pdf = None
 
     #####################################################################
     @property
@@ -209,6 +213,7 @@ class RQAE:
         step_circuit_stats = circuit.statistics()
         step_circuit_stats.update({"n_shots": shots})
         self.circuit_statistics.update({0: step_circuit_stats})
+        self.schedule.update({0 : shots})
         probability_sum = results["Probability"].iloc[
             bitfield_to_int([0] + list(self.target))
         ]
@@ -278,6 +283,7 @@ class RQAE:
         step_circuit_stats = circuit.statistics()
         step_circuit_stats.update({"n_shots": shots})
         self.circuit_statistics.update({k: step_circuit_stats})
+        self.schedule.update({k : shots})
         probability_sum = results["Probability"].iloc[
             bitfield_to_int([0] + list(self.target))
         ]
@@ -456,4 +462,14 @@ class RQAE:
         self.ae = (self.ae_u + self.ae_l) / 2.0
         end = time.time()
         self.run_time = end - start
+        self.schedule_pdf = pd.DataFrame.from_dict(
+            self.schedule,
+            columns = ['shots'],
+            orient = 'index'
+        )
+        self.schedule_pdf.reset_index(inplace = True)
+        self.schedule_pdf.rename(columns = {'index': 'm_k'}, inplace = True)
+        self.oracle_calls = np.sum(
+            self.schedule_pdf['shots'] * (2 * self.schedule_pdf['m_k'] + 1))
+        self.max_oracle_depth = np.max(2 *  self.schedule_pdf['m_k']+ 1)
         return self.ae

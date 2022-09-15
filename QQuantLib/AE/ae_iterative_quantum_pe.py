@@ -80,6 +80,8 @@ class IQPEAE:
         self.final_results = None
         self.circuit_statistics = None
         self.run_time = None
+        self.oracle_calls = None
+        self.max_oracle_depth = None
 
     #####################################################################
     @property
@@ -179,4 +181,10 @@ class IQPEAE:
         self.ae = np.cos(self.theta) ** 2
         end = time.time()
         self.run_time = end - start
+        #Total number of oracle calls
+        self.oracle_calls = self.shots * np.sum(
+            [2 * (2 ** i ) + 1 for i in range(self.cbits_number)]
+        )
+        #Maximum number of oracle applications
+        self.max_oracle_depth = 2 ** (int(self.cbits_number)-1) + 1
         return self.ae

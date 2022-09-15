@@ -462,3 +462,26 @@ def text_is_none(variable, variable_name, variable_type=float):
             + " should be  provided"
         )
         raise ValueError(message)
+
+def oracle_shots_calculation(m_k, n_k):
+    """
+    Function for computing the total number of oracle shots.
+
+    Parameters
+    ----------
+    m_k : list
+        list with integers. Applications of the Grover-like amplification
+        operator.
+    n_k : list
+        list with integers. Number of shots for each value of m_k.
+
+    Returns
+    ----------
+    oracle_shots : int
+        Number of total oracle calls for the input schedule
+    """
+
+    oracle_shots = 0.0
+    for step_k, step_n in zip(m_k, n_k):
+        oracle_shots = oracle_shots + (2 * step_k + 1) * step_n 
+    return oracle_shots

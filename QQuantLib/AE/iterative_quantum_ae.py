@@ -14,6 +14,7 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 import time
 from copy import deepcopy
 import numpy as np
+import pandas as pd
 import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
@@ -85,6 +86,9 @@ class IQAE:
         self.time_pdf = None
         self.run_time = None
         self.schedule = {}
+        self.oracle_calls = None
+        self.max_oracle_depth = None
+        self.schedule_pdf = None
 
     #####################################################################
     @property
@@ -472,4 +476,14 @@ class IQAE:
         self.ae = (self.ae_u + self.ae_l) / 2.0
         end = time.time()
         self.run_time = end - start
+        self.schedule_pdf = pd.DataFrame.from_dict(
+            self.schedule,
+            columns = ['shots'],
+            orient = 'index'
+        )
+        self.schedule_pdf.reset_index(inplace = True)
+        self.schedule_pdf.rename(columns = {'index': 'm_k'}, inplace = True)
+        self.oracle_calls = np.sum(
+            self.schedule_pdf['shots'] * (2 * self.schedule_pdf['m_k'] + 1))
+        self.max_oracle_depth = np.max(2 *  self.schedule_pdf['m_k']+ 1)
         return self.ae
