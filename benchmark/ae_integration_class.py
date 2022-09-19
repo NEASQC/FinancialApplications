@@ -6,20 +6,17 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
 """
 
+from copy import deepcopy
 import sys
 import numpy as np
 import pandas as pd
 sys.path.append("../")
 from encoding_protocols import Encoding
-from QQuantLib.AE.maximum_likelihood_ae import MLAE
-from QQuantLib.AE.ae_classical_qpe import CQPEAE
-from QQuantLib.AE.ae_iterative_quantum_pe import IQPEAE
-from QQuantLib.AE.iterative_quantum_ae import IQAE
-from QQuantLib.AE.real_quantum_ae import RQAE
+from QQuantLib.AE.ae_class import AE
 from QQuantLib.utils.utils import text_is_none
 
 
-class AE:
+class IntegrationAE:
     """
     Class for creating and solving an AE problem
     """
@@ -35,12 +32,12 @@ class AE:
         self.index = None
         self.target = None
         self.encoding = None
-        self.n_qbits = None 
+        self.n_qbits = None
         #Atributes for AE algorithm
         self.ae_type = None
         self.solver_ae = None
         self.solver_dict = None
-        self.ae_pdf = None 
+        self.ae_pdf = None
 
     def create_oracle(self):
         """
@@ -78,76 +75,16 @@ class AE:
         if self.oracle is None:
             raise ValueError("oracle atribute is None. \
                 Please execute create_oracle method!")
+        ae_dict = deepcopy(self.kwargs)
+        for step in ["array_function", "array_probability", "encoding", "multiplexor"]:
+            ae_dict.pop(step, None)
+        self.solver_ae = AE(
+            oracle=self.oracle,
+            target=self.target,
+            index=self.index,
+            **ae_dict)
 
-        self.ae_type = self.kwargs.get("ae_type", None)
-        text_is_none(self.ae_type, "ae_type", variable_type=str)
-        self.solver_dict = {
-            "mcz_qlm" : self.kwargs.get("mcz_qlm", True),
-            "qpu" : self.kwargs.get("qpu", None)
-        }
 
-        if self.ae_type == "MLAE":
-            self.solver_dict.update({
-                "delta" : self.kwargs.get("delta", None),
-                "ns" : self.kwargs.get("ns", None),
-                "schedule" : self.kwargs.get("schedule", None)
-            })
-            self.solver_ae = MLAE(
-                self.oracle,
-                target=self.target,
-                index=self.index,
-                **self.solver_dict
-            )
-        elif self.ae_type == "CQPEAE":
-            self.solver_dict.update({
-                "auxiliar_qbits_number" : self.kwargs.get("auxiliar_qbits_number", None),
-                "shots" : self.kwargs.get("shots", None)
-            })
-            self.solver_ae = CQPEAE(
-                self.oracle,
-                target=self.target,
-                index=self.index,
-                **self.solver_dict
-            )
-        elif self.ae_type == "IQPEAE":
-            self.solver_dict.update({
-                "cbits_number" : self.kwargs.get("cbits_number", None),
-                "shots" : self.kwargs.get("shots", None)
-            })
-            self.solver_ae = IQPEAE(
-                self.oracle,
-                target=self.target,
-                index=self.index,
-                **self.solver_dict
-            )
-        elif self.ae_type == "IQAE":
-            self.solver_dict.update({
-                "epsilon" : self.kwargs.get("epsilon", None),
-                "alpha" : self.kwargs.get("alpha", None),
-                "shots" : self.kwargs.get("shots", None)
-            })
-            self.solver_ae = IQAE(
-                self.oracle,
-                target=self.target,
-                index=self.index,
-                **self.solver_dict
-            )
-        elif self.ae_type == "RQAE":
-            self.solver_dict.update({
-                "epsilon" : self.kwargs.get("epsilon", None),
-                "gamma" : self.kwargs.get("gamma", None),
-                "q" : self.kwargs.get("q", None),
-                "shots" : self.kwargs.get("shots", None)
-            })
-            self.solver_ae = RQAE(
-                self.oracle,
-                target=self.target,
-                index=self.index,
-                **self.solver_dict
-            )
-        else:
-            raise ValueError("AE algorithm IS NOT PROVIDED in ae_type parameter \
-            Please use: MLAE, CQPEAE, IQPEAE, IQAE, RQAE")
 
     def run(self):
         """
@@ -166,10 +103,7 @@ class AE:
         self.solver_ae.run()
 
         # Recover amplitude estimation from ae_solver
-        self.ae_pdf = pd.DataFrame(
-            [self.solver_ae.ae, self.solver_ae.ae_l, self.solver_ae.ae_u],
-            index=["ae", "ae_l", "ae_u"],
-        ).T
+        self.ae_pdf = self.solver_ae.ae_pdf
         #Post Procces output
         a_estimation = None
         if self.encoding == 0:
@@ -200,4 +134,3 @@ class AE:
                     #Probability distribution used so is inside of the AE
                     a_estimation = np.sqrt(self.ae_pdf)
         return a_estimation
-

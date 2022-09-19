@@ -61,6 +61,8 @@ class AE:
         self.solver_ae = None
         self.ae_pdf = None
         self.solver_dict = None
+        self.oracle_calls = None
+        self.max_oracle_depth = None
 
     @property
     def ae_type(self):
@@ -77,6 +79,8 @@ class AE:
         self._ae_type = stringvalue
         self.solver_ae = None
         self.ae_pdf = None
+        self.solver_dict = None
+        self.oracle_calls = None
 
     def create_ae_solver(self):
         """
@@ -179,6 +183,9 @@ class AE:
         #create AE algorithm object
         self.create_ae_solver()
         self.solver_ae.run()
+        self.oracle_calls = self.solver_ae.oracle_calls
+        self.max_oracle_depth = self.solver_ae.max_oracle_depth
+        
         # Recover amplitude estimation from ae_solver
         self.ae_pdf = pd.DataFrame(
             [self.solver_ae.ae, self.solver_ae.ae_l, self.solver_ae.ae_u],
