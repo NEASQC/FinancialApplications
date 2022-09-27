@@ -6,6 +6,7 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 """
 
 import sys
+import warnings
 sys.path.append("../")
 import numpy as np
 import qat.lang.AQASM as qlm
@@ -51,15 +52,17 @@ class Encoding:
             raise ValueError("array_function not properly normalised.\
             Please divdide by the max(array_function)")
         if array_probability is not None:
+            if np.any(array_probability < 0):
+                raise ValueError("There are negative values in the probability")
             qbits_prob = test_bins(array_probability)
             if self.n_qbits != qbits_prob:
                 raise ValueError("Lengths of array_function and \
                 array_probability MUST BE equal")
             if np.sum(array_probability) > 1.00:
-                raise ValueError("array_function not properly normalised.\
+                raise ValueError("array_probability not properly normalised.\
                 Please divdide by the sum(array_probability)")
         self.probability = array_probability
-        self.encoding = encoding
+        self._encoding = encoding
 
         self.kwargs = kwargs
         self.multiplexor_bool = self.kwargs.get("multiplexor", True)
@@ -76,6 +79,22 @@ class Encoding:
         self.co_index = None
         self.registers = None
 
+    @property
+    def encoding(self):
+        """
+        creating the ecoding property
+        """
+        return self._encoding
+
+    @encoding.setter
+    def encoding(self, value):
+        """
+        setter of the encoding property
+        """
+        self._encoding = value
+        #Everytime encoding is changed all staff will be reseted
+        self.reset()
+
     def reset(self):
         """
         Method for resetting atributes
@@ -87,7 +106,7 @@ class Encoding:
         self.co_index = None
         self.registers = None
 
-    def oracle_encoding_01(self):
+    def oracle_encoding_0(self):
         """
         Method for creating the oracle. The probability density will be
         loaded with proability density gate and the
@@ -105,9 +124,11 @@ class Encoding:
         else:
             self.p_gate = dl.uniform_distribution(self.n_qbits)
 
+        if ~np.all(self.function >= 0):
+            warnings.warn('Some elements of the input array_function are negative')
         # Creation of function loading gate
         self.function_gate = dl.load_array(
-            np.sqrt(self.function), id_name="Function", method=self.multiplexor)
+            np.sqrt(np.abs(self.function)), id_name="Function", method=self.multiplexor)
         self.registers = self.oracle.new_wires(self.function_gate.arity)
         # Step 1 of Procedure: apply loading probabilty gate
         self.oracle.apply(self.p_gate, self.registers[: self.p_gate.arity])
@@ -116,7 +137,7 @@ class Encoding:
         self.co_target = [0]
         self.co_index = [self.oracle.arity - 1]
 
-    def oracle_encoding_02(self):
+    def oracle_encoding_1(self):
         """
         Method for creating the oracle. The probability density and the
         payoff functions will be loaded as function arrays.
@@ -158,7 +179,7 @@ class Encoding:
         self.co_target = [0 for i in range(self.oracle.arity)]
         self.co_index = [i for i in range(self.oracle.arity)]
 
-    def oracle_encoding_03(self):
+    def oracle_encoding_2(self):
         """
         Method for creating the oracle. The probability density and the
         payoff functions will be loaded as function arrays.
@@ -196,11 +217,11 @@ class Encoding:
             raise ValueError("Encoding parameter MUST NOT BE None. \
             Please select 0,1 or 2 for encoding procedure!")
         if self.encoding == 0:
-            self.oracle_encoding_01()
+            self.oracle_encoding_0()
         elif self.encoding == 1:
-            self.oracle_encoding_02()
+            self.oracle_encoding_1()
         elif self.encoding == 2:
-            self.oracle_encoding_03()
+            self.oracle_encoding_2()
         else:
             raise ValueError("Poblem with encoding atribute!")
 
