@@ -105,7 +105,7 @@ def q_solve_integral(**kwargs):
         raise ValueError("Not valid encoding key was provided!!!")
     #Now we need to deal with encoding normalisation
     ae_estimation = ae_pdf * encode_class.encoding_normalization
-    return ae_estimation
+    return ae_estimation, solver_ae, encode_class
 
 
 def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, save=False):
@@ -136,7 +136,7 @@ def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, 
     })
     linalg_qpu = get_qpu(qlmaas)
     ae_problem.update({"qpu": linalg_qpu})
-    solution = q_solve_integral(**ae_problem)
+    solution, solver_object, encode_object = q_solve_integral(**ae_problem)
 
     ae_problem.update({"file_name": file_name})
     ae_problem.update({"domain_a": a_})
@@ -160,6 +160,11 @@ def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, 
     pdf["error_classical"] = abs(
         pdf["integral_ae"] - pdf["riemman"]
     )
+    if solver_object.schedule_pdf is None:
+        pdf["schedule_pdf"] = [None]
+    else:
+        pdf["schedule_pdf"] = [solver_object.schedule_pdf.to_dict()]
+    
     if save:
         if folder_name is None:
             raise ValueError("folder_name is None!")
@@ -169,9 +174,7 @@ def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, 
         with open(file_name, "a") as f_pointer:
             pdf.to_csv(f_pointer, mode="a", header=f_pointer.tell() == 0)
 
-def run_staff(
-    dict_list, file_name="Todo.csv", folder_name=None, qlmaas=False, save=False
-):
+def run_staff(dict_list, file_name="Todo.csv", folder_name=None, qlmaas=False, save=False):
     """
     run all problems
     """

@@ -478,11 +478,11 @@ class IQAE:
         self.run_time = end - start
         self.schedule_pdf = pd.DataFrame.from_dict(
             self.schedule,
-            columns = ['shots'],
-            orient = 'index'
+            columns=['shots'],
+            orient='index'
         )
-        self.schedule_pdf.reset_index(inplace = True)
-        self.schedule_pdf.rename(columns = {'index': 'm_k'}, inplace = True)
+        self.schedule_pdf.reset_index(inplace=True)
+        self.schedule_pdf.rename(columns={'index': 'm_k'}, inplace=True)
         self.oracle_calls = np.sum(
             self.schedule_pdf['shots'] * (2 * self.schedule_pdf['m_k'] + 1))
         self.max_oracle_depth = np.max(2 *  self.schedule_pdf['m_k']+ 1)

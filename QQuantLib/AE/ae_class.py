@@ -63,6 +63,7 @@ class AE:
         self.solver_dict = None
         self.oracle_calls = None
         self.max_oracle_depth = None
+        self.schedule_pdf = None
 
     @property
     def ae_type(self):
@@ -185,6 +186,7 @@ class AE:
         self.solver_ae.run()
         self.oracle_calls = self.solver_ae.oracle_calls
         self.max_oracle_depth = self.solver_ae.max_oracle_depth
+        self.schedule_pdf = self.solver_ae.schedule_pdf
         
         # Recover amplitude estimation from ae_solver
         self.ae_pdf = pd.DataFrame(

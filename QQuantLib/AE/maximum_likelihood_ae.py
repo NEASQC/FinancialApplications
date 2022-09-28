@@ -109,7 +109,7 @@ class MLAE:
         self.run_time = None
         self.ae_l = None
         self.ae_u = None
-        self.summary_measurements = None
+        self.schedule_pdf = None
         self.oracle_calls = None
         self.max_oracle_depth = None
 
@@ -472,11 +472,11 @@ class MLAE:
         end = time.time()
         self.run_time = end - start
         #Number of oracle call calculation
-        self.summary_measurements = pd.DataFrame(
+        self.schedule_pdf = pd.DataFrame(
             [self.m_k, self.n_k, self.h_k],
             index=['m_k', 'n_k', 'h_k']
         ).T
         self.oracle_calls = np.sum(
-            self.summary_measurements['n_k'] * (2 * self.summary_measurements['m_k'] + 1))
-        self.max_oracle_depth = np.max(2 *  self.summary_measurements['m_k']+ 1)
+            self.schedule_pdf['n_k'] * (2 * self.schedule_pdf['m_k'] + 1))
+        self.max_oracle_depth = np.max(2 *  self.schedule_pdf['m_k']+ 1)
         return result

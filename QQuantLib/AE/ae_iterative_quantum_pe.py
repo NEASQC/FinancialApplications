@@ -82,6 +82,7 @@ class IQPEAE:
         self.run_time = None
         self.oracle_calls = None
         self.max_oracle_depth = None
+        self.schedule_pdf = None
 
     #####################################################################
     @property
