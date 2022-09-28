@@ -1,0 +1,25 @@
+[
+    {
+        "ae_type": ["RQAE"],
+
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+
+        "auxiliar_qbits_number": [null],
+
+        "cbits_number": [null],
+
+        "epsilon": [0.0005],
+        "alpha": [null],
+
+        "gamma": [0.05],
+        "q": [1.2],
+
+        "shots": [null],
+
+        "mcz_qlm": [false],
+        "encoding": [1, 2],
+        "number_of_tests": [1]
+    }
+]

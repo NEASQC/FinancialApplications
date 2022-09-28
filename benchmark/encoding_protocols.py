@@ -75,9 +75,10 @@ class Encoding:
         self.oracle = None
         self.p_gate = None
         self.function_gate = None
-        self.co_target = None
-        self.co_index = None
+        self.target = None
+        self.index = None
         self.registers = None
+        self.encoding_normalization = 1.0
 
     @property
     def encoding(self):
@@ -102,9 +103,10 @@ class Encoding:
         self.oracle = None
         self.p_gate = None
         self.function_gate = None
-        self.co_target = None
-        self.co_index = None
+        self.target = None
+        self.index = None
         self.registers = None
+        self.encoding_normalization = 1.0
 
     def oracle_encoding_0(self):
         """
@@ -123,6 +125,7 @@ class Encoding:
             )
         else:
             self.p_gate = dl.uniform_distribution(self.n_qbits)
+            self.encoding_normalization = 2 ** self.p_gate.arity
 
         if ~np.all(self.function >= 0):
             warnings.warn('Some elements of the input array_function are negative')
@@ -134,8 +137,8 @@ class Encoding:
         self.oracle.apply(self.p_gate, self.registers[: self.p_gate.arity])
         # Step 2 of Procedure: apply loading function gate
         self.oracle.apply(self.function_gate, self.registers)
-        self.co_target = [0]
-        self.co_index = [self.oracle.arity - 1]
+        self.target = [0]
+        self.index = [self.oracle.arity - 1]
 
     def oracle_encoding_1(self):
         """
@@ -176,8 +179,9 @@ class Encoding:
         self.oracle.apply(
             dl.uniform_distribution(self.n_qbits), self.registers[: self.n_qbits]
         )
-        self.co_target = [0 for i in range(self.oracle.arity)]
-        self.co_index = [i for i in range(self.oracle.arity)]
+        self.target = [0 for i in range(self.oracle.arity)]
+        self.index = [i for i in range(self.oracle.arity)]
+        self.encoding_normalization = 2 ** self.n_qbits
 
     def oracle_encoding_2(self):
         """
@@ -195,6 +199,7 @@ class Encoding:
             )
         else:
             self.p_gate = dl.uniform_distribution(self.n_qbits)
+            self.encoding_normalization = 2 ** self.p_gate.arity
         # Creation of function loading gate
         self.function_gate = dl.load_array(
             self.function,
@@ -208,8 +213,8 @@ class Encoding:
         self.oracle.apply(self.function_gate, self.registers)
         # Step 3 of Procedure: apply loading probability gate
         self.oracle.apply(self.p_gate.dag(), self.registers[: self.p_gate.arity])
-        self.co_target = [0 for i in range(self.oracle.arity)]
-        self.co_index = [i for i in range(self.oracle.arity)]
+        self.target = [0 for i in range(self.oracle.arity)]
+        self.index = [i for i in range(self.oracle.arity)]
 
 
     def run(self):

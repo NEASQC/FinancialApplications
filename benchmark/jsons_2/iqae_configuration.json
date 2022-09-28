@@ -1,0 +1,26 @@
+[
+    {
+        "ae_type": ["IQAE"],
+
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+
+        "auxiliar_qbits_number": [null],
+
+        "cbits_number": [null],
+
+        "epsilon": [0.01],
+        "alpha": [0.05],
+
+        "gamma": [null],
+        "q": [null],
+
+        "shots": [100],
+
+        "mcz_qlm": [false],
+
+        "encoding": [0, 1, 2],
+        "number_of_tests": [1]
+    }
+]
