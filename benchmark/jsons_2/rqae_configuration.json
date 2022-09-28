@@ -10,7 +10,7 @@
 
         "cbits_number": [null],
 
-        "epsilon": [0.0005],
+        "epsilon": [0.0001],
         "alpha": [null],
 
         "gamma": [0.05],

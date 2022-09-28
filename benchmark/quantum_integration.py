@@ -136,16 +136,19 @@ def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, 
     })
     linalg_qpu = get_qpu(qlmaas)
     ae_problem.update({"qpu": linalg_qpu})
+    solution = q_solve_integral(**ae_problem)
 
     ae_problem.update({"file_name": file_name})
+    ae_problem.update({"domain_a": a_})
+    ae_problem.update({"domain_b": b_})
+    ae_problem.update({"domain_n": n_})
+
     pdf = pd.DataFrame([ae_problem])
     pdf.drop(
         axis=1,
         columns=["array_function", "array_probability"],
         inplace=True
     )
-    print(pdf)
-    solution = q_solve_integral(**ae_problem)
     pdf = pd.concat([pdf, solution], axis=1)
     q_riemman = solution * p_x_normalisation * f_x_normalisation
     pdf[
