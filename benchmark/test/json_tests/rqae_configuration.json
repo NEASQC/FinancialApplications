@@ -19,7 +19,30 @@
         "shots": [null],
 
         "mcz_qlm": [false],
-        "encoding": [0, 1, 2],
+        "encoding": [0, 2],
+        "number_of_tests": [1]
+    },
+    {
+        "ae_type": ["RQAE"],
+
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+
+        "auxiliar_qbits_number": [null],
+
+        "cbits_number": [null],
+
+        "epsilon": [0.00001],
+        "alpha": [null],
+
+        "gamma": [0.05],
+        "q": [1.2],
+
+        "shots": [null],
+
+        "mcz_qlm": [false],
+        "encoding": [1],
         "number_of_tests": [1]
     }
 ]

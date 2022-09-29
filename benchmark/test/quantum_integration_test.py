@@ -24,8 +24,9 @@ def problem(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None,
     n_ = 6
     list_a = [0.0, np.pi - np.pi / 4.0, np.pi]
     list_b = [np.pi / 4.0, np.pi + np.pi / 8.0, np.pi + np.pi / 4.0]
+    list_c = ["positive_function", "positive_integral", "negative_integral"]
     opa = []
-    for a_, b_ in zip(list_a, list_b):
+    for a_, b_, c_ in zip(list_a, list_b, list_c):
         domain_x = np.linspace(a_, b_, 2 ** n_)
         #discretized function
         f_x = np.sin(domain_x)
@@ -48,6 +49,7 @@ def problem(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None,
                 "a_" : a_,
                 "b_" : b_,
                 "n_" : n_,
+                "result_type": c_,
                 "Probability" : prob,
                 "array_function" : norm_f_x,
                 "array_probability" : norm_p_x,
@@ -232,15 +234,15 @@ if __name__ == "__main__":
 
     lista_ae = []
     if args.mlae_var:
-        lista_ae.append("jsons_tests/mlae_configuration.json")
+        lista_ae.append("json_tests/mlae_configuration.json")
     if args.iqae_var:
-        lista_ae.append("jsons_tests/iqae_configuration.json")
+        lista_ae.append("json_tests/iqae_configuration.json")
     if args.rqae_var:
-        lista_ae.append("jsons_tests/rqae_configuration.json")
+        lista_ae.append("json_tests/rqae_configuration.json")
     if args.cqpeae_var:
-        lista_ae.append("jsons_tests/cqpeae_configuration.json")
+        lista_ae.append("json_tests/cqpeae_configuration.json")
     if args.iqpeae_var:
-        lista_ae.append("jsons_tests/iqpeae_configuration.json")
+        lista_ae.append("json_tests/iqpeae_configuration.json")
     final_list = list_of_dicts_from_jsons(lista_ae)
     if args.count:
         print(len(final_list))
