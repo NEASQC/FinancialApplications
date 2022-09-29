@@ -120,7 +120,7 @@ def run_staff(dict_list, file_name="Todo.csv", folder_name=None, qlmaas=False, s
     """
     #list_of_pdfs = []
     for i, step in enumerate(dict_list):
-        run_id(
+        problem(
             step,
             i,
             file_name=file_name,
@@ -260,7 +260,7 @@ if __name__ == "__main__":
             )
         else:
             if args.id is not None:
-                run_id(
+                problem(
                     final_list[args.id],
                     args.id,
                     file_name=args.file_name,
