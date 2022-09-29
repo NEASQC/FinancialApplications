@@ -149,7 +149,7 @@ class Encoding:
         self.oracle = qlm.QRoutine()
         # For new data loading procedure we need n+2 qbits
         if self.probability is None:
-            raise ValueError("For type encoding 2 array_probability \
+            raise ValueError("For type encoding 1 array_probability \
             CAN NOT BE NONE")
         self.registers = self.oracle.new_wires(self.n_qbits + 2)
         # Step 2 of Procedure: apply Uniform distribution

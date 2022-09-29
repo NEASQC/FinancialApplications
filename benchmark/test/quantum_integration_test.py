@@ -14,15 +14,17 @@ import pandas as pd
 sys.path.append("../../")
 from benchmark.encoding_protocols import Encoding
 from benchmark.benchmark_utils import list_of_dicts_from_jsons
-from benchmark.quantum_integration import q_solve_integral 
+from benchmark.quantum_integration import q_solve_integral
 from QQuantLib.AE.ae_class import AE
 from QQuantLib.utils.utils import text_is_none
 from QQuantLib.utils.qlm_solver import get_qpu
 
 
-def problem():
+def problem(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, save=False):
+    n_ = 6
     list_a = [0.0, np.pi - np.pi / 4.0, np.pi]
     list_b = [np.pi / 4.0, np.pi + np.pi / 8.0, np.pi + np.pi / 4.0]
+    opa = []
     for a_, b_ in zip(list_a, list_b):
         domain_x = np.linspace(a_, b_, 2 ** n_)
         #discretized function
@@ -53,10 +55,18 @@ def problem():
                 "p_x_normalisation" : p_x_normalisation,
                 "riemman" : riemman,
             }
-            print(encoding_dict)
-                
-            
-        
+            if not((not prob) and (int(ae_problem["encoding"]) == 1)):
+                pdf, _, _ = run_id(
+                    ae_problem,
+                    id_name,
+                    encoding_dict,
+                    qlmaas=qlmaas,
+                    file_name=file_name,
+                    folder_name=folder_name,
+                    save=save
+                )
+                opa.append(pdf)
+    return opa
 
 def run_id(ae_problem, id_name, encoding_problem, qlmaas=False, file_name=None, folder_name=None, save=False):
 
@@ -69,12 +79,9 @@ def run_id(ae_problem, id_name, encoding_problem, qlmaas=False, file_name=None, 
     #Post Procces and Saving
 
     ae_problem.update({"file_name": file_name})
-    ae_problem.update({"domain_a": a_})
-    ae_problem.update({"domain_b": b_})
-    ae_problem.update({"domain_n": n_})
     pdf = pd.DataFrame([ae_problem])
     pdf = pd.concat([pdf, solution], axis=1)
-    q_riemman = solution * p_x_normalisation * f_x_normalisation
+    q_riemman = solution * encoding_problem["p_x_normalisation"] * encoding_problem["f_x_normalisation"]
     pdf[
         ["integral_" + col for col in q_riemman.columns]
     ] = q_riemman
@@ -105,7 +112,7 @@ def run_id(ae_problem, id_name, encoding_problem, qlmaas=False, file_name=None, 
         file_name = folder_name + file_name
         with open(file_name, "a") as f_pointer:
             pdf.to_csv(f_pointer, mode="a", header=f_pointer.tell() == 0, sep=';')
-    return pdf, solver_object, encode_object 
+    return pdf, solver_object, encode_object
 
 def run_staff(dict_list, file_name="Todo.csv", folder_name=None, qlmaas=False, save=False):
     """
