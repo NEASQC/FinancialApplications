@@ -19,7 +19,7 @@
         "shots": [null],
 
         "mcz_qlm": [false],
-        "encoding": [1, 2],
+        "encoding": [0, 1, 2],
         "number_of_tests": [1]
     }
 ]

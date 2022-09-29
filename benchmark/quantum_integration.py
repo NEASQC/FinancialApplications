@@ -43,76 +43,88 @@ def q_solve_integral(**kwargs):
 
     encoding = kwargs.get("encoding", None)
     ae_type = kwargs.get("ae_type", None)
+    print(encoding)
     if (encoding == 0) and (ae_type == "RQAE"):
         string_error = (
             "RQAE method CAN NOT BE USED with encoding protocol: "+str(encoding)
         )
-        raise ValueError(string_error)
 
-    #Mandatory kwargs for encoding data
-    array_function = kwargs.get("array_function", None)
-    text_is_none(array_function, "array_function", variable_type=np.ndarray)
-    array_probability = kwargs.get("array_probability", None)
-    text_is_none(encoding, "encoding", variable_type=int)
-    encoding_dict = {"multiplexor": kwargs.get("multiplexor", True)}
-    #instantiate encoding class
-    encode_class = Encoding(
-        array_function=array_function,
-        array_probability=array_probability,
-        encoding=encoding,
-        **encoding_dict
-    )
-    #execute run method of the encoding class
-    encode_class.run()
-
-
-    if encode_class.oracle is None:
-        raise ValueError("Oracle was not created!!")
-
-    #Mandatory kwargs for ae solver
-    ae_dict = deepcopy(kwargs)
-    #Delete keys from encoding
-    for step in ["array_function", "array_probability", "encoding", "multiplexor"]:
-        ae_dict.pop(step, None)
-    ae_dict.pop("ae_type", None)
-    #Instantiate AE solver
-    solver_ae = AE(
-        oracle=encode_class.oracle,
-        target=encode_class.target,
-        index=encode_class.index,
-        ae_type=ae_type,
-        **ae_dict)
-    # run the amplitude estimation algorithm
-    solver_ae.run()
-    # Recover amplitude estimation from ae_solver
-    if encoding == 0:
-        ae_pdf = solver_ae.ae_pdf
-    elif encoding == 1:
-        if ae_type == "RQAE":
-            #Amplitude is provided directly by this algorithm
-            ae_pdf = solver_ae.ae_pdf
-        else:
-            #Other algorithms return probability
-            ae_pdf = np.sqrt(solver_ae.ae_pdf)
-    elif encoding == 2:
-        if ae_type == "RQAE":
-            #RQAE provides amplitude directly.
-            ae_pdf = solver_ae.ae_pdf
-        else:
-            #Other algorithms return probability
-            ae_pdf = np.sqrt(solver_ae.ae_pdf)
+         ae_estimation = pd.DataFrame(
+            [None, None, None],
+            index=["ae", "ae_l", "ae_u"],
+        ).T
+        raise ae_estimation, None, None
     else:
-        raise ValueError("Not valid encoding key was provided!!!")
-    #Now we need to deal with encoding normalisation
-    ae_estimation = ae_pdf * encode_class.encoding_normalization
-    return ae_estimation, solver_ae, encode_class
+        print(encoding)
+
+
+        #Mandatory kwargs for encoding data
+        array_function = kwargs.get("array_function", None)
+        text_is_none(array_function, "array_function", variable_type=np.ndarray)
+        array_probability = kwargs.get("array_probability", None)
+        text_is_none(encoding, "encoding", variable_type=int)
+        encoding_dict = {"multiplexor": kwargs.get("multiplexor", True)}
+        #instantiate encoding class
+        encode_class = Encoding(
+            array_function=array_function,
+            array_probability=array_probability,
+            encoding=encoding,
+            **encoding_dict
+        )
+        #execute run method of the encoding class
+        encode_class.run()
+
+
+        if encode_class.oracle is None:
+            raise ValueError("Oracle was not created!!")
+
+        #Mandatory kwargs for ae solver
+        ae_dict = deepcopy(kwargs)
+        #Delete keys from encoding
+        for step in ["array_function", "array_probability", "encoding", "multiplexor"]:
+            ae_dict.pop(step, None)
+        ae_dict.pop("ae_type", None)
+        #Instantiate AE solver
+        solver_ae = AE(
+            oracle=encode_class.oracle,
+            target=encode_class.target,
+            index=encode_class.index,
+            ae_type=ae_type,
+            **ae_dict)
+        # run the amplitude estimation algorithm
+        solver_ae.run()
+        # Recover amplitude estimation from ae_solver
+        if encoding == 0:
+            ae_pdf = solver_ae.ae_pdf
+        elif encoding == 1:
+            if ae_type == "RQAE":
+                #Amplitude is provided directly by this algorithm
+                ae_pdf = solver_ae.ae_pdf
+            else:
+                #Other algorithms return probability
+                ae_pdf = np.sqrt(solver_ae.ae_pdf)
+        elif encoding == 2:
+            if ae_type == "RQAE":
+                #RQAE provides amplitude directly.
+                ae_pdf = solver_ae.ae_pdf
+            else:
+                #Other algorithms return probability
+                ae_pdf = np.sqrt(solver_ae.ae_pdf)
+        else:
+            raise ValueError("Not valid encoding key was provided!!!")
+        #Now we need to deal with encoding normalisation
+        ae_estimation = ae_pdf * encode_class.encoding_normalization
+        return ae_estimation, solver_ae, encode_class
 
 
 def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, save=False):
 
     #domain defintion
-    a_ = 0.0
-    b_ = np.pi / 2.0
+    #Strict positive function
+    a_ = 0
+    b_ = np.pi / 4.0
+    #a_ = np.pi - np.pi / 4.0
+    #b_ = np.pi + np.pi / 8.0
     #number of qbits
     n_ = 6
     #domain discretization
@@ -121,34 +133,38 @@ def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, 
     p_x = domain_x
     #discretized function
     f_x = np.sin(domain_x)
-
-    #normalisation constants
-    p_x_normalisation = np.sum(p_x) + 1e-8
     f_x_normalisation = np.max(f_x) + 1e-8
-    #normalised inputs
-    norm_p_x = p_x / p_x_normalisation
+    #normalised function
     norm_f_x = f_x / f_x_normalisation
-    #desired integral
-    riemman = np.sum(p_x * f_x)
+    
+    Prob = True
+    #normalisation constants
+    if Prob == True:
+        p_x_normalisation = np.sum(p_x) + 1e-8
+        norm_p_x = p_x / p_x_normalisation
+        #desired integral
+        riemman = np.sum(p_x * f_x)
+    else:
+        p_x_normalisation = 1.0
+        norm_p_x = None
+        #desired integral
+        riemman = np.sum(f_x)
     ae_problem.update({
         "array_function" : norm_f_x,
         "array_probability" : norm_p_x,
     })
     linalg_qpu = get_qpu(qlmaas)
     ae_problem.update({"qpu": linalg_qpu})
+    #EXECUTE COMPUTATION
     solution, solver_object, encode_object = q_solve_integral(**ae_problem)
+    print(solution)
+    #Post Procces and Saving
 
     ae_problem.update({"file_name": file_name})
     ae_problem.update({"domain_a": a_})
     ae_problem.update({"domain_b": b_})
     ae_problem.update({"domain_n": n_})
-
     pdf = pd.DataFrame([ae_problem])
-    pdf.drop(
-        axis=1,
-        columns=["array_function", "array_probability"],
-        inplace=True
-    )
     pdf = pd.concat([pdf, solution], axis=1)
     q_riemman = solution * p_x_normalisation * f_x_normalisation
     pdf[
@@ -160,10 +176,27 @@ def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, 
     pdf["error_classical"] = abs(
         pdf["integral_ae"] - pdf["riemman"]
     )
-    if solver_object.schedule_pdf is None:
+
+
+    if (solver_object is None) and (encode_object is None) :
+        #Computation Fails Encoding 0 and RQAE
         pdf["schedule_pdf"] = [None]
+        pdf["oracle_calls"] = [None] 
+        pdf["max_oracle_depth"] = [None]
     else:
-        pdf["schedule_pdf"] = [solver_object.schedule_pdf.to_dict()]
+        if solver_object.schedule_pdf is None:
+            pdf["schedule_pdf"] = [None]
+        else:
+            pdf["schedule_pdf"] = [solver_object.schedule_pdf.to_dict()]
+        pdf["oracle_calls"] = solver_object.oracle_calls
+        pdf["max_oracle_depth"] = solver_object.max_oracle_depth
+
+
+    #pdf.drop(
+    #    axis=1,
+    #    columns=["array_function", "array_probability"],
+    #    inplace=True
+    #)
     
     if save:
         if folder_name is None:
@@ -172,7 +205,8 @@ def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, 
             file_name = ae_problem["ae_type"] + "_{}.csv".format(id_name)
         file_name = folder_name + file_name
         with open(file_name, "a") as f_pointer:
-            pdf.to_csv(f_pointer, mode="a", header=f_pointer.tell() == 0)
+            pdf.to_csv(f_pointer, mode="a", header=f_pointer.tell() == 0, sep=';')
+    return pdf
 
 def run_staff(dict_list, file_name="Todo.csv", folder_name=None, qlmaas=False, save=False):
     """
