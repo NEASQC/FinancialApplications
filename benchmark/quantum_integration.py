@@ -6,6 +6,7 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
 """
 
+import warnings
 from copy import deepcopy
 import sys
 import numpy as np
@@ -43,20 +44,19 @@ def q_solve_integral(**kwargs):
 
     encoding = kwargs.get("encoding", None)
     ae_type = kwargs.get("ae_type", None)
-    print(encoding)
     if (encoding == 0) and (ae_type == "RQAE"):
         string_error = (
             "RQAE method CAN NOT BE USED with encoding protocol: "+str(encoding)
         )
 
-         ae_estimation = pd.DataFrame(
+        warnings.warn(string_error)
+
+        ae_estimation = pd.DataFrame(
             [None, None, None],
             index=["ae", "ae_l", "ae_u"],
         ).T
-        raise ae_estimation, None, None
+        return ae_estimation, None, None
     else:
-        print(encoding)
-
 
         #Mandatory kwargs for encoding data
         array_function = kwargs.get("array_function", None)
@@ -136,10 +136,10 @@ def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, 
     f_x_normalisation = np.max(f_x) + 1e-8
     #normalised function
     norm_f_x = f_x / f_x_normalisation
-    
-    Prob = True
+
+    prob = True
     #normalisation constants
-    if Prob == True:
+    if prob:
         p_x_normalisation = np.sum(p_x) + 1e-8
         norm_p_x = p_x / p_x_normalisation
         #desired integral
@@ -155,9 +155,9 @@ def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, 
     })
     linalg_qpu = get_qpu(qlmaas)
     ae_problem.update({"qpu": linalg_qpu})
+
     #EXECUTE COMPUTATION
     solution, solver_object, encode_object = q_solve_integral(**ae_problem)
-    print(solution)
     #Post Procces and Saving
 
     ae_problem.update({"file_name": file_name})
@@ -178,10 +178,10 @@ def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, 
     )
 
 
-    if (solver_object is None) and (encode_object is None) :
+    if (solver_object is None) and (encode_object is None):
         #Computation Fails Encoding 0 and RQAE
         pdf["schedule_pdf"] = [None]
-        pdf["oracle_calls"] = [None] 
+        pdf["oracle_calls"] = [None]
         pdf["max_oracle_depth"] = [None]
     else:
         if solver_object.schedule_pdf is None:
@@ -192,12 +192,6 @@ def run_id(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, 
         pdf["max_oracle_depth"] = solver_object.max_oracle_depth
 
 
-    #pdf.drop(
-    #    axis=1,
-    #    columns=["array_function", "array_probability"],
-    #    inplace=True
-    #)
-    
     if save:
         if folder_name is None:
             raise ValueError("folder_name is None!")
