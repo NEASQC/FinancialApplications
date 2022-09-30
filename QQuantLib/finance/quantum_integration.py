@@ -8,14 +8,11 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
 import warnings
 from copy import deepcopy
-import sys
 import numpy as np
 import pandas as pd
-sys.path.append("../")
-from encoding_protocols import Encoding
+from QQuantLib.DL.encoding_protocols import Encoding
 from QQuantLib.AE.ae_class import AE
 from QQuantLib.utils.utils import text_is_none
-from QQuantLib.utils.qlm_solver import get_qpu
 
 def q_solve_integral(**kwargs):
     """
@@ -38,6 +35,15 @@ def q_solve_integral(**kwargs):
 
     Other keys will be realted with circuit implementations of the encoding procedure
     or/and AE algorithm configuration (see QQQuantLib.AE.ae_class)
+
+    Return
+    ----------
+
+    ae_estimation: pandas DataFrame with the desired integral computation. 
+
+    solver_ae: object 
+
+    encode_class: 
     """
 
 
@@ -54,7 +60,8 @@ def q_solve_integral(**kwargs):
             [None, None, None],
             index=["ae", "ae_l", "ae_u"],
         ).T
-        return ae_estimation, None, None
+        solver_ae = None
+        encode_class = None
     else:
 
         #Mandatory kwargs for encoding data
@@ -70,15 +77,18 @@ def q_solve_integral(**kwargs):
             encoding=encoding,
             **encoding_dict
         )
+
         #execute run method of the encoding class
         encode_class.run()
-
 
         if encode_class.oracle is None:
             raise ValueError("Oracle was not created!!")
 
         #Mandatory kwargs for ae solver
+        linal_gpu = kwargs.get("qpu")
+        del kwargs['qpu']
         ae_dict = deepcopy(kwargs)
+        ae_dict.update({"qpu": linal_gpu})
         #Delete keys from encoding
         for step in ["array_function", "array_probability", "encoding", "multiplexor"]:
             ae_dict.pop(step, None)
@@ -90,8 +100,10 @@ def q_solve_integral(**kwargs):
             index=encode_class.index,
             ae_type=ae_type,
             **ae_dict)
+
         # run the amplitude estimation algorithm
         solver_ae.run()
+
         # Recover amplitude estimation from ae_solver
         if encoding == 0:
             ae_pdf = solver_ae.ae_pdf
@@ -113,4 +125,4 @@ def q_solve_integral(**kwargs):
             raise ValueError("Not valid encoding key was provided!!!")
         #Now we need to deal with encoding normalisation
         ae_estimation = ae_pdf * encode_class.encoding_normalization
-        return ae_estimation, solver_ae, encode_class
+    return ae_estimation, solver_ae

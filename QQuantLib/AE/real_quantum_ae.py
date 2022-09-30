@@ -422,6 +422,7 @@ class RQAE:
         )
         epsilon_probability = np.sqrt(1 / (2 * n_i) * np.log(2 / gamma_i))
         shift = theoretical_epsilon / np.sin(np.pi / (2 * (ratio + 2)))
+        #print("First Step: {}".format(shift))
         #####################################
         # First step
         [amplitude_min, amplitude_max] = self.first_step(
@@ -434,6 +435,8 @@ class RQAE:
             k = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
             k = min(k, k_max)
             shift = -amplitude_min
+            shift = min(shift, 0.5)
+            #print("While Step: {}".format(shift))
             [amplitude_min, amplitude_max] = self.run_step(
                 shift=shift, shots=n_i, gamma=gamma_i, k=k
             )

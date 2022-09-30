@@ -12,11 +12,8 @@ import sys
 import numpy as np
 import pandas as pd
 sys.path.append("../../")
-from benchmark.encoding_protocols import Encoding
 from benchmark.benchmark_utils import list_of_dicts_from_jsons
-from benchmark.quantum_integration import q_solve_integral
-from QQuantLib.AE.ae_class import AE
-from QQuantLib.utils.utils import text_is_none
+from QQuantLib.finance.quantum_integration import q_solve_integral
 from QQuantLib.utils.qlm_solver import get_qpu
 
 
@@ -77,7 +74,7 @@ def run_id(ae_problem, id_name, encoding_problem, qlmaas=False, file_name=None, 
     ae_problem.update({"qpu": linalg_qpu})
 
     #EXECUTE COMPUTATION
-    solution, solver_object, encode_object = q_solve_integral(**ae_problem)
+    solution, solver_object = q_solve_integral(**ae_problem)
     #Post Procces and Saving
 
     ae_problem.update({"file_name": file_name})
@@ -92,7 +89,7 @@ def run_id(ae_problem, id_name, encoding_problem, qlmaas=False, file_name=None, 
     )
 
 
-    if (solver_object is None) and (encode_object is None):
+    if solver_object is None:
         #Computation Fails Encoding 0 and RQAE
         pdf["schedule_pdf"] = [None]
         pdf["oracle_calls"] = [None]
@@ -114,7 +111,7 @@ def run_id(ae_problem, id_name, encoding_problem, qlmaas=False, file_name=None, 
         file_name = folder_name + file_name
         with open(file_name, "a") as f_pointer:
             pdf.to_csv(f_pointer, mode="a", header=f_pointer.tell() == 0, sep=';')
-    return pdf, solver_object, encode_object
+    return pdf, solver_object
 
 def run_staff(dict_list, file_name="Todo.csv", folder_name=None, qlmaas=False, save=False):
     """

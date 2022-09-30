@@ -5,9 +5,7 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
 """
 
-import sys
 import warnings
-sys.path.append("../")
 import numpy as np
 import qat.lang.AQASM as qlm
 import QQuantLib.DL.data_loading as dl
@@ -48,7 +46,7 @@ class Encoding:
         #Inputs arrays MUST be of length 2^n
         self.n_qbits = test_bins(array_function)
         self.function = array_function
-        if np.max(self.function) > 1.00:
+        if np.max(np.abs(self.function)) > 1.00:
             raise ValueError("array_function not properly normalised.\
             Please divdide by the max(array_function)")
         if array_probability is not None:
@@ -229,4 +227,3 @@ class Encoding:
             self.oracle_encoding_2()
         else:
             raise ValueError("Poblem with encoding atribute!")
-
