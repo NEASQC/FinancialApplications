@@ -27,7 +27,7 @@ def problem(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None,
         domain_x = np.linspace(a_, b_, 2 ** n_)
         #discretized function
         f_x = np.sin(domain_x)
-        f_x_normalisation = np.max(f_x) + 1e-8
+        f_x_normalisation = np.max(np.abs(f_x)) + 1e-8
         #normalised function
         norm_f_x = f_x / f_x_normalisation
         p_x = domain_x
@@ -55,7 +55,7 @@ def problem(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None,
                 "riemman" : riemman,
             }
             if not((not prob) and (int(ae_problem["encoding"]) == 1)):
-                pdf, _, _ = run_id(
+                pdf, _ = run_id(
                     ae_problem,
                     id_name,
                     encoding_dict,
