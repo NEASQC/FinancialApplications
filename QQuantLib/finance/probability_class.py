@@ -2,7 +2,7 @@
 Definition for DensityProbability Class
 """
 from functools import partial
-import QQuantLib.utils.classical_finance as cf
+import QQuantLib.finance.classical_finance as cf
 from QQuantLib.utils.utils import text_is_none
 
 
