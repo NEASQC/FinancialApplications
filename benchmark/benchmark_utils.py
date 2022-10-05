@@ -52,6 +52,71 @@ def combination_for_list(input_list):
         )
     return list_of_combinations
 
+def create_pe_problem(domain_cfg, payoff_cfg, density_cfg):
+    """
+    Create a list of price estimation problems. Each element is a python
+    dictionary with a complete option price estimation problem.
+
+    Parameters
+    ----------
+    domain_cfg : list of dictionaries
+        Each dictionary has a domain configuration for a price estimation problem.
+    payoffs_cfg : list of dictionaries
+        Each dictionary has an option configuration for a price estimation problem.
+    density_cfg : list of dictionaries
+        Each dictionary has probability density configuration for a price estimation problem.
+
+    Returns
+    ----------
+    pe_problem_list : list of dictionaries
+        list with different price estimation problems.
+    """
+
+    # List of density probabilities dictionaries
+    dp_list = combination_for_list(density_cfg)
+    # List for pay offs
+    po_list = combination_for_list(payoff_cfg)
+    # list of domain dictionaries
+    do_list = combination_for_list(domain_cfg)
+    pe_problem_list = [
+        dict(ChainMap(*list(x))) for x in it.product(dp_list, do_list, po_list)
+    ]
+    return pe_problem_list
+
+def create_ae_pe_solution(ae_list, problem_list):
+    """
+    Creates a list of price estimation problems for solving with amplitude
+    estimation (AE) techniques. Each element will have the complete
+    information for generating a price estimation problem and the
+    configuration for solving it using an AE algorithm. This is each element
+    is a python dictionary that allows define a price estimation problem
+    and solving it using a properly configure AE algorithm
+
+    Parameters
+    ----------
+    ae_list : list
+        List with properly configured AE solvers.
+    problem_list : list
+        List with different price estimation problems.
+
+    Returns
+    ----------
+    solve_ae_pe_list : list
+        List where each element is a ae_pricep dictionary
+        The list will have the combination of each posible amplitude
+        estimation solver with all posible price problem list
+    """
+    solve_ae_pe_list = []
+    for ae in ae_list:
+        step_list = [dict(ChainMap(*list(x))) for x in it.product(problem_list, [ae])]
+        solve_ae_pe_list = solve_ae_pe_list + step_list
+    return solve_ae_pe_list
+
+
+
+
+
+
 def list_of_dicts_from_jsons(ae_json_list):
     """
     Creates a list of dictionaries from inputs jsons.

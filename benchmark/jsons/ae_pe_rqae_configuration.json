@@ -17,7 +17,7 @@
         "gamma": [0.05],
         "q": [null],
 
-        "encoding" : [0, 1, 2],
+        "encoding" : [1, 2],
         "multiplexor":  [true],
 
         "mcz_qlm": [false],
