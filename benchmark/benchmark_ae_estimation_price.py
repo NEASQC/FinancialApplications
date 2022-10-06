@@ -7,6 +7,7 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
 import sys
 import json
+import pandas as pd
 sys.path.append("../")
 from benchmark.benchmark_utils import create_pe_problem, combination_for_list,\
 create_ae_pe_solution
@@ -16,7 +17,12 @@ from QQuantLib.utils.qlm_solver import get_qpu
 
 
 def run_id(
-    solve_ae_pe, id_name, file_name=None, folder_name=None, qlmaas=False, save=False
+    solve_ae_pe,
+    id_name,
+    file_name=None,
+    folder_name=None,
+    qlmaas=False,
+    save=False
 ):
     """
     This function configure the mandatory dictionary neede for solvin
@@ -27,7 +33,7 @@ def run_id(
     ----------
 
     solve_ae_pe :  python dictionary
-        The dictioanary should have all the mandatory keys for creating
+        The dictionary should have all the mandatory keys for creating
         a price estimation problem and solving it using a properly configured
         AE integrations technique.
     id_name: string
@@ -48,10 +54,9 @@ def run_id(
     Return
     ----------
 
-    pe_object : PriceEstimation object
-        PriceEstimation object configured with the input solve_ae_pe
-        dictionary. The run method of the object is executed.
-
+    pdf : Pandas DataFrame
+        DataFrame with all the information of the price estimation
+        problem, the configuration of the ae and the obtained results
     """
     linalg_qpu = get_qpu(qlmaas)
     solve_ae_pe.update({"qpu": linalg_qpu})
@@ -67,6 +72,51 @@ def run_id(
     pdf = ae_price_estimation(**solve_ae_pe)
     return pdf
 
+def run_staff(
+    solve_ae_pe_list,
+    file_name="Todo.csv",
+    folder_name=None,
+    qlmaas=False,
+    save=False
+):
+    """
+    This function executes sequentially a list of different AE_PriceP
+    dictionaries.
+
+    Parameters
+    ----------
+
+    solve_ae_pe_list :  list of python dictionary
+        Each dictionary of the list should have all the mandatory keys for
+        creating a price estimation problem and solving it using a properly
+        configured AE integrations technique.
+    file_name: string
+        name for the file where results will be stored. If not given will
+        be created using id_name and ae_type string.
+    folder_name: string
+        folder name for saving the results of the solution of the
+        price estimation problem
+    qlmaas: bool
+        For usign a QLM as a Service for solving the price estimation
+        problem
+    save: bool
+        For saving the results of the the price estimation problem as a
+        csv
+
+    Return
+    ----------
+
+    price_pdf : Pandas DataFrame
+        DataFrame with all the information of the price estimation
+        problem, the configuration of the ae and the obtained results
+        for each element of the input dictionary
+    """
+    list_of_pdfs = []
+    for i, step in enumerate(solve_ae_pe_list):
+        step_pdf = run_id(step, i, file_name, folder_name, qlmaas, save)
+        list_of_pdfs.append(step_pdf)
+    price_pdf = pd.concat(list_of_pdfs)
+    return price_pdf
 
 
 if __name__ == "__main__":
@@ -214,7 +264,13 @@ if __name__ == "__main__":
             print(final_list)
     if args.execution:
         if args.all:
-            print("Not yet!!")
+            run_staff(
+                final_list,
+                file_name=args.file_name,
+                folder_name=args.folder_path,
+                qlmaas=args.qlmass,
+                save=args.save,
+            )
         else:
             if args.id is not None:
                 print(run_id(
