@@ -9,8 +9,11 @@ import pandas as pd
 import qat.lang.AQASM as qlm
 
 sys.path.append("../")
-import benchmark.payoff_class as po
-import benchmark.probability_class as pc
+from QQuantLib.finance import probability_class as pc
+from QQuantLib.finance import payoff_class as po
+
+#import benchmark.payoff_class as po
+#import benchmark.probability_class as pc
 import QQuantLib.DL.data_loading as dl
 from QQuantLib.AE.maximum_likelihood_ae import MLAE
 from QQuantLib.AE.ae_classical_qpe import CQPEAE
