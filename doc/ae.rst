@@ -11,3 +11,4 @@ The **AE** or *Amplitude Estimation* package groups the python modules from **QQ
    real_quantum_ae.rst 
    ae_classical_qpe.rst
    ae_iterative_quantum_pe.rst
+   ae_class.rst
