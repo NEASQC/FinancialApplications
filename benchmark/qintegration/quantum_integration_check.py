@@ -233,14 +233,14 @@ if __name__ == "__main__":
     if args.mlae_var:
         lista_ae.append("json_tests/mlae_configuration.json")
     if args.iqae_var:
-        lista_ae.append("json_tests/iqae_configuration.json")
+        lista_ae.append("json_checks/iqae_configuration.json")
     if args.rqae_var:
-        lista_ae.append("json_tests/rqae_configuration.json")
+        lista_ae.append("json_checks/rqae_configuration.json")
     if args.cqpeae_var:
-        lista_ae.append("json_tests/cqpeae_configuration.json")
+        lista_ae.append("json_checks/cqpeae_configuration.json")
     if args.iqpeae_var:
-        lista_ae.append("json_tests/iqpeae_configuration.json")
-    final_list = list_of_dicts_from_jsons(lista_ae)
+        lista_ae.append("json_checks/iqpeae_configuration.json")
+    final_list = list_of_dictschecks_from_jsons(lista_ae)
     if args.count:
         print(len(final_list))
     if args.list:
