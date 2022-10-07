@@ -240,7 +240,7 @@ if __name__ == "__main__":
         lista_ae.append("json_checks/cqpeae_configuration.json")
     if args.iqpeae_var:
         lista_ae.append("json_checks/iqpeae_configuration.json")
-    final_list = list_of_dictschecks_from_jsons(lista_ae)
+    final_list = list_of_dicts_from_jsons(lista_ae)
     if args.count:
         print(len(final_list))
     if args.list:
