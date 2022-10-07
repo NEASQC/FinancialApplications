@@ -39,4 +39,5 @@
     aa.rst
     ae.rst
     pe.rst
+    finance.rst
     utils.rst
