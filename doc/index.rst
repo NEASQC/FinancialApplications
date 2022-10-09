@@ -24,7 +24,8 @@
     2. **QQuantLib/AA**: This is the *Amplitude Amplification* package which contains modules related with amplitude amplification operators.
     3. **QQuantLib/AE**: This is the *Amplitude Estimation* package which is devoted to different amplitude amplification algorithms.
     4. **QQuantLib/PE**: This is the *Phase Estimation*  package which contains modules for phase estimation algorithms that can be used in amplitude estimation procedure. 
-    5. **QQuantLib/utils**: This package contains auxiliar modules used for all the beforementioned pacakges.
+    5. **QQuantLib/finance**:  This package implements different modules related with finace applications of *Amplitude Estimation* techniqes.
+    6. **QQuantLib/utils**: This package contains auxiliar modules used for all the beforementioned pacakges.
 
 
     NEASQC project has received funding from the European Union’s Horizon 2020 research and innovation programme under Grant Agreement No. 951821. https://www.neasqc.eu/
