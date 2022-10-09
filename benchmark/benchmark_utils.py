@@ -1,5 +1,7 @@
 """
-Uitls functions fro benchmark purpouses.
+Utils functions from benchmark purpouses.
+
+Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 """
 import json
 import itertools as it
@@ -111,11 +113,6 @@ def create_ae_pe_solution(ae_list, problem_list):
         step_list = [dict(ChainMap(*list(x))) for x in it.product(problem_list, [ae])]
         solve_ae_pe_list = solve_ae_pe_list + step_list
     return solve_ae_pe_list
-
-
-
-
-
 
 def list_of_dicts_from_jsons(ae_json_list):
     """

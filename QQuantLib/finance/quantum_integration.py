@@ -1,6 +1,11 @@
 
 """
-This module contains a class for selecting data encoding protocols
+This module contains a function for solving integrals using Amplitude
+Estimation techniques. The function uses the Encoding class for loading
+data into the quantum circut by creating an oracle and the AE class for
+getting the amplitude of a selected state using AE techniques. The function
+deals with all the normalisations needed for transform this amplitde into
+the desired integral.
 
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
@@ -39,11 +44,10 @@ def q_solve_integral(**kwargs):
     Return
     ----------
 
-    ae_estimation: pandas DataFrame with the desired integral computation. 
+    ae_estimation: pandas DataFrame
+        DataFrame with the desired integral computation.
+    solver_ae: objet based on the AE class
 
-    solver_ae: object 
-
-    encode_class: 
     """
 
 

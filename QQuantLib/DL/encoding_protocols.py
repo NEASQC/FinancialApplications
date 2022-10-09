@@ -109,8 +109,9 @@ class Encoding:
     def oracle_encoding_0(self):
         """
         Method for creating the oracle. The probability density will be
-        loaded with proability density gate and the
-        function will be loaded as function array.
+        loaded as a probability density using the dl.load_probability
+        function and the function array will be loaded with dl.load_array
+        dunction. The SQUARE ROOT of the function array will be loaded!.
         """
 
         self.reset()
@@ -141,7 +142,9 @@ class Encoding:
     def oracle_encoding_1(self):
         """
         Method for creating the oracle. The probability density and the
-        payoff functions will be loaded as function arrays.
+        payoff functions will be loaded with the dl.load_array function.
+        In this method a uniform distribution is used for creating the
+        initial supeprosition of basis states.
         """
         self.reset()
         self.oracle = qlm.QRoutine()
@@ -183,8 +186,9 @@ class Encoding:
 
     def oracle_encoding_2(self):
         """
-        Method for creating the oracle. The probability density and the
-        payoff functions will be loaded as function arrays.
+        Method for encoding where the probability density will be encoding
+        as probability density using dl.load_probability (or a uniform
+        distribution) and the function with the dl.load_array.
         """
         self.reset()
         self.oracle = qlm.QRoutine()

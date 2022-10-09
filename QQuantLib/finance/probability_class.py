@@ -1,5 +1,7 @@
 """
-Definition for DensityProbability Class
+Definition for DensityProbability Class.
+
+Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 """
 from functools import partial
 import QQuantLib.finance.classical_finance as cf
@@ -24,6 +26,13 @@ class DensityProbability:
 
         probability_type : string
            type of probability density function to load
+        kwargs: dictionary
+            with necesary information for connfiguring the probability
+            density.
+            * s_0: initial value of the asset
+            * risk_free_rate: risk free ratio
+            * maturity: time where the probability wants to be calculated.
+            * volatiliy: volatility of the asset.
         """
 
         self.probability_type = probability_type
@@ -36,6 +45,18 @@ class DensityProbability:
     def get_density(self, **kwargs):
         """
         Create the probability function
+
+        Parameters
+        ----------
+
+        kwargs: dictionary
+            with necesary information for connfiguring the probability
+            density.
+            * s_0: initial value of the asset
+            * risk_free_rate: risk free ratio
+            * maturity: time where the probability wants to be calculated.
+            * volatiliy: volatility of the asset.
+
         """
 
         if self.probability_type == "Black-Scholes":
@@ -62,6 +83,18 @@ class DensityProbability:
     def get_density_prob(self, **kwargs):
         """
         Configures a probabiliy density
+
+        Parameters
+        ----------
+
+        kwargs: dictionary
+            with necesary information for connfiguring the probability
+            density.
+            * s_0: initial value of the asset
+            * risk_free_rate: risk free ratio
+            * maturity: time where the probability wants to be calculated.
+            * volatiliy: volatility of the asset.
+
         """
 
         if self.probability_type == "Black-Scholes":

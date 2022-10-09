@@ -1,6 +1,14 @@
 """
-Functions for automatization of different option price estimation using
+Function for automatization of different option price estimation using
 Amplitude Estimation algorithms.
+
+The function uses the DensityProbability and the PayOff classes for
+defining the option pice estimation problem. Then q_solve_integral
+function is used for computing the expected value integral. The function
+deals with all the mandatory normalisations for returned the desired price
+estimation.
+
+Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
 """
 
 import sys
@@ -18,12 +26,12 @@ def ae_price_estimation(**kwargs):
 
     Parameters
     ----------
-    
+
     kwargs : python configuration dictionary
 
     Returns
     _______
-    
+
     pdf : Pandas DataFrame
         DataFrame with the configuration of the AE problem and the solution
     """
