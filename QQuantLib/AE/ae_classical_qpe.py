@@ -1,5 +1,5 @@
 """
-This module contains a wraper class of the PE_QFT class from
+This module contains a wrapper class of the PE_QFT class from
 QQuantLib/PE/phase_estimation_wqft module for adapting classical
 phase estimation algorithm to solve amplitude estimation problems.
 Following references were used:
@@ -30,6 +30,23 @@ class CQPEAE:
     """
     Class for doing Amplitude Estimation (AE) using classical Quantum
     Amplitude Estimation (with QFT) algorithm
+
+    Parameters
+    ----------
+    oracle: QLM gate
+        QLM gate with the Oracle for implementing the
+        Grover operator
+    target : list of ints
+        python list with the target for the amplitude estimation
+    index : list of ints
+        qubits which mark the register to do the amplitude
+        estimation
+
+    kwars : dictionary
+        dictionary that allows the configuration of the CQPEAE algorithm:
+        Implemented keys:
+    qpu : QLM solver
+        solver for simulating the resulting circuits
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
@@ -37,22 +54,6 @@ class CQPEAE:
 
         Method for initializing the class
 
-        Parameters
-        ----------
-        oracle: QLM gate
-            QLM gate with the Oracle for implementing the
-            Grover operator
-        target : list of ints
-            python list with the target for the amplitude estimation
-        index : list of ints
-            qubits which mark the register to do the amplitude
-            estimation
-
-        kwars : dictionary
-            dictionary that allows the configuration of the IQAE algorithm:
-            Implemented keys:
-        qpu : QLM solver
-            solver for simulating the resulting circutis
         """
         # Setting attributes
         self._oracle = deepcopy(oracle)
@@ -157,9 +158,13 @@ class CQPEAE:
         -----
         .. math::
             a = \cos^2(\theta)
-            \; where \; \theta \; is \;
+
+        Where :math:`\theta`  is:
+
+        .. math::
             \mathcal{Q}|\Psi\rangle = e^{2i\theta}|\Psi\rangle
-            \; and \; \mathcal{Q} \; the \; Grover \; Operator
+
+        And :math:`\mathcal{Q}` the Grover Operator
 
 
         """

@@ -1,10 +1,7 @@
 """
-
-This module contains several auxiliar functions used in quantitative
-classical finances
+This module contains several auxiliar functions used in quantitative classical finances
 
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
-
 """
 
 import numpy as np

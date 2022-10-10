@@ -1,6 +1,6 @@
 """
-This module contains necesary functions and classes to implement
-the clasical Quantum Phase Estimation with inverse of the
+This module contains necessary functions and classes to implement
+the classical Quantum Phase Estimation with inverse of the
 Quantum Fourier Transform. Following references were used:
 
     Brassard, G., Hoyer, P., Mosca, M., & Tapp, A. (2000).
@@ -28,33 +28,32 @@ class CQPE:
     """
     Class for using classical Quantum Phase Estimation, with inverse of
     Quantum Fourier Transformation.
+
+    Parameters
+    ----------
+
+    kwars : dictionary
+        dictionary that allows the configuration of the ML-QPE algorithm:
+    Implemented keys:
+        initial_state : QLM Program
+            QLM Program with the initial Psi state over the
+            Grover-like operator will be applied
+            Only used if oracle is None
+        unitary_operator : QLM gate or routine
+            Grover-like operator which autovalues want to be calculated
+            Only used if oracle is None
+        cbits_number : int
+            number of classical bits for phase estimation
+        qpu : QLM solver
+            solver for simulating the resulting circuits
+        shots : int
+            number of shots for quantum job. If 0 exact probabilities
+            will be computed.
     """
 
     def __init__(self, **kwargs):
         """
-
         Method for initializing the class
-
-        Parameters
-        ----------
-
-        kwars : dictionary
-            dictionary that allows the configuration of the ML-QPE algorithm:
-            Implemented keys:
-            initial_state : QLM Program
-                QLM Program with the initial Psi state over the
-                Grover-like operator will be applied
-                Only used if oracle is None
-            unitary_operator : QLM gate or routine
-                Grover-like operator which autovalues want to be calculated
-                Only used if oracle is None
-            cbits_number : int
-                number of classical bits for phase estimation
-            qpu : QLM solver
-                solver for simulating the resulting circutis
-            shots : int
-                number of shots for quantum job. If 0 exact probabilities
-                will be computed.
         """
 
         # Setting attributes
@@ -88,7 +87,7 @@ class CQPE:
 
     def restart(self):
         """
-        Reinitialize several properties for restart purpouses
+        Reinitialize several properties for restart purposes
         """
         self.q_prog = None
         self.q_aux = None
@@ -122,7 +121,7 @@ class CQPE:
         self.results, self.circuit = self.run_qprogram(
             self.q_prog, self.q_aux, self.shots, self.linalg_qpu
         )
-        # Post-Proccess results
+        # Post-Process results
         start = time.time()
         self.final_results = self.post_proccess(self.results)
         end = time.time()
@@ -133,9 +132,9 @@ class CQPE:
         """
         This functions creates the first part of the Phase Estimation
         algorithm with QFT. Given a initial state, a unitary operator
-        and group of auxiliar qbits following steps are done:
-        1. Applies a Haddamard Gate to each auxiliar qbit.
-        2. Each auxiliar qbit controlles an exponential application
+        and group of auxiliary bits following steps are done:
+        1. Applies a Haddamard Gate to each auxiliary qubit.
+        2. Each auxiliary qubit controlls an exponential application
         of the given operator on the principal quantum state.
 
         Parameters
@@ -147,7 +146,7 @@ class CQPE:
             QLM implementation of the unitary operator. We want estimate
             the autovalue theta of this operator
         q_aux : QLM qbit
-            auxiliar qbits for PE. Each qbit will be the control for
+            auxiliary bits for PE. Each qubit will be the control for
             application of the unitary operator (powers of it in fact)
             to the initial state
 
@@ -158,7 +157,7 @@ class CQPE:
 
         """
 
-        # Getting the principal qbits
+        # Getting the principal bits
         q_prog = deepcopy(q_prog_)
         q_bits = q_prog.registers[0]
         for i, aux in enumerate(q_aux):
@@ -172,15 +171,15 @@ class CQPE:
     def apply_inv_qft(q_prog_, q_aux):
         """
         Apply an inverse of Quantum Fourier Transformation to the
-        desired qbits of a QLM program
+        desired bits of a QLM program
 
         Parameters
         ----------
 
         q_prog : QLM program
             QLM Program where the unitary operator will be applied
-        q_aux : QLM qbit
-            qbits where the inverse of the QFT will be applied
+        q_aux : QLM qubit
+            bits where the inverse of the QFT will be applied
 
         Returns
         ----------
@@ -206,7 +205,7 @@ class CQPE:
             QLM implementation of the unitary operator. We want estimate
             the autovalue theta of this operator
         q_aux : QLM qbit
-            auxiliar qbits for PE.
+            auxiliary bits for PE.
 
         Returns
         ----------
@@ -229,7 +228,7 @@ class CQPE:
 
         q_prog : QLM Program
         q_aux : QLM qbit
-            auxiliar qbit for measuring during all ipe steps
+            auxiliary qubit for measuring during all ipe steps
         shots : int
             number of shots for simulation
         linalg_qpu : QLM solver
@@ -240,8 +239,6 @@ class CQPE:
         result : pandas DataFrame
             DataFrame with the results
         circuit : QLM circuit
-        time_pdf : pandas DataFrame
-            DataFrame with time of different procces of the simulation
 
         """
         start = q_aux.start
@@ -261,6 +258,13 @@ class CQPE:
         """
         This function uses the results property and add it additional
         columns that are useful for Amplitude Amplification procedure
+
+        Returns
+        ----------
+
+        final_result : pandas DataFrame
+            DataFrame with the final results
+        circuit : QLM circuit
         """
         final_results = input_pdf.copy(deep=True)
         # Eigenvalue of the Grover-like operator

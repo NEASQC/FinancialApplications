@@ -1,5 +1,5 @@
 QQuantLib.finance
-============
+=================
 
 The **finance** package groups the python modules from **QQuantLib** related with finances and option price estimation. Following modules are presented in this package.
 

@@ -17,7 +17,9 @@ class Encoding:
     Class for data encoding into the quantum circuit.
 
     """
-    def __init__(self, array_function, array_probability=None, encoding=None, **kwargs):
+    def __init__(
+        self, array_function, array_probability=None, encoding=None, **kwargs
+    ):
         """
         Initialize class for data encoding into the quantum circuit.
 
@@ -25,40 +27,52 @@ class Encoding:
         ----------
 
         array_function : numpy array
-            numpy array wiht the desired function for encoding into the
-            Quantum Cirucit:
-                * MANDATORY of lenght = 2^n
+            numpy array with the desired function for encoding into the
+            Quantum Circuit:
+                * MANDATORY of length = 2^n
                 * MANDATORY: max(array_function) <= 1.0.
         array_probability : numpy array
-            numpy array wiht the desired probability for encoding into the
-            Quantum Cirucit:
+            numpy array with the desired probability for encoding into
+            the Quantum Circuit:
                 * Is None is provided uniform distribution will be used
-                * MANDATORY of lenght = 2^n
+                * MANDATORY of length = 2^n
                 * MANDATORY: sum(array_probability) <= 1.0.
                 * MANDATORY: length(array_function) == length(array_probability)
         encoding : int
             Selecting the encode protocol
                 * 0 : standard encoding procedure (load density as density)
                 * 1 : first encoding procedure (load density as function)
-                * 2 : second encoding procedure (double loading of a density as a density)
+                * 2 : second encoding procedure (double loading of a
+                density as a density)
         kwargs : dictionary
         """
         #Inputs arrays MUST be of length 2^n
         self.n_qbits = test_bins(array_function)
         self.function = array_function
         if np.max(np.abs(self.function)) > 1.00:
-            raise ValueError("array_function not properly normalised.\
-            Please divdide by the max(array_function)")
+            error_string = (
+                "array_function not properly normalised"
+                "Please divide by the max(array_function)"
+            )
+            raise ValueError(error_string)
         if array_probability is not None:
             if np.any(array_probability < 0):
-                raise ValueError("There are negative values in the probability")
+                error_string = ("There are negative values in the probability")
+                raise ValueError(error_string)
             qbits_prob = test_bins(array_probability)
             if self.n_qbits != qbits_prob:
-                raise ValueError("Lengths of array_function and \
-                array_probability MUST BE equal")
+                error_string = (
+                    "Lengths of array_function"
+                    "and array_probability"
+                    "MUST BE equal"
+                )
+                raise ValueError(error_string)
             if np.sum(array_probability) > 1.00:
-                raise ValueError("array_probability not properly normalised.\
-                Please divdide by the sum(array_probability)")
+                error_string = (
+                    "array_probability not properly normalised."
+                    "Please divide by the sum(array_probability)"
+                )
+                raise ValueError(error_string)
         self.probability = array_probability
         self._encoding = encoding
 
@@ -81,7 +95,7 @@ class Encoding:
     @property
     def encoding(self):
         """
-        creating the ecoding property
+        creating the encoding property
         """
         return self._encoding
 
@@ -91,12 +105,12 @@ class Encoding:
         setter of the encoding property
         """
         self._encoding = value
-        #Everytime encoding is changed all staff will be reseted
+        #Every time encoding is changed all staff will be reset
         self.reset()
 
     def reset(self):
         """
-        Method for resetting atributes
+        Method for resetting attributes
         """
         self.oracle = None
         self.p_gate = None
@@ -107,11 +121,30 @@ class Encoding:
         self.encoding_normalization = 1.0
 
     def oracle_encoding_0(self):
-        """
+        r"""
         Method for creating the oracle. The probability density will be
         loaded as a probability density using the dl.load_probability
         function and the function array will be loaded with dl.load_array
-        dunction. The SQUARE ROOT of the function array will be loaded!.
+        function. The SQUARE ROOT of the function array will be loaded!.
+
+        Notes
+        -----
+        The encoding procedure is summarised as:
+
+        .. math::
+            |\Psi\rangle = \mathbf{U}_f\left(I\otimes \mathbf{U}_p \\
+            \right)|0\rangle\otimes|0\rangle_{n}
+
+        Where :math:`\mathbf{U}_f` encodes function :math:`f(x)` as a \
+        function and :math:`\mathbf{U}_p` encodes probability density \
+        :math:`p(x)` as a probability density.
+
+        After this protocol the quantum state is in the form:
+
+        .. math::
+            |\Psi\rangle = \sum_{i=0}^{2^{n}-1}|i\rangle_{n}\otimes \
+            \sqrt{p(x_i)f(x_i)}|0\rangle \; + \; ...
+
         """
 
         self.reset()
@@ -132,7 +165,7 @@ class Encoding:
         self.function_gate = dl.load_array(
             np.sqrt(np.abs(self.function)), id_name="Function", method=self.multiplexor)
         self.registers = self.oracle.new_wires(self.function_gate.arity)
-        # Step 1 of Procedure: apply loading probabilty gate
+        # Step 1 of Procedure: apply loading probability gate
         self.oracle.apply(self.p_gate, self.registers[: self.p_gate.arity])
         # Step 2 of Procedure: apply loading function gate
         self.oracle.apply(self.function_gate, self.registers)
@@ -140,18 +173,43 @@ class Encoding:
         self.index = [self.oracle.arity - 1]
 
     def oracle_encoding_1(self):
-        """
+        r"""
         Method for creating the oracle. The probability density and the
         payoff functions will be loaded with the dl.load_array function.
         In this method a uniform distribution is used for creating the
-        initial supeprosition of basis states.
+        initial superposition of basis states.
+
+        Notes
+        -----
+        The encoding procedure is summarised as:
+
+        .. math::
+            |\Psi\rangle = \big(I \otimes I \otimes H^{\otimes n}\big) \
+            \left(\mathbf{U}_f \otimes I  \right) \
+            \left( I \otimes \mathbf{U}_p \right)  \big(I \otimes I \
+            \otimes H^{\otimes n}\big) \
+            \big(|0\rangle \otimes |0\rangle \otimes|0\rangle_{n}\big)
+
+        Where :math:`\mathbf{U}_f` encodes function :math:`f(x)` and \
+        :math:`\mathbf{U}_p` encodes \
+        probability density :math:`p(x)`. Both will be encoded as functions.
+
+        After this protocol the quantum state is in the form:
+
+        .. math::
+            |\Psi\rangle = \frac{1}{2^n} \sum_{i=0}^{2^{n}-1} \
+            p(x_i)f(x_i) |0\rangle \otimes |0\rangle \otimes \
+            |0\rangle_n \; + \; ...
+
         """
         self.reset()
         self.oracle = qlm.QRoutine()
-        # For new data loading procedure we need n+2 qbits
+        # For new data loading procedure we need n+2 qubits
         if self.probability is None:
-            raise ValueError("For type encoding 1 array_probability \
-            CAN NOT BE NONE")
+            error_string = (
+            "For type encoding 1 array_probability CAN NOT BE NONE"
+            )
+            raise ValueError(error_string)
         self.registers = self.oracle.new_wires(self.n_qbits + 2)
         # Step 2 of Procedure: apply Uniform distribution
         self.oracle.apply(
@@ -185,10 +243,30 @@ class Encoding:
         self.encoding_normalization = 2 ** self.n_qbits
 
     def oracle_encoding_2(self):
-        """
+        r"""
         Method for encoding where the probability density will be encoding
         as probability density using dl.load_probability (or a uniform
         distribution) and the function with the dl.load_array.
+
+        Notes
+        -----
+        The encoding procedure is summarised as:
+
+        .. math::
+            |\Psi \rangle = \left(I\otimes \mathbf{U}_p \dagger \right) \
+            \mathbf{U}_f \left(I\otimes \mathbf{U}_p \right) |0\rangle \
+            \otimes|0\rangle_{n}
+
+        Where :math:`\mathbf{U}_f` encodes function :math:`f(x)` as a \
+        function and :math:`\mathbf{U}_p` encodes probability density \
+        :math:`p(x)` as a probability density.
+
+        After this protocol the quantum state is in the form:
+
+        .. math::
+            |\Psi \rangle = \sum_{i=0}^{2^{n}-1} p(x_i) f(x_i) \
+            |0\rangle \otimes |0\rangle_{n} \; + \; ...
+
         """
         self.reset()
         self.oracle = qlm.QRoutine()
@@ -209,7 +287,7 @@ class Encoding:
             method=self.multiplexor
             )
         self.registers = self.oracle.new_wires(self.function_gate.arity)
-        # Step 1 of Procedure: apply loading probabilty gate
+        # Step 1 of Procedure: apply loading probability gate
         self.oracle.apply(self.p_gate, self.registers[: self.p_gate.arity])
         # Step 2 of Procedure: apply loading function gate
         self.oracle.apply(self.function_gate, self.registers)
@@ -221,8 +299,11 @@ class Encoding:
 
     def run(self):
         if self.encoding is None:
-            raise ValueError("Encoding parameter MUST NOT BE None. \
-            Please select 0,1 or 2 for encoding procedure!")
+            error_string = (
+                "Encoding parameter MUST NOT BE None."
+                "Please select 0,1 or 2 for encoding procedure!"
+            )
+            raise ValueError(error_string)
         if self.encoding == 0:
             self.oracle_encoding_0()
         elif self.encoding == 1:
@@ -230,4 +311,4 @@ class Encoding:
         elif self.encoding == 2:
             self.oracle_encoding_2()
         else:
-            raise ValueError("Poblem with encoding atribute!")
+            raise ValueError("Problem with encoding attribute!")

@@ -17,29 +17,30 @@ from QQuantLib.utils.utils import text_is_none
 class AE:
     """
     Class for creating and solving an AE problem
-    """
+
+    Parameters
+    ----------
+    oracle: QLM gate
+        QLM gate with the Oracle for implementing the
+        Grover operator
+    target : list of ints
+        python list with the target for the amplitude estimation
+    index : list of ints
+        qubits which mark the register to do the amplitude
+        estimation
+    ae_type : string
+        string with the desired AE algorithm:
+        MLAE, CQPEAE, IQPEAE, IQAE, RQAE
+    kwars : dictionary
+        dictionary that allows the configuration of the AE algorithm:
+        Implemented keys: different keys from the different AE algorithms
+        can be provided.
+"""
     def __init__(self, oracle=None, target=None, index=None, ae_type=None, **kwargs):
         """
 
         Method for initializing the class
 
-        Parameters
-        ----------
-        oracle: QLM gate
-            QLM gate with the Oracle for implementing the
-            Grover operator
-        target : list of ints
-            python list with the target for the amplitude estimation
-        index : list of ints
-            qubits which mark the register to do the amplitude
-            estimation
-        ae_type : string
-            string with the desired AE algorithm:
-            MLAE, CQPEAE, IQPEAE, IQAE, RQAE
-        kwars : dictionary
-            dictionary that allows the configuration of the AE algorithm:
-            Implemented keys: different keys from the different AE algorithms
-            can be provided.
         """
 
         # Setting attributes
@@ -50,14 +51,14 @@ class AE:
         text_is_none(index, "index", variable_type=list)
         self.index = index
 
-        #Proccesing kwargs
+        #Processing kwargs
         self.kwargs = kwargs
         self.linalg_qpu = self.kwargs.get("qpu", None)
         if self.linalg_qpu is None:
             print("Not QPU was provide. Default QPU will be used")
             self.linalg_qpu = get_default_qpu()
         self._ae_type = ae_type
-        #atributtes created
+        #attributes created
         self.solver_ae = None
         self.ae_pdf = None
         self.solver_dict = None
@@ -87,8 +88,8 @@ class AE:
         """
         Method for instantiate the AE algorithm class.
         """
-        text_is_none(self.ae_type, "ae_type atribute", variable_type=str)
-        #commom ae settings
+        text_is_none(self.ae_type, "ae_type attribute", variable_type=str)
+        #common ae settings
         self.solver_dict = {
             "mcz_qlm" : self.kwargs.get("mcz_qlm", True),
             "qpu" : self.kwargs.get("qpu", None)
@@ -100,10 +101,6 @@ class AE:
                 val_par = self.kwargs.get(par)
                 if val_par is not None:
                     self.solver_dict.update({par : val_par})
-            #    "delta" : self.kwargs.get("delta", None),
-            #    "ns" : self.kwargs.get("ns", None),
-            #    "schedule" : self.kwargs.get("schedule", None)
-            #})
             self.solver_ae = MLAE(
                 self.oracle,
                 target=self.target,
@@ -115,11 +112,6 @@ class AE:
                 val_par = self.kwargs.get(par)
                 if val_par is not None:
                     self.solver_dict.update({par : val_par})
-            #self.solver_dict.update({
-            #    "auxiliar_qbits_number" : self.kwargs.get(
-            #        "auxiliar_qbits_number", None),
-            #    "shots" : self.kwargs.get("shots", None)
-            #})
             self.solver_ae = CQPEAE(
                 self.oracle,
                 target=self.target,
@@ -131,10 +123,6 @@ class AE:
                 val_par = self.kwargs.get(par)
                 if val_par is not None:
                     self.solver_dict.update({par : val_par})
-            #self.solver_dict.update({
-            #    "cbits_number" : self.kwargs.get("cbits_number", None),
-            #    "shots" : self.kwargs.get("shots", None)
-            #})
             self.solver_ae = IQPEAE(
                 self.oracle,
                 target=self.target,
@@ -146,11 +134,6 @@ class AE:
                 val_par = self.kwargs.get(par)
                 if val_par is not None:
                     self.solver_dict.update({par : val_par})
-            #self.solver_dict.update({
-            #    "epsilon" : self.kwargs.get("epsilon", None),
-            #    "alpha" : self.kwargs.get("alpha", None),
-            #    "shots" : self.kwargs.get("shots", None)
-            #})
             self.solver_ae = IQAE(
                 self.oracle,
                 target=self.target,
@@ -162,12 +145,6 @@ class AE:
                 val_par = self.kwargs.get(par)
                 if val_par is not None:
                     self.solver_dict.update({par : val_par})
-            #self.solver_dict.update({
-            #    "epsilon" : self.kwargs.get("epsilon", None),
-            #    "gamma" : self.kwargs.get("gamma", None),
-            #    "q" : self.kwargs.get("q", None),
-            #    "shots" : self.kwargs.get("shots", None)
-            #})
             self.solver_ae = RQAE(
                 self.oracle,
                 target=self.target,

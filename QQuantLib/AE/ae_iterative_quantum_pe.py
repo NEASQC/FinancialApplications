@@ -1,5 +1,5 @@
 """
-This module contains necesary functions and classes to implement amplitude
+This module contains necessary functions and classes to implement amplitude
 estimation algorithm using Iterative Quantum Phase Estimation (IQPE).
 The implementation is based on following paper:
 
@@ -29,6 +29,22 @@ class IQPEAE:
     Class for using Iterative Quantum Phase Estimation (IQPE) class for
     doing Amplitude Estimation (AE)
 
+    Parameters
+    ----------
+    oracle: QLM gate
+        QLM gate with the Oracle for implementing the
+        Grover operator
+    target : list of ints
+        python list with the target for the amplitude estimation
+    index : list of ints
+        qubits which mark the register to do the amplitude
+        estimation
+
+    kwars : dictionary
+        dictionary that allows the configuration of the IQPEAE algorithm:
+        Implemented keys:
+    qpu : QLM solver
+        solver for simulating the resulting circutis
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
@@ -36,22 +52,6 @@ class IQPEAE:
 
         Method for initializing the class
 
-        Parameters
-        ----------
-        oracle: QLM gate
-            QLM gate with the Oracle for implementing the
-            Grover operator
-        target : list of ints
-            python list with the target for the amplitude estimation
-        index : list of ints
-            qubits which mark the register to do the amplitude
-            estimation
-
-        kwars : dictionary
-            dictionary that allows the configuration of the IQAE algorithm:
-            Implemented keys:
-        qpu : QLM solver
-            solver for simulating the resulting circutis
         """
         # Setting attributes
         self._oracle = deepcopy(oracle)
