@@ -12,8 +12,20 @@ from QQuantLib.utils.utils import text_is_none
 class DensityProbability:
 
     """
-    Class for selectin pay off functions
+    Class for selecting pay off functions
     algorithm
+
+    Parameters
+    ----------
+
+    probability_type : string
+       type of probability density function to load
+    kwargs: dictionary
+    Implemented keys:
+        * s_0: initial value of the asset
+        * risk_free_rate: risk free ratio
+        * maturity: time where the probability wants to be calculated.
+        * volatiliy: volatility of the asset.
     """
 
     def __init__(self, probability_type: str, **kwargs):
@@ -21,18 +33,6 @@ class DensityProbability:
 
         Method for initializing the class
 
-        Parameters
-        ----------
-
-        probability_type : string
-           type of probability density function to load
-        kwargs: dictionary
-            with necesary information for connfiguring the probability
-            density.
-            * s_0: initial value of the asset
-            * risk_free_rate: risk free ratio
-            * maturity: time where the probability wants to be calculated.
-            * volatiliy: volatility of the asset.
         """
 
         self.probability_type = probability_type
@@ -50,7 +50,7 @@ class DensityProbability:
         ----------
 
         kwargs: dictionary
-            with necesary information for connfiguring the probability
+            with necessary information for configuring the probability
             density.
             * s_0: initial value of the asset
             * risk_free_rate: risk free ratio
@@ -82,13 +82,13 @@ class DensityProbability:
 
     def get_density_prob(self, **kwargs):
         """
-        Configures a probabiliy density
+        Configures a probability density
 
         Parameters
         ----------
 
         kwargs: dictionary
-            with necesary information for connfiguring the probability
+            with necessary information for configuring the probability
             density.
             * s_0: initial value of the asset
             * risk_free_rate: risk free ratio

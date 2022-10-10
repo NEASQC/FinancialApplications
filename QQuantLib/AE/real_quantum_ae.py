@@ -1,5 +1,5 @@
 """
-This module contains necesary functions and classes to implement
+This module contains necessary functions and classes to implement
 Real Quantum Amplitude Estimation based on the paper:
 
     Manzano, A., Musso, D., Leitao, A. et al.
@@ -25,6 +25,29 @@ class RQAE:
     """
     Class for Real Quantum Amplitude Estimation (RQAE)
     algorithm
+
+    Parameters
+    ----------
+    oracle: QLM gate
+        QLM gate with the Oracle for implementing the
+        Grover operator
+    target : list of ints
+        python list with the target for the amplitude estimation
+    index : list of ints
+        qubits which mark the register to do the amplitude
+        estimation
+
+    kwars : dictionary
+        dictionary that allows the configuration of the IQAE algorithm:
+    Implemented keys:
+        qpu : QLM solver
+            solver for simulating the resulting circuits
+        q : int
+            amplification ratio
+        epsilon : int
+            precision
+        gamma : float
+            accuracy
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
@@ -32,28 +55,6 @@ class RQAE:
 
         Method for initializing the class
 
-        Parameters
-        ----------
-        oracle: QLM gate
-            QLM gate with the Oracle for implementing the
-            Grover operator
-        target : list of ints
-            python list with the target for the amplitude estimation
-        index : list of ints
-            qubits which mark the register to do the amplitude
-            estimation
-
-        kwars : dictionary
-            dictionary that allows the configuration of the IQAE algorithm:
-            Implemented keys:
-            qpu : QLM solver
-                solver for simulating the resulting circutis
-            q : int
-                amplification ratio
-            epsilon : int
-                precision
-            gamma : float
-                accuracy
         """
         ###########################################
         # Setting attributes
@@ -68,7 +69,7 @@ class RQAE:
             self.linalg_qpu = get_default_qpu()
         self.epsilon = kwargs.get("epsilon", 0.01)
         self.gamma = kwargs.get("gamma", 0.05)
-        # Amplification Ratio: q in the papper
+        # Amplification Ratio: q in the paper
         self.ratio = kwargs.get("q", 2)
         self.mcz_qlm = kwargs.get("mcz_qlm", True)
 
@@ -200,8 +201,6 @@ class RQAE:
            lower bound for the amplitude to be estimated
         amplitude_max : float
            upper bound for the amplitude to be estimated
-        time_pdf : pandas DataFrame
-            DataFrame with time information of the proccess
 
         """
 
@@ -234,8 +233,6 @@ class RQAE:
         )
         end = time.time()
         first_step_time = end - start
-        # time_pdf["m_k"] = 0
-        # time_pdf["rqae_overheating"] = first_step_time
 
         return [amplitude_min, amplitude_max]
 
@@ -261,8 +258,6 @@ class RQAE:
            lower bound for the amplitude to be estimated
         amplitude_max : float
            upper bound for the amplitude to be estimated
-        time_pdf : pandas DataFrame
-            DataFrame with time information of the proccess
 
         """
         self.shifted_oracle = 2 * shift
@@ -297,8 +292,6 @@ class RQAE:
         amplitude_min = np.sin(angle_min) - shift
         end = time.time()
         first_step_time = end - start
-        # time_pdf["m_k"] = k
-        # time_pdf["rqae_overheating"] = first_step_time
 
         return [amplitude_min, amplitude_max]
 
@@ -307,8 +300,8 @@ class RQAE:
         ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05
     ):
         """
-        This function displays information of the propoerties of the method for a given
-        set of parameters
+        This function displays information of the properties of the
+        method for a given set of parameters
 
         Parameters
         ----------
@@ -319,8 +312,6 @@ class RQAE:
         gamma : float
             accuracy
 
-        Returns
-        ----------
         """
         theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
         k_max = int(
@@ -339,7 +330,7 @@ class RQAE:
             / (np.arcsin(2 * epsilon))
         ) / np.log(ratio)
         gamma_i = gamma / big_t
-        # This is shots for each iteration: Ni in the papper
+        # This is shots for each iteration: Ni in the paper
         n_i = int(
             np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
         )
@@ -354,8 +345,8 @@ class RQAE:
     @staticmethod
     def chebysev_bound(n_samples: int, gamma: float):
         """
-        Computes the length of the confidence interval for a given number of samples
-        n_samples and an accuracy gamma.
+        Computes the length of the confidence interval for a given number
+        of samples n_samples and an accuracy gamma.
 
         Parameters
         ----------
@@ -372,9 +363,9 @@ class RQAE:
 
     def rqae(self, ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05):
         """
-        This function implements the first step of the RQAE paper. The result
-        is an estimation of the desired amplitude with precision epsilon
-        and accuracy gamma.
+        This function implements the first step of the RQAE paper. The
+        result is an estimation of the desired amplitude with precision
+        epsilon and accuracy gamma.
 
         Parameters
         ----------
@@ -396,7 +387,7 @@ class RQAE:
         ######################################
 
         epsilon = 0.5 * epsilon
-        # Always need to clean the cirucit statistics property
+        # Always need to clean the circuit statistics property
         self.circuit_statistics = {}
         # time_list = []
         theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
@@ -416,7 +407,7 @@ class RQAE:
             / (np.arcsin(2 * epsilon))
         ) / np.log(ratio)
         gamma_i = gamma / big_t
-        # This is shots for each iteration: Ni in the papper
+        # This is shots for each iteration: Ni in the paper
         n_i = int(
             np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
         )
@@ -443,8 +434,6 @@ class RQAE:
             # time_list.append(time_pdf)
             epsilon_amplitude = (amplitude_max - amplitude_min) / 2
 
-        # self.time_pdf = pd.concat(time_list)
-        # self.time_pdf.reset_index(drop=True, inplace=True)
         return [2 * amplitude_min, 2 * amplitude_max]
 
     def run(self):

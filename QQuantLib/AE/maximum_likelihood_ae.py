@@ -1,5 +1,5 @@
 """
-This module contains necesary functions and classes to implement
+This module contains necessary functions and classes to implement
 Maximum Likelihood Amplitude Estimation based on the paper:
 
     Suzuki, Y., Uno, S., Raymond, R., Tanaka, T., Onodera, T., & Yamamoto, N.
@@ -26,8 +26,34 @@ from QQuantLib.utils.utils import bitfield_to_int, check_list_type, load_qn_gate
 
 class MLAE:
     """
-    Class for using Maximum Likelihood Quantum Amplitude Estimation (ML-AE)
-    algorithm
+    Class for using Maximum Likelihood Quantum Amplitude Estimation
+    (MLAE) algorithm
+
+    Parameters
+    ----------
+    oracle: QLM gate
+        QLM gate with the Oracle for implementing the
+        Grover operator:
+        init_q_prog and q_gate will be interpreted as None
+    target : list of ints
+        python list with the target for the amplitude estimation
+    index : list of ints
+        qubits which mark the register to do the amplitude
+        estimation
+
+    kwars : dictionary
+        dictionary that allows the configuration of the MLAE algorithm:
+    Implemented keys:
+        qpu : QLM solver
+            solver for simulating the resulting circuits
+        schedule : list of two lists
+            the schedule for the algorithm
+        optimizer :
+            an optimizer with just one possible entry
+        delta : float
+            tolerance to avoid division by zero warnings
+        ns : int
+            number of grid points for brute scipy optimizer
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
@@ -35,31 +61,6 @@ class MLAE:
 
         Method for initializing the class
 
-        Parameters
-        ----------
-        oracle: QLM gate
-            QLM gate with the Oracle for implementing the
-            Grover operator:
-            init_q_prog and q_gate will be interpreted as None
-        target : list of ints
-            python list with the target for the amplitude estimation
-        index : list of ints
-            qubits which mark the register to do the amplitude
-            estimation
-
-        kwars : dictionary
-            dictionary that allows the configuration of the MLAE algorithm:
-            Implemented keys:
-                qpu : QLM solver
-                    solver for simulating the resulting circuits
-                schedule : list of two lists
-                    the schedule for the algorithm
-                optimizer :
-                    an optimizer with just one possible entry
-                delta : float
-                    tolerance to avoid division by zero warnings
-                ns : int
-                    number of grid points for brute scipy optimizer
         """
         # Setting attributes
         self._oracle = deepcopy(oracle)
@@ -250,7 +251,7 @@ class MLAE:
     @staticmethod
     def likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
         r"""
-        Calculates Likelihood from Suzuki papper. For h_k positive events
+        Calculates Likelihood from Suzuki paper. For h_k positive events
         of n_k total events, this function calculates the probability of
         this taking into account that the probability of a positive
         event is given by theta and by m_k
@@ -260,8 +261,8 @@ class MLAE:
         Notes
         -----
         .. math::
-            l_k(\theta|h_k) = \sin^2\left((2m_k+1)\theta\right)^{h_k}\cos^2
-            \left((2m_k+1)\theta\right)^{n_k-h_k}
+            l_k(\theta|h_k) = \sin^2\left((2m_k+1)\theta\right)^{h_k} \
+            \cos^2 \left((2m_k+1)\theta\right)^{n_k-h_k}
 
         Parameters
         ----------
@@ -292,13 +293,14 @@ class MLAE:
     @staticmethod
     def log_likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
         r"""
-        Calculates log of the likelihood from Suzuki papper.
+        Calculates log of the likelihood from Suzuki paper.
 
         Notes
         -----
         .. math::
-            \log{l_k(\theta|h_k)} = 2h_k\log\big[\sin\left((2m_k+1)\theta\right)\big]
-            +2(n_k-h_k)\log\big[\cos\left((2m_k+1)\theta\right)\big]
+            \log{l_k(\theta|h_k)} = 2h_k\log\big[\sin\left((2m_k+1) \
+            \theta\right)\big] +2(n_k-h_k)\log\big[\cos\left((2m_k+1) \
+            \theta\right)\big]
 
         Parameters
         ----------
@@ -395,16 +397,12 @@ class MLAE:
             step_circuit_stats.update({"n_shots": n_k[i]})
             step_circuit_stats.update({"h_k": h_k[i]})
             self.circuit_statistics.update({m_k[i]: step_circuit_stats})
-        #   time_list.append(time_pdf)
-        # self.time_pdf = pd.concat(time_list)
-        # self.time_pdf["m_k"] = m_k
-        # self.time_pdf.reset_index(drop=True, inplace=True)
         return h_k
 
     def mlae(self, schedule, optimizer):
         """
         This method executes a complete Maximum Likelihood Algorithm,
-        including executing schedule, defining the correspondient cost
+        including executing schedule, defining the correspondent cost
         function and optimizing it.
 
         Parameters
@@ -415,7 +413,7 @@ class MLAE:
         optimizer : optimization routine.
             the optimizer should receive a function of one variable
             the angle to be optimized. Using lambda functions is the
-            recomended way.
+            recommended way.
 
         Returns
         ----------
@@ -455,13 +453,13 @@ class MLAE:
         Notes
         -----
         .. math::
-            a^*  = \sin^2(\theta^*)
-            \; where \; \theta^* = \arg \min_{\theta} L(\theta,\mathbf{h})
+            a^*  = \sin^2(\theta^*) \; where \; \theta^* = \arg \
+            \min_{\theta} L(\theta,\mathbf{h})
 
 
         """
 
-        # overwrite of the different propeties of the class
+        # overwrite of the different properties of the class
         start = time.time()
         self.theta, self.h_k, self.partial_cost_function = self.mlae(
             self.schedule, self.brute_force

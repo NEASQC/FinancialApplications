@@ -154,10 +154,14 @@ class IQPEAE:
         Notes
         -----
         .. math::
-            a  = \cos^2(\theta)
-            \; where \; \theta \; is \;
+            a = \cos^2(\theta)
+
+        Where :math:`\theta`  is:
+
+        .. math::
             \mathcal{Q}|\Psi\rangle = e^{2i\theta}|\Psi\rangle
-            \; and \; \mathcal{Q} \; the \; Grover \; Operator
+
+        And :math:`\mathcal{Q}` the Grover Operator
         """
 
         start = time.time()

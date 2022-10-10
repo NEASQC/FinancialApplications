@@ -3,7 +3,7 @@ Function for automatization of different option price estimation using
 Amplitude Estimation algorithms.
 
 The function uses the DensityProbability and the PayOff classes for
-defining the option pice estimation problem. Then q_solve_integral
+defining the option price estimation problem. Then q_solve_integral
 function is used for computing the expected value integral. The function
 deals with all the mandatory normalisations for returned the desired price
 estimation.
@@ -67,7 +67,7 @@ def ae_price_estimation(**kwargs):
     for i in range(ae_problem["number_of_tests"]):
         #Each loop step solves a complete price estimation problem
 
-        #Now we update the input dictionary with the probabiliy and the
+        #Now we update the input dictionary with the probability and the
         #function arrays
         ae_problem.update({
             "array_function" : norm_pay_off,
@@ -86,7 +86,7 @@ def ae_price_estimation(**kwargs):
 
         #Creating the output DataFrame with the complete information
 
-        #The basis will be the input python dictionary for trazability
+        #The basis will be the input python dictionary for traceability
         pdf = pd.DataFrame([ae_problem])
         #Added normalisation constants
         pdf["payoff_normalisation"] = pay_off_normalisation
@@ -94,7 +94,7 @@ def ae_price_estimation(**kwargs):
 
         #Expectation calculation using Rieman sum
         pdf["riemman_expectation"] = np.sum(p_x * pay_off)
-        #Expectation calculation using AE integration techniqes
+        #Expectation calculation using AE integration techniques
         pdf[
             [col + "_expectation" for col in ae_expectation.columns]
         ] = ae_expectation

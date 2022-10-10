@@ -1,5 +1,6 @@
 """
-This module contains several auxiliar functions used in quantitative classical finances
+This module contains several auxiliary functions used in quantitative
+classical finances
 
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
 """
@@ -9,10 +10,11 @@ from scipy.stats import norm
 
 
 def call_payoff(s_t: float, strike: float, **kwargs):
-    r"""Computes the payoff of a european call option.
+    r"""Computes the payoff of a European call option.
 
     Notes
     -----
+
     .. math::
         C(S_T, K) = \left(S_T-K, 0\right)^+
 
@@ -32,10 +34,11 @@ def call_payoff(s_t: float, strike: float, **kwargs):
 
 
 def put_payoff(s_t: float, strike: float, **kwargs):
-    r"""Computes the payoff of a european put option.
+    r"""Computes the payoff of a European put option.
 
     Notes
     -----
+
     .. math::
         P(S_T, K) = \left(K-S_T, 0\right)^+
 
@@ -59,6 +62,7 @@ def futures_payoff(s_t: float, strike: float, **kwargs):
 
     Notes
     -----
+
     .. math::
         F(S_T, K) = \left(S_T-K, 0\right)
 
@@ -83,6 +87,7 @@ def digital_call_payoff(s_t: float, strike: float, coupon: float = 1.0, **kwargs
 
     Notes
     -----
+
     .. math::
         DC(S_T, K, Coupon) = Coupon\mathbb{1}_{\{S_T-K\}}
 
@@ -106,11 +111,13 @@ def digital_call_payoff(s_t: float, strike: float, coupon: float = 1.0, **kwargs
 
 
 def digital_put_payoff(s_t: float, strike: float, coupon: float = 1.0, **kwargs):
-    r"""Computes the payoff for a digital(binary) put option.
-    The formula is:
+    r"""
+    Computes the payoff for a digital(binary) put option.
 
     Notes
     -----
+    The formula is:
+
     .. math::
         DC(S_T, K, Coupon) = Coupon\mathbb{1}_{\{K-S_T\}}
 
@@ -141,14 +148,18 @@ def bs_density(
     maturity: float,
     **kwargs
 ):
-    r"""Evaluates the Black-Scholes density function at s_t
-    for a given set of parameters. The formula is:
+    r"""
+    Evaluates the Black-Scholes density function at s_t for a given set
+    of parameters. The formula is:
 
     Notes
     -----
+
     .. math::
-        \dfrac{1}{S_T\sigma\sqrt{2\pi T}}\exp\left(-\dfrac{\left(\log(S_T)-\mu\right)}{2\sigma^2T}\right)
-    where :math:`\mu = (risk_free_rate-0.5\sigma)T+\log(S_0)`.
+        \dfrac{1}{S_T\sigma\sqrt{2\pi T}}\exp\left(-\dfrac{ \
+        \left(\log(S_T)-\mu\right)}{2\sigma^2T}\right)
+
+    where :math:`\mu = (risk\_free\_rate-0.5\sigma)T+\log(S_0)`.
 
     Parameters
     ----------
@@ -166,8 +177,7 @@ def bs_density(
     Returns
     -------
     density : float
-        value of the Black-Scholes denisty function
-        in s_t
+        value of the Black-Scholes density function in s_t
     """
     mean = (risk_free_rate - 0.5 * volatility * volatility) * maturity + np.log(s_0)
     factor = s_t * volatility * np.sqrt(2 * np.pi * maturity)
@@ -184,7 +194,8 @@ def bs_probability(
     maturity: float,
     **kwargs
 ):
-    r"""Computes a discrete probability distribution from the  Black-Scholes
+    r"""
+    Computes a discrete probability distribution from the  Black-Scholes
     density function for a given set of parameters. This is done by evaluating
     the Black-Scholes density function in s_t and the normlising this result.
 
@@ -218,12 +229,15 @@ def bs_sde_solution(
     maturity: float,
     **kwargs
 ):
-    r"""For a certain parametrization $x$ it returns a value of the underlying $S_T(x)$
-    and the probability density of that value of the underlying.
-    The formulas are:
+    r"""
+    For a certain parametrization :math:`x` it returns a value of the
+    underlying :math:`S_T(x)` and the probability density of that
+    value of the underlying.
 
     Notes
     -----
+    The formulas are:
+
     .. math::
         S_T = S_0e^{\sigma x+(risk_free_rate-\sigma^2/2)t}
         p(S_T(x)) = N(x;mean = 0, variance = T)
@@ -264,11 +278,14 @@ def bs_call_price(
     strike: float,
     **kwargs
 ):
-    r"""Computes the price for a european call option.
-    The formula is:
+    r"""
+    Computes the price for a European call option. 
 
     Notes
     -----
+
+    The formula is:
+
     .. math::
         C(S, T) = S\Phi(d_1)-Ke^{-rT}\Phi(d_2)
 
@@ -288,7 +305,7 @@ def bs_call_price(
     Returns
     -------
     price : float
-        price of the european call option
+        price of the European call option
     """
     first = np.log(s_0 / strike)
     positive = (risk_free_rate + volatility * volatility / 2) * maturity
@@ -309,11 +326,13 @@ def bs_put_price(
     strike: float,
     **kwargs
 ):
-    r"""Computes the price for a european put option.
-    The formula is:
+    r"""
+    Computes the price for a European put option.
 
     Notes
     -----
+    The formula is:
+
     .. math::
         C(S, T) = Ke^{-rT}\Phi(-d_2)-S\Phi(-d_1)
 
@@ -333,7 +352,7 @@ def bs_put_price(
     Returns
     -------
     price : float
-        price of the european put option
+        price of the European put option
     """
     first = np.log(s_0 / strike)
     positive = (risk_free_rate + volatility * volatility / 2) * maturity
@@ -355,11 +374,13 @@ def bs_digital_call_price(
     coupon: float,
     **kwargs
 ):
-    r"""Computes the price for a digital(binary) call option.
-    The formula is:
+    r"""
+    Computes the price for a digital(binary) call option.
 
     Notes
     -----
+    The formula is:
+
     .. math::
         DC(S, T) = e^{-rT}Coupon N(d_2)
 
@@ -376,14 +397,13 @@ def bs_digital_call_price(
     strike : float
         the strike
     coupon : float
-        the amount received in case
-        that the underlying pring exceeds
+        the amount received in case that the underlying pring exceeds
         the strike
 
     Returns
     -------
     price : float
-        price of the european digital call option
+        price of the digital call option
     """
     first = np.log(s_0 / strike)
     negative = (risk_free_rate - volatility * volatility / 2) * maturity
@@ -401,11 +421,13 @@ def bs_digital_put_price(
     coupon: float,
     **kwargs
 ):
-    r"""Computes the price for a digital (binary) put option.
-    The formula is:
+    r"""
+    Computes the price for a digital (binary) put option.
 
     Notes
     -----
+    The formula is:
+
     .. math::
         DC(S, T) = e^{-rT}Coupon N(-d_2)
 
@@ -422,14 +444,13 @@ def bs_digital_put_price(
     strike : float
         the strike
     coupon : float
-        the amount received in case
-        that the underlying pring exceeds
+        the amount received in case that the underlying pring exceeds
         the strike
 
     Returns
     -------
     price : float
-        price of the european digital call option
+        price of the digital call option
     """
     first = np.log(s_0 / strike)
     negative = (risk_free_rate - volatility * volatility / 2) * maturity
@@ -446,11 +467,13 @@ def bs_exact_samples(
     number_samples: int,
     **kwargs
 ):
-    r"""Computes samples from the exact solution of the Black-Scholes SDE.
-    The formula is:
+    r"""
+    Computes samples from the exact solution of the Black-Scholes SDE.
 
     Notes
     -----
+    The formula is:
+
     .. math::
         S_T = S_0e^{\sigma*W_t+(risk_free_rate-\sigma^2/2)t}
 
@@ -490,12 +513,14 @@ def bs_em_samples(
     time_steps: int,
     **kwargs
 ):
-    r"""Computes samples from the approximated solution of the Black-Scholes SDE
-            using the Euler-Maruyama discretization.
-    The formula is:
+    r"""
+    Computes samples from the approximated solution of the Black-Scholes
+    SDE using the Euler-Maruyama discrimination.
 
     Notes
     -----
+    The formula is:
+
     .. math::
         S_{t+\Delta t} = S_t+rS_tdt+\sigma S_t N(0, 1)\sqrt{dt}
 
@@ -540,10 +565,11 @@ def bs_tree(
     bounds: float,
     **kwargs
 ):
-    r"""Computes the probabilities of all possible pahts
-         from the approximated solution of the Black-Scholes SDE
-         using the Euler-Maruyama discretization
-         for a given discretization of the brownian motion.
+    r"""
+    Computes the probabilities of all possible pahts from the
+    approximated solution of the Black-Scholes SDE using the
+    Euler-Maruyama discretization for a given discretization of the
+    Brownian motion.
 
     Parameters
     ----------
@@ -565,7 +591,7 @@ def bs_tree(
         number of points to build the discrete version
         of the gaussian density
     bounds : float
-        bounds of the gaussian density
+        bounds of the Gaussian density
 
     Returns
     -------
@@ -604,7 +630,16 @@ def bs_tree(
 
 
 def geometric_sum(base: float, exponent: int, coeficient: float = 1.0, **kwargs):
-    r"""Computes a geometric sum
+    r"""
+    Computes a geometric sum
+
+    Notes
+    -----
+
+    .. math::
+        s = a+a*base+a*base^2+a*base^3+...+a*base^{exponent} = \\
+        = \sum_{k=0}^{exponent}a*base^k = \
+        a\big(\frac{1-base^{exponent+1}}{1-base}\big)
 
     Parameters
     ----------
@@ -612,21 +647,15 @@ def geometric_sum(base: float, exponent: int, coeficient: float = 1.0, **kwargs)
     base : float
         base of the geometric sum
     exponent: int
-        maximum exponet for the geomtric sum
+        maximum exponent for the geometric sum
     coeficient : float
-        coeficient for the geomtric sum
+        coefficient for the geometric sum
 
     Returns
     _______
     return : float
         result of the geometric sum
 
-    Notes
-    -----
-    .. math::
-        s = a+a*base+a*base^2+a*base^3+...+a*base^exponent = \\
-        = \sum_{k=0}^{exponent}a*base^k = \\
-        = a\big(\frac{1-base^{exponent+1}}{1-base}\big)
     """
     return coeficient * (base ** (exponent + 1) - 1) / (base - 1)
 
@@ -634,12 +663,14 @@ def geometric_sum(base: float, exponent: int, coeficient: float = 1.0, **kwargs)
 def bs_forward_price(
     s_0: float, risk_free_rate: float, maturity: float, strike: float, **kwargs
 ):
-    r"""Computes the price for a forward contract.
-    Note that it doesn't assume that we are
-    at the begining of the lifetime of the contract
-    The formula is:
+    r"""
+    Computes the price for a forward contract.  Note that it doesn't
+    assume that we are at the begining of the lifetime of the contract
+
     Notes
     -----
+    The formula is:
+
     .. math::
         V(S, T) = S-Ke^{-r(T-t)}
     Parameters

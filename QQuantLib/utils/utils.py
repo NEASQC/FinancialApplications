@@ -1,5 +1,5 @@
 """
-This module contains several auxiliar functions needed by other scripts
+This module contains several auxiliary functions needed by other scripts
 of the library
 
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
@@ -10,7 +10,6 @@ import time
 import numpy as np
 import qat.lang.AQASM as qlm
 
-# Convierte un entero n en un array de bits de longitud size
 def bitfield(n_int: int, size: int):
     """Transforms an int n_int to the corresponding bitfield of size size
 
@@ -35,7 +34,7 @@ def bitfield(n_int: int, size: int):
 
 
 def bitfield_to_int(lista):
-    """Transforms the bitfield lista to the corresponding int
+    """Transforms the bitfield list to the corresponding int
     Parameters
     ----------
     lista : ist of ints
@@ -44,7 +43,7 @@ def bitfield_to_int(lista):
     Returns
     ----------
     integer : int
-        integer obtained from it's binay representation.
+        integer obtained from it's binary representation.
     """
 
     integer = 0
@@ -101,8 +100,10 @@ def expmod(n_input: int, base: int):
 
 @qlm.build_gate("Mask", [int, int], arity=lambda x, y: x)
 def mask(number_qubits, index):
-    """Transforms the state |index> into the state
-    |11...1> of size number qubits.
+    r"""
+    Transforms the state :math:`|index\rangle` into the state
+    :math:`|11...1\rangle` of size number qubits.
+
     Parameters
     ----------
     number_qubits : int
@@ -112,7 +113,7 @@ def mask(number_qubits, index):
     ----------
     mask : Qlm abstract gate
         the gate that we have to apply in order to transform
-        state |index>. Note that it affects all states.
+        state :math:`|index\rangle`. Note that it affects all states.
     """
     routine = qlm.QRoutine()
     quantum_register = routine.new_wires(number_qubits)
@@ -151,7 +152,7 @@ def fwht_natural(array: np.array):
 
 
 def fwht_sequency(x_input: np.array):
-    """Fast Walsh-Hadamard Transform of array x_input in sequency ordering
+    """Fast Walsh-Hadamard Transform of array x_input in sequence ordering
     The result is not normalised
     Based on mex function written by Chengbo Li@Rice Uni for his TVAL3
     algorithm.
@@ -283,7 +284,7 @@ def test_bins(array, text="probability"):
     array : np.ndarray
         Numpy Array whose dimensionality is going to test
     test : str
-        String for identification purpouses
+        String for identification purposes
     Raises
     ----------
 
@@ -309,13 +310,13 @@ def left_conditional_probability(initial_bins, probability):
     """
     This function calculate f(i) according to the Lov Grover and Terry
     Rudolph 2008 papper:
-    'Creating superpositions that correspond to efficiently integrable
+    'Creating superposition that correspond to efficiently integrable
     probability distributions'
     http://arXiv.org/abs/quant-ph/0208112v1
 
     Given a discretized probability and an initial number of bins
     the function splits each initial region in 2 equally regions and
-    calculates the condicional probabilities for x is located in the
+    calculates the conditional probabilities for x is located in the
     left part of the new regions when x is located in the region that
     contains the corresponding left region
 
@@ -323,7 +324,7 @@ def left_conditional_probability(initial_bins, probability):
     ----------
 
     initial_bins : int
-        Number of initial bins for spliting the input probabilities
+        Number of initial bins for splitting the input probabilities
     probability : np.darray.
         Numpy array with the probabilities to be load.
         initial_bins <= len(Probability)
@@ -352,7 +353,7 @@ def left_conditional_probability(initial_bins, probability):
         np.sum(probability[j * bins_by_dd : j * bins_by_dd + bins_by_dd])
         for j in range(domain_divisions)
     ]
-    # Each bin of Initial domain division is splitted in 2 equal parts
+    # Each bin of Initial domain division is splatted in 2 equal parts
     bins4_left_dd = nbins // (2 ** (initial_bins + 1))
     # probability for x located in the left bin of the new splits
     left_probabilities = [
@@ -362,7 +363,7 @@ def left_conditional_probability(initial_bins, probability):
     # Conditional probability of x located in the left bin when x is located
     # in the bin of the initial domain division that contains the split
     # Basically this is the f(j) function of the article with
-    # j=0,1,2,...2^(i-1)-1 and i the number of qbits of the initial
+    # j=0,1,2,...2^(i-1)-1 and i the number of qubits of the initial
     # domain division
     with np.errstate(divide="ignore", invalid="ignore"):
         left_cond_prob = np.array(left_probabilities) / np.array(prob4dd)
@@ -372,12 +373,12 @@ def left_conditional_probability(initial_bins, probability):
 
 def get_histogram(probability, low_limit, high_limit, nbin):
     """
-    Given a function probability, convert it into a histogram. The function must
-    be positive, the normalization is automatic. Note that instead of
-    having an analytical expression, probability could just create an arbitrary
-    vector of the right dimensions and positive amplitudes.
-    This procedure could be used to initialize any quantum state
-    with real amplitudes
+    Given a function probability, convert it into a histogram. The
+    function must be positive, the normalization is automatic. Note
+    that instead of having an analytical expression, probability could
+    just create an arbitrary vector of the right dimensions and positive
+    amplitudes.  This procedure could be used to initialize any quantum
+    state with real amplitudes
 
     Parameters
     ----------
@@ -397,10 +398,10 @@ def get_histogram(probability, low_limit, high_limit, nbin):
     ----------
 
     centers : np.darray
-        numpy array with the centers of the bins of the histogtram
+        numpy array with the centers of the bins of the histogram
     probs : np.darray
         numpy array with the probability at the centers of the bins
-        of the histogtram
+        of the histogram
     """
     step = (high_limit - low_limit) / nbin
     # Center of the bin calculation
@@ -470,8 +471,8 @@ def oracle_shots_calculation(m_k, n_k):
     Parameters
     ----------
     m_k : list
-        list with integers. Applications of the Grover-like amplification
-        operator.
+        list with integers. Applications of the Grover-like
+        amplification operator.
     n_k : list
         list with integers. Number of shots for each value of m_k.
 

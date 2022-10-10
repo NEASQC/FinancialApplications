@@ -11,7 +11,19 @@ from QQuantLib.utils.utils import text_is_none
 class PayOff:
 
     """
-    Class for selecting derivative otpions and configuring them.
+    Class for selecting derivative options and configuring them.
+
+    Parameters
+    ----------
+
+    kwargs: dictionary
+    Implemented keys:
+        * strike: float
+            strike of the option.
+        * coupon: float
+            only valid for Digital Options
+        * pay_off : string
+           type of pay_off function to load
     """
 
     def __init__(self, **kwargs):
@@ -19,17 +31,6 @@ class PayOff:
 
         Method for initializing the class
 
-        Parameters
-        ----------
-
-        pay_off : string
-           type of pay_off function to load
-        kwargs: dictionary
-            dictionary with keys for configuring the option.
-            * strike: float
-                strike of the option.
-            * coupon: float
-                only valid for Digital Options
         """
 
         self.pay_off_type = kwargs.get("pay_off_type", None)

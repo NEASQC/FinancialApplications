@@ -1,5 +1,5 @@
 """
-This module contains necesary functions and classes to implement
+This module contains necessary functions and classes to implement
 Iterative Quantum Amplitude Estimation based on the paper:
 
     Grinko, D., Gacon, J., Zoufal, C. et al.
@@ -26,35 +26,35 @@ class IQAE:
     """
     Class for Iterative Quantum Amplitude Estimation (IQAE)
     algorithm
+
+    Parameters
+    ----------
+    oracle: QLM gate
+        QLM gate with the Oracle for implementing the
+        Grover operator
+    target : list of ints
+        python list with the target for the amplitude estimation
+    index : list of ints
+        qubits which mark the register to do the amplitude
+        estimation
+
+    kwars : dictionary
+        dictionary that allows the configuration of the IQAE algorithm:
+    Implemented keys:
+        qpu : QLM solver
+            solver for simulating the resulting circuits
+        epsilon : float
+            precision
+        alpha : float
+            accuracy
+        shots : int
+            number of measurements on each iteration
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
         """
 
         Method for initializing the class
-
-        Parameters
-        ----------
-        oracle: QLM gate
-            QLM gate with the Oracle for implementing the
-            Grover operator
-        target : list of ints
-            python list with the target for the amplitude estimation
-        index : list of ints
-            qubits which mark the register to do the amplitude
-            estimation
-
-        kwars : dictionary
-            dictionary that allows the configuration of the IQAE algorithm:
-            Implemented keys:
-            qpu : QLM solver
-                solver for simulating the resulting circutis
-            epsilon : float
-                precision
-            alpha : float
-                accuracy
-            shots : int
-                number of measurements on each iteration
         """
         # Setting attributes
         self._oracle = deepcopy(oracle)
@@ -149,8 +149,8 @@ class IQAE:
         k: int, theta_lower: float, theta_upper: float, flag: bool, ratio: float = 2
     ):
         """
-        This is an implementation of Algorithm 2 from the IQAE paper. This function computes
-        the next suitable k.
+        This is an implementation of Algorithm 2 from the IQAE paper.
+        This function computes the next suitable k.
 
         Parameters
         ----------
@@ -175,20 +175,20 @@ class IQAE:
             upper or lower half pane
 
         """
-        # This is K_i in the papper
+        # This is K_i in the paper
         bigk_i = 4 * k + 2
         theta_min = bigk_i * theta_lower
         theta_max = bigk_i * theta_upper
-        # This K_max in the papper
+        # This K_max in the paper
         bigk_max = np.floor(np.pi / (theta_upper - theta_lower))
-        # This is K in the papper
+        # This is K in the paper
         big_k = bigk_max - np.mod(bigk_max - 2, 4)
         while big_k > ratio * bigk_i:
             q_ = big_k / bigk_i
             if (np.mod(q_ * theta_max, 2 * np.pi) <= np.pi) and (
                 np.mod(q_ * theta_min, 2 * np.pi) <= np.pi
             ):
-                # This K_next in the papper
+                # This K_next in the paper
                 bigk_next = big_k
                 flag = True
                 k_next = (bigk_next - 2) / 4
@@ -196,7 +196,7 @@ class IQAE:
             if (np.mod(q_ * theta_max, 2 * np.pi) >= np.pi) and (
                 np.mod(q_ * theta_min, 2 * np.pi) >= np.pi
             ):
-                # This K_next in the papper
+                # This K_next in the paper
                 bigk_next = big_k
                 flag = False
                 k_next = (bigk_next - 2) / 4
@@ -250,8 +250,8 @@ class IQAE:
         epsilon: float = 0.01, shots: int = 100, alpha: float = 0.05
     ):
         """
-        This function displays information of the properties of the method for a given
-        set of parameters
+        This function displays information of the properties of the
+        method for a given set of parameters
 
         Parameters
         ----------
@@ -262,8 +262,6 @@ class IQAE:
         shots : int
             number of measurements on each iteration
 
-        Returns
-        ----------
         """
 
         print("-------------------------------------------------------------")
@@ -294,11 +292,12 @@ class IQAE:
     @staticmethod
     def chebysev_bound(n_samples: int, gamma: float):
         r"""
-        Computes the length of the confidence interval for a given number of samples
-        n_samples and an accuracy gamma:
+        Computes the length of the confidence interval for a given
+        number of samples n_samples and an accuracy gamma:
 
         .. math::
-            \epsilon = \dfrac{1}{\sqrt{2N}}\log\left(\dfrac{2}{\gamma}\right)
+            \epsilon = \dfrac{1}{\sqrt{2N}}\log\left(\dfrac{2}{\gamma} \
+            \right)
 
         Parameters
         ----------
@@ -309,7 +308,7 @@ class IQAE:
 
         Returns
         ----------
-        length of the confidence interval
+        length of the confidence interval : float
         """
         return np.sqrt(1 / (2 * n_samples) * np.log(2 / gamma))
 
@@ -334,10 +333,6 @@ class IQAE:
            lower bound for the probability to be estimated
         a_u : float
            upper bound for the probability to be estimated
-        theta_l :
-           lower bound for the angle to be estimated
-        theta_u :
-           upper bound for the angle to be estimated
 
         """
 
@@ -347,9 +342,9 @@ class IQAE:
         k = int(0)
         flag = True
         [theta_l, theta_u] = [0.0, np.pi / 2]
-        # This is T the number of rounds in the papper
+        # This is T the number of rounds in the paper
         big_t = int(np.ceil(np.log2(np.pi / (8 * epsilon))) + 1)
-        # This is L in the papper
+        # This is L in the paper
         big_l = (np.arcsin(2 / shots * np.log(2 * big_t / epsilon))) ** 0.25
         #####################################################
         h_k = 0
@@ -367,11 +362,6 @@ class IQAE:
             finding_time = end - start
 
             #####################################################
-            # routine = qlm.QRoutine()
-            # wires = routine.new_wires(self.oracle.arity)
-            # routine.apply(self.oracle, wires)
-            # for j in range(k):
-            #     routine.apply(self._grover_oracle, wires)
             routine = self.quantum_step(k)
             results, circuit, _, _ = get_results(
                 routine, linalg_qpu=self.linalg_qpu, shots=shots, qubits=self.index
@@ -380,7 +370,7 @@ class IQAE:
             # time_pdf["m_k"] = k
             a_ = results["Probability"].iloc[bitfield_to_int(self.target)]
             #####################################################
-            # Agregate results from different iterations
+            # Aggregate results from different iterations
             if j == 0:
                 # In the first step we need to store the circuit statistics
                 step_circuit_stats = circuit.statistics()
@@ -424,12 +414,6 @@ class IQAE:
             theta_u = np.minimum(theta_u, theta_u_)
             end = time.time()
             j = j + 1
-            # time_pdf["iqae_overheating"] = (end - start) + finding_time
-            # time_list.append(time_pdf)
-
-        # self.time_pdf = pd.concat(time_list)
-        # self.time_pdf["m_k"] = m_k
-        # self.time_pdf.reset_index(drop=True, inplace=True)
         [a_l, a_u] = [np.sin(theta_l) ** 2, np.sin(theta_u) ** 2]
         return [a_l, a_u]
 
