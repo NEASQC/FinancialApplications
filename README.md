@@ -1,6 +1,6 @@
 # Financial Applications
 
-This repo is associated to the use case of *Financial Applications* of **Machine Learning & Optimisation** group of use cases of the NEASQC european project. The main idea for this repo is the development of a QLM library, called *Quantum Quantitative Finance Library* (**QQuantLib** from now) that assemble different quantum algorithms and techniques for using in the financial industry.
+This repo is associated to the use case of *Financial Applications* of **Machine Learning & Optimisation** group of use cases of the NEASQC European project. The main idea for this repo is the development of a QLM library, called *Quantum Quantitative Finance Library* (**QQuantLib** from now) that assemble different quantum algorithms and techniques for using in the financial industry.
 
 
 
@@ -15,7 +15,7 @@ The *requirements.txt* file contains the mandatory python libraries for using pr
 
 ## Library organisation 
 
-The *Quantum Quantitative Finance Library* is deployed as typical Python library in the **QQuantLib** folder (we can use *import QQuantLib* for have access to the complete library). The library was organised in the following packages:
+library *Quantum Quantitative Finance Library* is deployed as typical Python library in the **QQuantLib** folder (we can use *import QQuantLib* for have access to the complete library). The library was organised in the following packages:
 * *Data Loading* or **DL** package. Under **QQuantLib/DL**. This package contains modules related with the loading of the data into the quantum circuits.
     * data\_loading.py (QQuantLib.DL.data\_loading): this modules deals with functions for loading data in quantum circuits using two different kind of approximation: the brute force one where multi-controlled rotations are used directly and using a more efficient method based on *quantum multiplexors*.
   *  encoding\_protocols.py (QQuantLib.DL.encoding\_protocols): in this module a class, called **Encoding**, was implemented for encoding numpy arrays into a quantum circuit. 
@@ -35,7 +35,7 @@ The *Quantum Quantitative Finance Library* is deployed as typical Python library
     * data\_extracting.py (QQuantLib.utils.data\_extracting). This module implements functions for creating QLM Programs from AbstractGates or QRoutines, creating their correspondent quantum circuits and jobs, simulating them and post processing the obtained results.
     * qlm\_solver.py (QQuantLib.utils.qlm\_solver). Module for calling the QLM solver.
     * utils.py (QQuantLib.utils.utils). Module with different auxiliary functions used for the other packages of the library.
-* *finance* package. Under **QQuantLib/finance**. This package implements several modules for using amplittude estimation techniques for solving financial problems.
+* *finance* package. Under **QQuantLib/finance**. This package implements several modules for using amplitude estimation techniques for solving financial problems.
     * classical\_finance.py: (QQuantLib.finance.classical\_finance). Module with several functions from classical quantitative finance.
     * probability\_class.py: (QQuantLib.finance.probability\_class). Module where a class for defining and configuring typical financial probability densities are implemented.
     * payoff\_class.py: (QQuantLib.finance.payoff\_class). Module where a class for defining and configuring otpion derivative returns are implemented.
@@ -54,10 +54,11 @@ The misc/notebooks folder contains jupyter notebooks that explain the use of the
  * 05\_Iterative\_Quantum\_Phase\_Estimation\_Class.ipynb. The Kitaev *IPE* algorithm is explained in this notebook using the module *iterative\_quantum\_pe* from *Phase Estimation* package (QQuantLib.PE.iterative\_quantum\_pe)
 * 06\_Iterative\_Quantum\_Amplitude\_Estimation\_class.ipynb. The Iterative Quantum Amplitude Estimation is explained in this notebook using the iterative\_quantum\_ae from *Amplitude Estimation* package (QQuantLib.AE.iterative\_quantum\_ae). 
 * 07\_Real\_Quantum\_Amplitude\_Estimation\_class.ipynb. The Real Quantum Amplitude Estimation algorithm and it associated class, from the module *real\_quantum\_ae* from  *Amplitude Estimation* package (QQuantLib.AE.real\_quantum\_ae), is presented in this notebook.
-* 08\_ApplicationTo\_Finance\_01\_StandardApproach.ipynb. In this notebook we present how to use the diferent **amplitude estimation** classes of the library for computing the expectation of agiven function $f(x)$ when $x$ follows a probability density $p(x)$. 
-* 09\_ApplicationTo\_Finance\_02\_Call\_Option\_BlackScholes.ipynb. This notebook uses the **amplitude estimation** classes of the library for solving the pricing problem of a *vanilla european call option* under the **Black Scholes** model.
-* 10\_ApplicationTo\_Finance\_03\_StandardApproachProblems.ipynb. This notebook presents several problems of the **amplitude estimation** procedures when are applied to the computation of the expectation of a function. Additionally a new loading procedure is presented and the **RQAE** algorithm is used for solving the presented issues.
-* 11\_ApplicationTo\_Finance\_04\_NewDataLoading.ipynb. This notebooks uses the modifications presented on previous one for solving several price estimation of **derivative contracts** using different **amplitude estimation** techniques.
+* 08\_AmplitudeEstimation\_Class.ipynb. In this notebook the **AE** (QQuantLib.AE.ae\_class) class is presented. This class allows configuring and executing any of the *AE* algorithms of the **AE** package, given an input oracle, in an easy way.
+* 09\_DataEncodingClass.ipynb. The **Encoding** class (QQuantLib.DL.encoding\_protocols) is presented in this notebook. This class deals with different encoding protocols used for creating quantum oracles suitable for computing integrals using amplitude estimation algorithms.
+* 10\_ApplicationTo\_Finance\_01\_IntegralComputing.ipynb. This notebooks explains how to use the **q_solve_integral** (QQuantLib.finance.quantum\_integration) function for computing integrals using the different **AE** algorithms presented into the *AE* package.
+* 11\_ApplicationTo\_Finance\_02\_ClassicalFinance.ipynb. This notebook presented several classical finance concepts related with derivatives price estimation. The **classical_finance** module, the **DensityProbability** and the **PayOff** classes  (QQuantLib.finance package) are introducing in this notebook.
+* 12\_ApplicationTo\_Finance\_03\_AEPriceEstimation.ipynb. This notebook explains how to use the **ae_price_estimation** function (*from QQuantLib.finance.ae\_price\_estimatio*) for computing option price estimation with the help of amplitude estimation techniques.
 
 
 ## Acknowledgements
@@ -69,7 +70,7 @@ This work is supported by the [NEASQC](https://cordis.europa.eu/project/id/95182
 The html documentation of the **QQuantLib** library can be access at: https://neasqc.github.io/FinancialApplications
 ## Test it
 
-You can test the libray in binder using following link:
+You can test the library in binder using following link:
 
 [Binder Link for QQuantLib](https://mybinder.org/v2/gh/NEASQC/FinancialApplications/HEAD)
 
