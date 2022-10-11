@@ -33,8 +33,9 @@ class CQPE:
     ----------
 
     kwars : dictionary
-        dictionary that allows the configuration of the ML-QPE algorithm:
-    Implemented keys:
+        dictionary that allows the configuration of the CQPE algorithm: \\
+        Implemented keys:
+
         initial_state : QLM Program
             QLM Program with the initial Psi state over the
             Grover-like operator will be applied
@@ -108,9 +109,6 @@ class CQPE:
         """
         This method apply a workflow for executing a complete PE with QFT
         algorithm
-
-        Parameters
-        ----------
 
         """
         # Initialize program

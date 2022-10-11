@@ -1,5 +1,5 @@
 """
-Function for automatization of different option price estimation using
+Function for automation of different option price estimation using
 Amplitude Estimation algorithms.
 
 The function uses the DensityProbability and the PayOff classes for
@@ -27,7 +27,19 @@ def ae_price_estimation(**kwargs):
     Parameters
     ----------
 
-    kwargs : python configuration dictionary
+    kwargs : dictionary.
+        Dictionary for configuring the price estimation problem, the
+        encoding of the price estimation data into the quantum circuit
+        and the AE integration technique for solving it.
+
+    Note
+    ____
+
+    The keys for the input kwargs dictionary will be the necessary keys
+    for configuring the DensityProbability class \\
+    (see QQuantLib.finance.probability_class), the PayOff class \\
+    (see QQuantLib.finance.payoff_class) and the q_solve_integral \\
+    function (see QQuantLib.finance.quantum_integration).
 
     Returns
     _______
@@ -92,15 +104,15 @@ def ae_price_estimation(**kwargs):
         pdf["payoff_normalisation"] = pay_off_normalisation
         pdf["p_x_normalisation"] = p_x_normalisation
 
-        #Expectation calculation using Rieman sum
-        pdf["riemman_expectation"] = np.sum(p_x * pay_off)
+        #Expectation calculation using Riemann sum
+        pdf["riemann_expectation"] = np.sum(p_x * pay_off)
         #Expectation calculation using AE integration techniques
         pdf[
             [col + "_expectation" for col in ae_expectation.columns]
         ] = ae_expectation
 
-        #Option price estimation using expectation computed as Rieman sum
-        pdf["rieman_price_estimation"] = pdf["riemman_expectation"] * np.exp(
+        #Option price estimation using expectation computed as Riemann sum
+        pdf["riemann_price_estimation"] = pdf["riemann_expectation"] * np.exp(
             -pdf["risk_free_rate"] * pdf["maturity"]
         )
         #Exact option price under the Black-Scholes model
@@ -111,12 +123,12 @@ def ae_price_estimation(**kwargs):
             * np.exp(-pdf["risk_free_rate"] * pdf["maturity"]).iloc[0]
         )
         #Computing Absolute: Rieman vs AE techniques
-        pdf["error_rieman"] = np.abs(
-            pdf["ae_price_estimation"] - pdf["rieman_price_estimation"]
+        pdf["error_riemann"] = np.abs(
+            pdf["ae_price_estimation"] - pdf["riemann_price_estimation"]
         )
         #Computing Relative: Rieman vs AE techniques
-        pdf["relative_error_rieman"] = (
-            pdf["error_rieman"] / pdf["rieman_price_estimation"]
+        pdf["relative_error_riemann"] = (
+            pdf["error_riemann"] / pdf["riemann_price_estimation"]
         )
         #Computing Absolute error: Exact BS price vs AE techniques
         pdf["error_exact"] = np.abs(

@@ -21,11 +21,17 @@ class DensityProbability:
     probability_type : string
        type of probability density function to load
     kwargs: dictionary
-    Implemented keys:
-        * s_0: initial value of the asset
-        * risk_free_rate: risk free ratio
-        * maturity: time where the probability wants to be calculated.
-        * volatiliy: volatility of the asset.
+        Dictionary for configuring the asset and the probability \\
+        used for simulating its behaviour.Implemented keys:
+
+        s_0 : float
+            initial value of the asset
+        risk_free_rate : float
+            risk free ratio
+        maturity : float
+            time where the probability wants to be calculated.
+        volatiliy : float
+            volatility of the asset.
     """
 
     def __init__(self, probability_type: str, **kwargs):
@@ -39,27 +45,37 @@ class DensityProbability:
         text_is_none(self.probability_type, "probability_type", variable_type=str)
         self.probability = None
         self.density_probability = None
-        self.get_density(**kwargs)
-        self.get_density_prob(**kwargs)
+        self.probability = self.get_density(
+            self.probability_type, **kwargs)
+        self.density_probability = self.get_density_prob(
+            self.probability_type, **kwargs)
 
-    def get_density(self, **kwargs):
+    @staticmethod
+    def get_density(probability_type, **kwargs):
         """
         Create the probability function
 
         Parameters
         ----------
 
+        probability_type : string
+           type of probability density function to load
         kwargs: dictionary
-            with necessary information for configuring the probability
-            density.
-            * s_0: initial value of the asset
-            * risk_free_rate: risk free ratio
-            * maturity: time where the probability wants to be calculated.
-            * volatiliy: volatility of the asset.
+            with necessary information for configuring the probability \\
+            density
+
+            s_0 : float
+                initial value of the asset
+            risk_free_rate : float
+                risk free ratio
+            maturity : float
+                time where the probability wants to be calculated
+            volatiliy : float
+                volatility of the asset
 
         """
 
-        if self.probability_type == "Black-Scholes":
+        if probability_type == "Black-Scholes":
 
             s_0 = kwargs.get("s_0", None)
             text_is_none(s_0, "s_0", variable_type=float)
@@ -70,34 +86,42 @@ class DensityProbability:
             volatility = kwargs.get("volatility", None)
             text_is_none(volatility, "volatility", variable_type=float)
 
-            self.probability = partial(
-                cf.bs_probability,
-                s_0=s_0,
-                risk_free_rate=risk_free_rate,
-                volatility=volatility,
-                maturity=maturity,
-            )
         else:
             raise ValueError()
 
-    def get_density_prob(self, **kwargs):
+        return partial(
+            cf.bs_probability,
+            s_0=s_0,
+            risk_free_rate=risk_free_rate,
+            volatility=volatility,
+            maturity=maturity,
+        )
+
+    @staticmethod
+    def get_density_prob(probability_type, **kwargs):
         """
         Configures a probability density
 
         Parameters
         ----------
 
+        probability_type : string
+           type of probability density function to load
         kwargs: dictionary
-            with necessary information for configuring the probability
+            with necessary information for configuring the probability \\
             density.
-            * s_0: initial value of the asset
-            * risk_free_rate: risk free ratio
-            * maturity: time where the probability wants to be calculated.
-            * volatiliy: volatility of the asset.
 
+            s_0 : float
+                initial value of the asset
+            risk_free_rate : float
+                risk free ratio
+            maturity : float
+                time where the probability wants to be calculated
+            volatiliy : float
+                volatility of the asset
         """
 
-        if self.probability_type == "Black-Scholes":
+        if probability_type == "Black-Scholes":
 
             s_0 = kwargs.get("s_0", None)
             text_is_none(s_0, "s_0", variable_type=float)
@@ -108,12 +132,12 @@ class DensityProbability:
             volatility = kwargs.get("volatility", None)
             text_is_none(volatility, "volatility", variable_type=float)
 
-            self.density_probability = partial(
-                cf.bs_density,
-                s_0=s_0,
-                risk_free_rate=risk_free_rate,
-                volatility=volatility,
-                maturity=maturity,
-            )
         else:
             raise ValueError()
+        return partial(
+            cf.bs_density,
+            s_0=s_0,
+            risk_free_rate=risk_free_rate,
+            volatility=volatility,
+            maturity=maturity,
+        )

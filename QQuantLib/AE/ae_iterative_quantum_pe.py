@@ -41,10 +41,16 @@ class IQPEAE:
         estimation
 
     kwars : dictionary
-        dictionary that allows the configuration of the IQPEAE algorithm:
+        dictionary that allows the configuration of the IQPEAE algorithm: \\
         Implemented keys:
-    qpu : QLM solver
-        solver for simulating the resulting circutis
+
+        qpu : QLM solver
+            solver for simulating the resulting circutis
+        shots : int
+            number of measurements
+        mcz_qlm : bool
+            for using or not QLM implementation of the multi controlled Z
+            gate
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):

@@ -32,8 +32,8 @@ class AE:
         string with the desired AE algorithm:
         MLAE, CQPEAE, IQPEAE, IQAE, RQAE
     kwars : dictionary
-        dictionary that allows the configuration of the AE algorithm:
-        Implemented keys: different keys from the different AE algorithms
+        dictionary that allows the configuration of the AE algorithm. \\
+        The different configration keys of the different AE algorithms \\
         can be provided.
 """
     def __init__(self, oracle=None, target=None, index=None, ae_type=None, **kwargs):

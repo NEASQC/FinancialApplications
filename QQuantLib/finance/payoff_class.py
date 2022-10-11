@@ -17,7 +17,9 @@ class PayOff:
     ----------
 
     kwargs: dictionary
-    Implemented keys:
+        Dictionary for selecting and configuring the derivative option. \\ç
+        Implemented keys:
+
         * strike: float
             strike of the option.
         * coupon: float

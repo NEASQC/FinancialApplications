@@ -2,9 +2,9 @@
 """
 This module contains a function for solving integrals using Amplitude
 Estimation techniques. The function uses the Encoding class for loading
-data into the quantum circut by creating an oracle and the AE class for
+data into the quantum circuit by creating an oracle and the AE class for
 getting the amplitude of a selected state using AE techniques. The function
-deals with all the normalisations needed for transform this amplitde into
+deals with all the normalisations needed for transform this amplitude into
 the desired integral.
 
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
@@ -21,25 +21,35 @@ from QQuantLib.utils.utils import text_is_none
 
 def q_solve_integral(**kwargs):
     """
-    Function for solving an integral using quantum amplitude estimationtechniques.
+    Function for solving an integral using quantum amplitude \\
+    estimation techniques.
 
     Parameters
     ----------
-    Mandatory keys of the input kwargs will be:
 
-    array_function : numpy array
-        numpy array wiht the desired function for encoding into the Quantum Circuit.
-    encoding : int
-        Selecting the encode protocol
-    array_probability : numpy array
-        numpy array wiht the desired probability for encoding into the
-        Quantum Cirucit. It can be None (uniform distribution will be used)
-    ae_type : string
-        string with the desired AE algorithm:
-        MLAE, CQPEAE, IQPEAE, IQAE, RQAE
+    kwars : dictionary
+        Dictionary for configuring the integration to compute and the \\
+        AE technique used for getting the solution.
 
-    Other keys will be realted with circuit implementations of the encoding procedure
-    or/and AE algorithm configuration (see QQQuantLib.AE.ae_class)
+        array_function : numpy array
+            numpy array with the desired function for encoding into the \\
+            Quantum Circuit.
+        encoding : int
+            Selecting the encode protocol
+        array_probability : numpy array
+            numpy array with the desired probability for encoding into the \\
+            Quantum Circuit. It can be None (uniform distribution will be used)
+        ae_type : string
+            string with the desired AE algorithm: MLAE, CQPEAE, IQPEAE, \\
+            IQAE, RQAE
+
+    Note
+    ----
+    
+    Other kwargs input dictionary keys will be related with the encoding \\
+    of the integral into the quantum circuit \\
+    (see QQuantLib.DL.encoding_protocols) and for the configuration \\
+    of the AE algorithm used (see QQuantLib.AE.ae_class)
 
     Return
     ----------

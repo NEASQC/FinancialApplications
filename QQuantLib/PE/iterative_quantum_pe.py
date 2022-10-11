@@ -37,8 +37,9 @@ class IQPE:
     ----------
 
     kwars : dictionary
-        dictionary that allows the configuration of the ML-QPE algorithm:
-    Implemented keys:
+        dictionary that allows the configuration of the ML-QPE algorithm. \\
+        Implemented keys:
+
         initial_state : QLM Program
             QLM Program withe the initial Psi state over the
             Grover-like operator will be applied
@@ -368,17 +369,18 @@ class IQPE:
         ----------
 
         pdf : pandas DataFrame
-            contains extracted information from intermediate_measurements
+            contains extracted information from intermediate_measurements \\
             from a qlm result. Columns:
-        BitString : str.
-            String with the bits of the measurements done during
-            simulation of the circuit
-        BitInt : int.
-            Integer representation of the BitString
-        Phi : float.
-            Angle representation of the BitString between [0,1].
-        Probability : float.
-            Probability of the measurement of the classical bits.
+
+            BitString : str.
+              String with the bits of the measurements done during
+              simulation of the circuit
+            BitInt : int.
+              Integer representation of the BitString
+            Phi : float.
+              Angle representation of the BitString between [0,1].
+            Probability : float.
+              Probability of the measurement of the classical bits.
         """
         list_of_results = []
 

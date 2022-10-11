@@ -123,8 +123,8 @@ class Encoding:
     def oracle_encoding_0(self):
         r"""
         Method for creating the oracle. The probability density will be
-        loaded as a probability density using the dl.load_probability
-        function and the function array will be loaded with dl.load_array
+        loaded as a probability density using the DL.load_probability
+        function and the function array will be loaded with DL.load_array
         function. The SQUARE ROOT of the function array will be loaded!.
 
         Notes
@@ -132,12 +132,13 @@ class Encoding:
         The encoding procedure is summarised as:
 
         .. math::
-            |\Psi\rangle = \mathbf{U}_f\left(I\otimes \mathbf{U}_p \\
+            |\Psi\rangle = \mathbf{U}_f\left(I\otimes \mathbf{U}_p \
             \right)|0\rangle\otimes|0\rangle_{n}
 
-        Where :math:`\mathbf{U}_f` encodes function :math:`f(x)` as a \
-        function and :math:`\mathbf{U}_p` encodes probability density \
-        :math:`p(x)` as a probability density.
+        Where :math:`\mathbf{U}_f` will encode :math:`f(x)` as a function
+        (using DL.load_array function) and :math:`\mathbf{U}_p` will
+        encode probability density :math:`p(x)` as a probability density
+        (using DL.load_probability)
 
         After this protocol the quantum state is in the form:
 
@@ -175,7 +176,7 @@ class Encoding:
     def oracle_encoding_1(self):
         r"""
         Method for creating the oracle. The probability density and the
-        payoff functions will be loaded with the dl.load_array function.
+        payoff functions will be loaded with the DL.load_array function.
         In this method a uniform distribution is used for creating the
         initial superposition of basis states.
 
@@ -190,9 +191,10 @@ class Encoding:
             \otimes H^{\otimes n}\big) \
             \big(|0\rangle \otimes |0\rangle \otimes|0\rangle_{n}\big)
 
-        Where :math:`\mathbf{U}_f` encodes function :math:`f(x)` and \
-        :math:`\mathbf{U}_p` encodes \
-        probability density :math:`p(x)`. Both will be encoded as functions.
+        Where :math:`\mathbf{U}_f` encodes function :math:`f(x)` and
+        :math:`\mathbf{U}_p` encodes probability density :math:`p(x)`.
+        Both will be encoded as functions using the
+        DL.load_array function.
 
         After this protocol the quantum state is in the form:
 
@@ -245,8 +247,8 @@ class Encoding:
     def oracle_encoding_2(self):
         r"""
         Method for encoding where the probability density will be encoding
-        as probability density using dl.load_probability (or a uniform
-        distribution) and the function with the dl.load_array.
+        as probability density using DL.load_probability (or a uniform
+        distribution) and the function with the DL.load_array.
 
         Notes
         -----
@@ -258,8 +260,9 @@ class Encoding:
             \otimes|0\rangle_{n}
 
         Where :math:`\mathbf{U}_f` encodes function :math:`f(x)` as a \
-        function and :math:`\mathbf{U}_p` encodes probability density \
-        :math:`p(x)` as a probability density.
+        function (DL.load_array will be used) and :math:`\mathbf{U}_p`
+        encodes probability density :math:`p(x)` as a probability
+        density (DL.load_probability will be used)
 
         After this protocol the quantum state is in the form:
 

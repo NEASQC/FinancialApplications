@@ -38,8 +38,9 @@ class RQAE:
         estimation
 
     kwars : dictionary
-        dictionary that allows the configuration of the IQAE algorithm:
-    Implemented keys:
+        dictionary that allows the configuration of the IQAE algorithm: \\
+        Implemented keys:
+
         qpu : QLM solver
             solver for simulating the resulting circuits
         q : int
@@ -48,6 +49,9 @@ class RQAE:
             precision
         gamma : float
             accuracy
+        mcz_qlm : bool
+            for using or not QLM implementation of the multi controlled Z
+            gate
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):

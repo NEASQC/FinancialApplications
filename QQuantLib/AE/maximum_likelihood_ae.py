@@ -40,10 +40,10 @@ class MLAE:
     index : list of ints
         qubits which mark the register to do the amplitude
         estimation
-
     kwars : dictionary
-        dictionary that allows the configuration of the MLAE algorithm:
-    Implemented keys:
+        dictionary that allows the configuration of the MLAE algorithm: \\
+        Implemented keys:
+
         qpu : QLM solver
             solver for simulating the resulting circuits
         schedule : list of two lists
@@ -54,6 +54,9 @@ class MLAE:
             tolerance to avoid division by zero warnings
         ns : int
             number of grid points for brute scipy optimizer
+        mcz_qlm : bool
+            for using or not QLM implementation of the multi controlled Z
+            gate
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
@@ -227,8 +230,6 @@ class MLAE:
             number of times to apply the self.q_gate to the quantum circuit
         n_k : int
             number of shots
-        time_pdf : pandas DataFrame
-            DataFrame with different times of the simulation
 
         Returns
         ----------
