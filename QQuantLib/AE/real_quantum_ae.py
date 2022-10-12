@@ -18,7 +18,7 @@ import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.data_extracting import get_results
-from QQuantLib.utils.utils import bitfield_to_int, check_list_type, mask
+from QQuantLib.utils.utils import measure_state_probability, bitfield_to_int, check_list_type, mask
 
 
 class RQAE:
@@ -217,12 +217,20 @@ class RQAE:
         step_circuit_stats.update({"n_shots": shots})
         self.circuit_statistics.update({0: step_circuit_stats})
         self.schedule.update({0 : shots})
-        probability_sum = results["Probability"].iloc[
-            bitfield_to_int([0] + list(self.target))
-        ]
-        probability_diff = results["Probability"].iloc[
-            bitfield_to_int([1] + list(self.target))
-        ]
+
+        #probability_sum = results["Probability"].iloc[
+        #    bitfield_to_int([0] + list(self.target))
+        #]
+        probability_sum = measure_state_probability(
+            results, [0] + list(self.target)
+        )
+
+        #probability_diff = results["Probability"].iloc[
+        #    bitfield_to_int([1] + list(self.target))
+        #]
+        probability_diff = measure_state_probability(
+            results, [1] + list(self.target)
+        )
         epsilon_probability = RQAE.chebysev_bound(shots, gamma)
 
         amplitude_max = np.minimum(
@@ -264,6 +272,7 @@ class RQAE:
            upper bound for the amplitude to be estimated
 
         """
+        #print(shift)
         self.shifted_oracle = 2 * shift
 
         grover_oracle = grover(
@@ -283,9 +292,12 @@ class RQAE:
         step_circuit_stats.update({"n_shots": shots})
         self.circuit_statistics.update({k: step_circuit_stats})
         self.schedule.update({k : shots})
-        probability_sum = results["Probability"].iloc[
-            bitfield_to_int([0] + list(self.target))
-        ]
+        #probability_sum = results["Probability"].iloc[
+        #    bitfield_to_int([0] + list(self.target))
+        #]
+        probability_sum = measure_state_probability(
+            results, [0] + list(self.target)
+        )
 
         epsilon_probability = RQAE.chebysev_bound(shots, gamma)
         probability_max = min(probability_sum + epsilon_probability, 1)

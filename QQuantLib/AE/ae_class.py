@@ -12,6 +12,7 @@ from QQuantLib.AE.ae_classical_qpe import CQPEAE
 from QQuantLib.AE.ae_iterative_quantum_pe import IQPEAE
 from QQuantLib.AE.iterative_quantum_ae import IQAE
 from QQuantLib.AE.real_quantum_ae import RQAE
+from QQuantLib.AE.montecarlo_ae import MCAE
 from QQuantLib.utils.utils import text_is_none
 
 class AE:
@@ -146,6 +147,17 @@ class AE:
                 if val_par is not None:
                     self.solver_dict.update({par : val_par})
             self.solver_ae = RQAE(
+                self.oracle,
+                target=self.target,
+                index=self.index,
+                **self.solver_dict
+            )
+        elif self.ae_type == "MCAE":
+            for par in ["shots"]:
+                val_par = self.kwargs.get(par)
+                if val_par is not None:
+                    self.solver_dict.update({par : val_par})
+            self.solver_ae = MCAE(
                 self.oracle,
                 target=self.target,
                 index=self.index,

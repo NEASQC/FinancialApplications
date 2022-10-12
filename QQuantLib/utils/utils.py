@@ -484,5 +484,32 @@ def oracle_shots_calculation(m_k, n_k):
 
     oracle_shots = 0.0
     for step_k, step_n in zip(m_k, n_k):
-        oracle_shots = oracle_shots + (2 * step_k + 1) * step_n 
+        oracle_shots = oracle_shots + (2 * step_k + 1) * step_n
     return oracle_shots
+
+def measure_state_probability(input_result, target):
+    """
+    From an input result DataFrame gets the probability of target state
+
+    Parameters
+    ----------
+    input_result : Pandas DataFrame
+        DataFrame with measurement results like obtained in the
+        get_results function (from QQuantLib.utils.data_extracting)
+    target : list
+        python list with the state we want to extract
+
+    Returns
+    ----------
+    output_probability : float
+        Probability of the desired target state. If the state it is not
+        found then 0.0 is returned.
+    """
+    probability = input_result[
+        input_result['Int_lsb'] == bitfield_to_int(target)
+    ]['Probability']
+    if len(probability) == 0:
+        output_probability = 0.0
+    else:
+        output_probability = probability.values[0]
+    return output_probability

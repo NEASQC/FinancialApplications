@@ -21,8 +21,7 @@ import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.data_extracting import get_results
-from QQuantLib.utils.utils import bitfield_to_int, check_list_type, load_qn_gate
-
+from QQuantLib.utils.utils import measure_state_probability, check_list_type, load_qn_gate
 
 class MLAE:
     """
@@ -245,7 +244,8 @@ class MLAE:
         result, circuit, _, job = get_results(
             routine, linalg_qpu=self.linalg_qpu, shots=n_k, qubits=self.index
         )
-        h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)] * n_k)
+        h_k = int(measure_state_probability(result, self.target) * n_k)
+        #h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)] * n_k)
 
         return h_k, circuit
 

@@ -74,6 +74,7 @@ class CQPE:
             print("Not QPU was provide. Default QPU will be used")
             self.linalg_qpu = get_default_qpu()
         self.shots = kwargs.get("shots", 10)
+        self.complete = kwargs.get("complete", False)
 
         # Attributes not given as input
         self.q_prog = None
@@ -117,7 +118,8 @@ class CQPE:
         self.q_prog = self.apply_pe_wqft(self.q_prog, self.q_gate, self.q_aux)
         # Execute algorithm
         self.results, self.circuit = self.run_qprogram(
-            self.q_prog, self.q_aux, self.shots, self.linalg_qpu
+            self.q_prog, self.q_aux, self.shots, self.linalg_qpu,
+            self.complete
         )
         # Post-Process results
         start = time.time()
@@ -217,7 +219,7 @@ class CQPE:
         return q_prog
 
     @staticmethod
-    def run_qprogram(q_prog, q_aux, shots, linalg_qpu):
+    def run_qprogram(q_prog, q_aux, shots, linalg_qpu, complete=False):
         """
         Executes a complete simulation
 
@@ -230,6 +232,8 @@ class CQPE:
         shots : int
             number of shots for simulation
         linalg_qpu : QLM solver
+        complete : bool
+            For returning the complete state space in the results file
 
         Returns
         ----------
@@ -246,6 +250,7 @@ class CQPE:
             linalg_qpu=linalg_qpu,
             shots=shots,
             qubits=list(range(start, start + lenght, 1)),
+            complete=complete
         )
         del result["Amplitude"]
         result["Phi"] = result["Int"] / (2**lenght)

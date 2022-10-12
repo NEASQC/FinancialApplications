@@ -19,7 +19,7 @@ import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.data_extracting import get_results
-from QQuantLib.utils.utils import bitfield_to_int, check_list_type
+from QQuantLib.utils.utils import check_list_type, measure_state_probability
 
 
 class IQAE:
@@ -372,7 +372,8 @@ class IQAE:
             )
             start = time.time()
             # time_pdf["m_k"] = k
-            a_ = results["Probability"].iloc[bitfield_to_int(self.target)]
+            a_ = measure_state_probability(results, self.target)
+            #a_ = results["Probability"].iloc[bitfield_to_int(self.target)]
             #####################################################
             # Aggregate results from different iterations
             if j == 0:
