@@ -1,5 +1,5 @@
 """
-This module contains necesary functions and classes to implement
+This module contains necessary functions and classes to implement
 Real Quantum Amplitude Estimation based on the paper:
 
     Manzano, A., Musso, D., Leitao, A. et al.
@@ -18,13 +18,40 @@ import qat.lang.AQASM as qlm
 from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.data_extracting import get_results
-from QQuantLib.utils.utils import bitfield_to_int, check_list_type, mask
+from QQuantLib.utils.utils import measure_state_probability, bitfield_to_int, check_list_type, mask
 
 
 class RQAE:
     """
     Class for Real Quantum Amplitude Estimation (RQAE)
     algorithm
+
+    Parameters
+    ----------
+    oracle: QLM gate
+        QLM gate with the Oracle for implementing the
+        Grover operator
+    target : list of ints
+        python list with the target for the amplitude estimation
+    index : list of ints
+        qubits which mark the register to do the amplitude
+        estimation
+
+    kwars : dictionary
+        dictionary that allows the configuration of the IQAE algorithm: \\
+        Implemented keys:
+
+        qpu : QLM solver
+            solver for simulating the resulting circuits
+        q : int
+            amplification ratio
+        epsilon : int
+            precision
+        gamma : float
+            accuracy
+        mcz_qlm : bool
+            for using or not QLM implementation of the multi controlled Z
+            gate
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
@@ -32,28 +59,6 @@ class RQAE:
 
         Method for initializing the class
 
-        Parameters
-        ----------
-        oracle: QLM gate
-            QLM gate with the Oracle for implementing the
-            Grover operator
-        target : list of ints
-            python list with the target for the amplitude estimation
-        index : list of ints
-            qubits which mark the register to do the amplitude
-            estimation
-
-        kwars : dictionary
-            dictionary that allows the configuration of the IQAE algorithm:
-            Implemented keys:
-            qpu : QLM solver
-                solver for simulating the resulting circutis
-            q : int
-                amplification ratio
-            epsilon : int
-                precision
-            gamma : float
-                accuracy
         """
         ###########################################
         # Setting attributes
@@ -68,7 +73,7 @@ class RQAE:
             self.linalg_qpu = get_default_qpu()
         self.epsilon = kwargs.get("epsilon", 0.01)
         self.gamma = kwargs.get("gamma", 0.05)
-        # Amplification Ratio: q in the papper
+        # Amplification Ratio: q in the paper
         self.ratio = kwargs.get("q", 2)
         self.mcz_qlm = kwargs.get("mcz_qlm", True)
 
@@ -83,6 +88,10 @@ class RQAE:
         self.circuit_statistics = None
         self.time_pdf = None
         self.run_time = None
+        self.schedule = {}
+        self.oracle_calls = None
+        self.max_oracle_depth = None
+        self.schedule_pdf = None
 
     #####################################################################
     @property
@@ -196,8 +205,6 @@ class RQAE:
            lower bound for the amplitude to be estimated
         amplitude_max : float
            upper bound for the amplitude to be estimated
-        time_pdf : pandas DataFrame
-            DataFrame with time information of the proccess
 
         """
 
@@ -209,12 +216,21 @@ class RQAE:
         step_circuit_stats = circuit.statistics()
         step_circuit_stats.update({"n_shots": shots})
         self.circuit_statistics.update({0: step_circuit_stats})
-        probability_sum = results["Probability"].iloc[
-            bitfield_to_int([0] + list(self.target))
-        ]
-        probability_diff = results["Probability"].iloc[
-            bitfield_to_int([1] + list(self.target))
-        ]
+        self.schedule.update({0 : shots})
+
+        #probability_sum = results["Probability"].iloc[
+        #    bitfield_to_int([0] + list(self.target))
+        #]
+        probability_sum = measure_state_probability(
+            results, [0] + list(self.target)
+        )
+
+        #probability_diff = results["Probability"].iloc[
+        #    bitfield_to_int([1] + list(self.target))
+        #]
+        probability_diff = measure_state_probability(
+            results, [1] + list(self.target)
+        )
         epsilon_probability = RQAE.chebysev_bound(shots, gamma)
 
         amplitude_max = np.minimum(
@@ -229,8 +245,6 @@ class RQAE:
         )
         end = time.time()
         first_step_time = end - start
-        # time_pdf["m_k"] = 0
-        # time_pdf["rqae_overheating"] = first_step_time
 
         return [amplitude_min, amplitude_max]
 
@@ -256,10 +270,9 @@ class RQAE:
            lower bound for the amplitude to be estimated
         amplitude_max : float
            upper bound for the amplitude to be estimated
-        time_pdf : pandas DataFrame
-            DataFrame with time information of the proccess
 
         """
+        #print(shift)
         self.shifted_oracle = 2 * shift
 
         grover_oracle = grover(
@@ -278,9 +291,13 @@ class RQAE:
         step_circuit_stats = circuit.statistics()
         step_circuit_stats.update({"n_shots": shots})
         self.circuit_statistics.update({k: step_circuit_stats})
-        probability_sum = results["Probability"].iloc[
-            bitfield_to_int([0] + list(self.target))
-        ]
+        self.schedule.update({k : shots})
+        #probability_sum = results["Probability"].iloc[
+        #    bitfield_to_int([0] + list(self.target))
+        #]
+        probability_sum = measure_state_probability(
+            results, [0] + list(self.target)
+        )
 
         epsilon_probability = RQAE.chebysev_bound(shots, gamma)
         probability_max = min(probability_sum + epsilon_probability, 1)
@@ -291,8 +308,6 @@ class RQAE:
         amplitude_min = np.sin(angle_min) - shift
         end = time.time()
         first_step_time = end - start
-        # time_pdf["m_k"] = k
-        # time_pdf["rqae_overheating"] = first_step_time
 
         return [amplitude_min, amplitude_max]
 
@@ -301,8 +316,8 @@ class RQAE:
         ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05
     ):
         """
-        This function displays information of the propoerties of the method for a given
-        set of parameters
+        This function displays information of the properties of the
+        method for a given set of parameters
 
         Parameters
         ----------
@@ -313,8 +328,6 @@ class RQAE:
         gamma : float
             accuracy
 
-        Returns
-        ----------
         """
         theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
         k_max = int(
@@ -333,7 +346,7 @@ class RQAE:
             / (np.arcsin(2 * epsilon))
         ) / np.log(ratio)
         gamma_i = gamma / big_t
-        # This is shots for each iteration: Ni in the papper
+        # This is shots for each iteration: Ni in the paper
         n_i = int(
             np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
         )
@@ -348,8 +361,8 @@ class RQAE:
     @staticmethod
     def chebysev_bound(n_samples: int, gamma: float):
         """
-        Computes the length of the confidence interval for a given number of samples
-        n_samples and an accuracy gamma.
+        Computes the length of the confidence interval for a given number
+        of samples n_samples and an accuracy gamma.
 
         Parameters
         ----------
@@ -366,9 +379,9 @@ class RQAE:
 
     def rqae(self, ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05):
         """
-        This function implements the first step of the RQAE paper. The result
-        is an estimation of the desired amplitude with precision epsilon
-        and accuracy gamma.
+        This function implements the first step of the RQAE paper. The
+        result is an estimation of the desired amplitude with precision
+        epsilon and accuracy gamma.
 
         Parameters
         ----------
@@ -390,7 +403,7 @@ class RQAE:
         ######################################
 
         epsilon = 0.5 * epsilon
-        # Always need to clean the cirucit statistics property
+        # Always need to clean the circuit statistics property
         self.circuit_statistics = {}
         # time_list = []
         theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
@@ -410,12 +423,13 @@ class RQAE:
             / (np.arcsin(2 * epsilon))
         ) / np.log(ratio)
         gamma_i = gamma / big_t
-        # This is shots for each iteration: Ni in the papper
+        # This is shots for each iteration: Ni in the paper
         n_i = int(
             np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
         )
         epsilon_probability = np.sqrt(1 / (2 * n_i) * np.log(2 / gamma_i))
         shift = theoretical_epsilon / np.sin(np.pi / (2 * (ratio + 2)))
+        #print("First Step: {}".format(shift))
         #####################################
         # First step
         [amplitude_min, amplitude_max] = self.first_step(
@@ -428,14 +442,14 @@ class RQAE:
             k = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
             k = min(k, k_max)
             shift = -amplitude_min
+            shift = min(shift, 0.5)
+            #print("While Step: {}".format(shift))
             [amplitude_min, amplitude_max] = self.run_step(
                 shift=shift, shots=n_i, gamma=gamma_i, k=k
             )
             # time_list.append(time_pdf)
             epsilon_amplitude = (amplitude_max - amplitude_min) / 2
 
-        # self.time_pdf = pd.concat(time_list)
-        # self.time_pdf.reset_index(drop=True, inplace=True)
         return [2 * amplitude_min, 2 * amplitude_max]
 
     def run(self):
@@ -456,4 +470,14 @@ class RQAE:
         self.ae = (self.ae_u + self.ae_l) / 2.0
         end = time.time()
         self.run_time = end - start
+        self.schedule_pdf = pd.DataFrame.from_dict(
+            self.schedule,
+            columns=['shots'],
+            orient='index'
+        )
+        self.schedule_pdf.reset_index(inplace=True)
+        self.schedule_pdf.rename(columns={'index': 'm_k'}, inplace=True)
+        self.oracle_calls = np.sum(
+            self.schedule_pdf['shots'] * (2 * self.schedule_pdf['m_k'] + 1))
+        self.max_oracle_depth = np.max(2 *  self.schedule_pdf['m_k']+ 1)
         return self.ae

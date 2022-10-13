@@ -33,7 +33,7 @@ def phase_multiplexor_base(theta):
     _______
 
     routine : QLM routine
-        QLM routine wiht the implementation of the basis multiplexor
+        QLM routine with the implementation of the basis multiplexor
         for the controlled phase gate
 
     """
@@ -52,20 +52,20 @@ def phase_multiplexor_base(theta):
 def recursive_multiplexor(input_gate):
     """
     Create a new multiplexor from an input gate.
-    In this case takes the input gate adds a new qbit and creates a new
-    multiplexor by applying the input gate, a cnot and the input gate again
+    In this case takes the input gate adds a new qubit and creates a new
+    multiplexor by applying the input gate, a c-NOT and the input gate again
 
     Parameters
     ----------
 
     input_gate : QLM routine
-        QLM routine with the gate we want for multiplexion
+        QLM routine with the gate we want for multiplexor
 
     Returns
     _______
 
     routine : QLM routine
-        QLM routine with a multiplexion of the input_gate
+        QLM routine with a multiplexor of the input_gate
 
     """
     routine = qlm.QRoutine()
@@ -92,13 +92,13 @@ def multiplexor_controlled_ph(angle, number_qubits):
     angle : float
         Desired angle for Controlled-Phase application
     number_qubits : int
-        Number of qbits for the multi-controlled phase gate
+        Number of qubits for the multi-controlled phase gate
 
     Returns
     _______
 
     routine : QLM routine
-        QLM routine wiht the implementation of a multi-controlled phase gate
+        QLM routine with the implementation of a multi-controlled phase gate
 
     """
     routine = qlm.QRoutine()
@@ -108,16 +108,16 @@ def multiplexor_controlled_ph(angle, number_qubits):
     for i, _ in enumerate(register):
         # print('i:', i)
         if i == 0:
-            # In the first qbit we need a Phase rotation
+            # In the first qubit we need a Phase rotation
             routine.apply(qlm.PH(angle), register[i])
         elif i == 1:
-            # In the second qbit we need the base gate for the multiplexor
+            # In the second qubit we need the base gate for the multiplexor
             routine.apply(qlm.CNOT, register[i - 1], register[i])
             multiplexor = phase_multiplexor_base(angle)
             # print(register[:i])
             routine.apply(multiplexor, register[: i + 1])
         else:
-            # For other qbits we need to create the new multiplexor
+            # For other qubits we need to create the new multiplexor
             # from the before step multiplexor
             routine.apply(qlm.CNOT, register[i - 1], register[i])
             multiplexor = recursive_multiplexor(multiplexor)
@@ -135,13 +135,13 @@ def multiplexor_controlled_z(number_qubits):
 
 
     number_qubits : int
-        Number of qbits for the multi-controlled phase gate gate
+        Number of qubits for the multi-controlled phase gate gate
 
     Returns
     _______
 
     routine : QLM routine
-        QLM routine wiht the implementation of a multi-controlled Z gate
+        QLM routine with the implementation of a multi-controlled Z gate
     """
     routine = qlm.QRoutine()
     register = routine.new_wires(number_qubits)
@@ -158,7 +158,9 @@ def reflection(lista: np.ndarray, mcz_qlm=True):
     Notes
     -----
     .. math::
-        |\Psi\rangle=|\Psi_0\rangle+|\Psi_1\rangle\\
+        |\Psi\rangle=|\Psi_0\rangle+|\Psi_1\rangle
+
+    .. math::
         \mathcal{reflection}(|\Psi_0\rangle)|\Psi\rangle=
         -|\Psi_0\rangle+|\Psi_1\rangle\\
 
@@ -207,10 +209,11 @@ def create_u0_gate(
     Notes
     -----
     .. math::
-        If \hspace{1em} |\Psi\rangle=\alpha_0|\Psi_0\rangle+\alpha_1|\Psi_1\rangle
-        \hspace{1em} where \hspace{1em} |\Psi_0\rangle \perp |\Psi_1\rangle
-        \hspace{1em} then \hspace{1em}
-        \mathcal{U0}(|\Psi_0\rangle)=\mathcal{I}-2|\Psi_0\rangle\langle\Psi_0|
+        If \hspace{1em} |\Psi\rangle=\alpha_0|\Psi_0\rangle+ \
+        \alpha_1|\Psi_1\rangle \hspace{1em} where \hspace{1em} \
+        |\Psi_0\rangle \perp |\Psi_1\rangle \hspace{1em} then \
+        \hspace{1em} \mathcal{U0}(|\Psi_0\rangle)=\mathcal{I}-2 \
+        |\Psi_0\rangle\langle\Psi_0|
 
     Parameters
     ----------
@@ -241,8 +244,8 @@ def create_u0_gate(
 
 def create_u_gate(oracle: qlm.QRoutine, mcz_qlm=True):
     r"""
-    This function creates a QLM AbstractGate that implements a grover Diffusor
-    from an input state.
+    This function creates a QLM AbstractGate that implements a grover
+    diffusion operator from an input state.
 
     Notes
     -----

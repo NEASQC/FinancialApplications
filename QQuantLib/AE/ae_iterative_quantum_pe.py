@@ -1,5 +1,5 @@
 """
-This module contains necesary functions and classes to implement amplitude
+This module contains necessary functions and classes to implement amplitude
 estimation algorithm using Iterative Quantum Phase Estimation (IQPE).
 The implementation is based on following paper:
 
@@ -29,6 +29,28 @@ class IQPEAE:
     Class for using Iterative Quantum Phase Estimation (IQPE) class for
     doing Amplitude Estimation (AE)
 
+    Parameters
+    ----------
+    oracle: QLM gate
+        QLM gate with the Oracle for implementing the
+        Grover operator
+    target : list of ints
+        python list with the target for the amplitude estimation
+    index : list of ints
+        qubits which mark the register to do the amplitude
+        estimation
+
+    kwars : dictionary
+        dictionary that allows the configuration of the IQPEAE algorithm: \\
+        Implemented keys:
+
+        qpu : QLM solver
+            solver for simulating the resulting circutis
+        shots : int
+            number of measurements
+        mcz_qlm : bool
+            for using or not QLM implementation of the multi controlled Z
+            gate
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
@@ -36,22 +58,6 @@ class IQPEAE:
 
         Method for initializing the class
 
-        Parameters
-        ----------
-        oracle: QLM gate
-            QLM gate with the Oracle for implementing the
-            Grover operator
-        target : list of ints
-            python list with the target for the amplitude estimation
-        index : list of ints
-            qubits which mark the register to do the amplitude
-            estimation
-
-        kwars : dictionary
-            dictionary that allows the configuration of the IQAE algorithm:
-            Implemented keys:
-        qpu : QLM solver
-            solver for simulating the resulting circutis
         """
         # Setting attributes
         self._oracle = deepcopy(oracle)
@@ -80,6 +86,9 @@ class IQPEAE:
         self.final_results = None
         self.circuit_statistics = None
         self.run_time = None
+        self.oracle_calls = None
+        self.max_oracle_depth = None
+        self.schedule_pdf = None
 
     #####################################################################
     @property
@@ -151,10 +160,14 @@ class IQPEAE:
         Notes
         -----
         .. math::
-            a  = \cos^2(\theta)
-            \; where \; \theta \; is \;
+            a = \cos^2(\theta)
+
+        Where :math:`\theta`  is:
+
+        .. math::
             \mathcal{Q}|\Psi\rangle = e^{2i\theta}|\Psi\rangle
-            \; and \; \mathcal{Q} \; the \; Grover \; Operator
+
+        And :math:`\mathcal{Q}` the Grover Operator
         """
 
         start = time.time()
@@ -179,4 +192,10 @@ class IQPEAE:
         self.ae = np.cos(self.theta) ** 2
         end = time.time()
         self.run_time = end - start
+        #Total number of oracle calls
+        self.oracle_calls = self.shots * np.sum(
+            [2 * (2 ** i ) + 1 for i in range(self.cbits_number)]
+        )
+        #Maximum number of oracle applications
+        self.max_oracle_depth = 2 ** (int(self.cbits_number)-1) + 1
         return self.ae

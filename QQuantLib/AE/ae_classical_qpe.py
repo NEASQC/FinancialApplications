@@ -1,5 +1,5 @@
 """
-This module contains a wraper class of the PE_QFT class from
+This module contains a wrapper class of the PE_QFT class from
 QQuantLib/PE/phase_estimation_wqft module for adapting classical
 phase estimation algorithm to solve amplitude estimation problems.
 Following references were used:
@@ -30,6 +30,29 @@ class CQPEAE:
     """
     Class for doing Amplitude Estimation (AE) using classical Quantum
     Amplitude Estimation (with QFT) algorithm
+
+    Parameters
+    ----------
+    oracle: QLM gate
+        QLM gate with the Oracle for implementing the
+        Grover operator
+    target : list of ints
+        python list with the target for the amplitude estimation
+    index : list of ints
+        qubits which mark the register to do the amplitude
+        estimation
+
+    kwars : dictionary
+        dictionary that allows the configuration of the CQPEAE algorithm: \\
+        Implemented keys:
+
+        qpu : QLM solver
+            solver for simulating the resulting circuits
+        shots : int
+            number of measurements
+        mcz_qlm : bool
+            for using or not QLM implementation of the multi controlled Z
+            gate
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):
@@ -37,22 +60,6 @@ class CQPEAE:
 
         Method for initializing the class
 
-        Parameters
-        ----------
-        oracle: QLM gate
-            QLM gate with the Oracle for implementing the
-            Grover operator
-        target : list of ints
-            python list with the target for the amplitude estimation
-        index : list of ints
-            qubits which mark the register to do the amplitude
-            estimation
-
-        kwars : dictionary
-            dictionary that allows the configuration of the IQAE algorithm:
-            Implemented keys:
-        qpu : QLM solver
-            solver for simulating the resulting circutis
         """
         # Setting attributes
         self._oracle = deepcopy(oracle)
@@ -82,6 +89,9 @@ class CQPEAE:
         self.final_results = None
         self.circuit_statistics = None
         self.run_time = None
+        self.oracle_calls = None
+        self.max_oracle_depth = None
+        self.schedule_pdf = None
 
     #####################################################################
     @property
@@ -154,9 +164,13 @@ class CQPEAE:
         -----
         .. math::
             a = \cos^2(\theta)
-            \; where \; \theta \; is \;
+
+        Where :math:`\theta`  is:
+
+        .. math::
             \mathcal{Q}|\Psi\rangle = e^{2i\theta}|\Psi\rangle
-            \; and \; \mathcal{Q} \; the \; Grover \; Operator
+
+        And :math:`\mathcal{Q}` the Grover Operator
 
 
         """
@@ -186,4 +200,10 @@ class CQPEAE:
         self.ae = np.cos(self.theta) ** 2
         end = time.time()
         self.run_time = end - start
+        #Total number of oracle calls
+        self.oracle_calls = self.shots * np.sum(
+            [2 * (2 ** i ) + 1 for i in range(self.auxiliar_qbits_number)]
+        )
+        #Maximum number of oracle applications
+        self.max_oracle_depth = 2 ** (int(self.auxiliar_qbits_number)-1) + 1
         return self.ae

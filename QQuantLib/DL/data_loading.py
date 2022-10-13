@@ -51,16 +51,18 @@ def uniform_distribution(number_qubits: int):
 def load_angle(number_qubits: int, index: int, angle: float):
     r"""
     Creates an QLM Abstract Gate that apply a rotation of a given angle
-    into a auxiliar qbit controlled by a given state of the measurement basis.
-    Direct QLM multicontrolled rotations were used for the implementation.
+    into a auxiliary qubit controlled by a given state of the measurement basis.
+    Direct QLM multi controlled rotations were used for the implementation.
 
     Notes
     -----
     .. math::
-        |\Psi\rangle = \sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle \\
-        \mathcal{load\_angle}(\theta, |i\rangle)|\Psi\rangle=\sum_{j=0, j\ne i}
-        ^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle+\alpha_i|i\rangle\otimes
-        \big(\cos(\theta)|0\rangle+\sin(\theta)|1\rangle\big)
+        |\Psi\rangle = \sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle
+    .. math::
+        \mathcal{load\_angle}(\theta, |i\rangle)|\Psi\rangle \
+        =\sum_{j=0, j\ne i}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle+ \
+        \alpha_i|i\rangle\otimes\big(\cos(\theta)|0\rangle+\sin(\theta) \
+        |1\rangle\big)
 
 
     Parameters
@@ -90,17 +92,19 @@ def load_angle(number_qubits: int, index: int, angle: float):
 def load_angles_brute_force(angles: np.array):
     r"""
     Given a list of angles this function creates a QLM routine that applies
-    rotations of each angle of the list, over an auxiliar qbit, controlled
+    rotations of each angle of the list, over an auxiliary qubit, controlled
     by the different states of the measurement basis.
-    Direct QLM multicontrolled rotations were used for the implementation.
+    Direct QLM multi controlled rotations were used for the implementation.
 
     Notes
     -----
     .. math::
-        |\Psi\rangle = \sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle \\
-        \mathcal{load\_angles\_brute\_force}([\theta_j]_{j=0,1,2...2^n-1})
-        |\Psi\rangle=\sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes
-        \big(\cos(\theta_j)|0\rangle+\sin(\theta_j)|1\rangle\big)
+        |\Psi\rangle = \sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle
+    .. math::
+        \mathcal{load\_angles\_brute\_force} \
+        ([\theta_j]_{j=0,1,2...2^n-1}) |\Psi\rangle=\sum_{j=0}^{2^n-1} \
+        \alpha_j|j\rangle\otimes\big(\cos(\theta_j)|0\rangle+ \
+        \sin(\theta_j)|1\rangle\big)
 
 
     Parameters
@@ -120,17 +124,18 @@ def load_angles_brute_force(angles: np.array):
 def multiplexor_ry(angles: np.array, ordering: str = "sequency"):
     r"""
     Given a list of angles this functions creates a QLM routine that applies
-    rotations of each angle of the list, over an auxiliar qbit, controlled
+    rotations of each angle of the list, over an auxiliary qubit, controlled
     by the different states of the measurement basis.
     The multi-controlled rotations were implemented using Quantum Multiplexors.
 
     Notes
     -----
     .. math::
-        |\Psi\rangle = \sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle \\
-        \mathcal{multiplexor\_RY}([\theta_j]_{j=0,1,2...2^n-1})|\Psi\rangle
-        =\sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes
-        \big(\cos(\theta_j)|0\rangle+\sin(\theta_j)|1\rangle\big)
+        |\Psi\rangle = \sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle
+    .. math::
+        \mathcal{multiplexor\_RY} \
+        ([\theta_j]_{j=0,1,2...2^n-1})|\Psi\rangle = \sum_{j=0}^{2^n-1} \
+        \alpha_j|j\rangle\otimes\big(\cos(\theta_j)|0\rangle+\sin(\theta_j)|1\rangle\big)
 
     Parameters
     ----------
@@ -158,14 +163,16 @@ def multiplexor_ry(angles: np.array, ordering: str = "sequency"):
 def load_angles(angles: np.array, method: str = "multiplexor"):
     r"""
     This function serves as an interface for the two different implementations
-    of multicontrolled rotations: load_angles_brute_force and multiplexor_RY.
+    of multi controlled rotations: load_angles_brute_force and multiplexor_RY.
 
     Notes
     -----
     .. math::
-        |\Psi\rangle = \sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle \\
-        \mathcal{load\_angles}([\theta_j]_{j=0,1,2...2^n-1})|\Psi\rangle
-        =\sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes
+        |\Psi\rangle = \sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes|0\rangle
+
+    .. math::
+        \mathcal{load\_angles}([\theta_j]_{j=0,1,2...2^n-1})|\Psi\rangle \
+        =\sum_{j=0}^{2^n-1}\alpha_j|j\rangle\otimes \
         \big(\cos(\theta_j)|0\rangle+\sin(\theta_j)|1\rangle\big)
 
     Parameters

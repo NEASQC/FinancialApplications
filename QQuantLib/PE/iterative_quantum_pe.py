@@ -1,5 +1,5 @@
 """
-This module contains necesary functions and classes to implement
+This module contains necessary functions and classes to implement
 Iterative Quantum Phase Estimation (IQPE). The implementation is based on
 following paper:
 
@@ -32,6 +32,32 @@ from QQuantLib.utils.utils import load_qn_gate
 class IQPE:
     """
     Class for using Iterative Quantum Phase Estimation (IQPE) algorithm
+
+    Parameters
+    ----------
+
+    kwars : dictionary
+        dictionary that allows the configuration of the ML-QPE algorithm. \\
+        Implemented keys:
+
+        initial_state : QLM Program
+            QLM Program withe the initial Psi state over the
+            Grover-like operator will be applied
+            Only used if oracle is None
+        unitary_operator : QLM gate or routine
+            Grover-like operator whose autovalues want to be calculated
+            Only used if oracle is None
+        cbits_number : int
+            number of classical bits for phase estimation
+        qpu : QLM solver
+            solver for simulating the resulting circuits
+        shots : int
+            number of shots for quantum job. If 0 exact probabilities
+            will be computed.
+        easy : bool
+            If True step_iqpe_easy will be used for each step of the
+            algorithm
+            If False step_iqpe will be used for each step.
     """
 
     def __init__(self, **kwargs):
@@ -39,30 +65,6 @@ class IQPE:
 
         Method for initializing the class
 
-        Parameters
-        ----------
-
-        kwars : dictionary
-            dictionary that allows the configuration of the ML-QPE algorithm:
-            Implemented keys:
-            initial_state : QLM Program
-                QLM Program withe the initial Psi state over the
-                Grover-like operator will be applied
-                Only used if oracle is None
-            unitary_operator : QLM gate or routine
-                Grover-like operator which autovalues want to be calculated
-                Only used if oracle is None
-            cbits_number : int
-                number of classical bits for phase estimation
-            qpu : QLM solver
-                solver for simulating the resulting circutis
-            shots : int
-                number of shots for quantum job. If 0 exact probabilities
-                will be computed.
-            easy : bool
-                If True step_iqpe_easy will be used for each step of the
-                algorithm
-                If False step_iqpe will be used for each step.
         """
 
         # Setting attributes
@@ -98,7 +100,7 @@ class IQPE:
 
     def restart(self):
         """
-        Reinitialize several properties for restart purpouses
+        Reinitialize several properties for restart purposes
         """
         self.q_prog = None
         self.q_aux = None
@@ -165,9 +167,9 @@ class IQPE:
         Parameters
         ----------
 
-        number_of_cbits : int (overwrite correspondient property)
+        number_of_cbits : int (overwrite correspondent property)
             Number of classical bits for storing the phase estimation
-        shots : int (overwrite correspondient property)
+        shots : int (overwrite correspondent property)
             Number of shots for executing the QLM job
         """
 
@@ -192,11 +194,6 @@ class IQPE:
         self.final_results = IQPE.post_proccess(self.classical_bits)
         end = time.time()
         time_post_proccess = end - start
-        # qpu_type = self.time_pdf["qpu_type"]
-        # self.time_pdf.drop("qpu_type", axis=1, inplace=True)
-        # self.time_pdf["time_post_proccess"] = time_post_proccess
-        # self.time_pdf["time_total"] = self.time_pdf.sum(axis=1)
-        # self.time_pdf["qpu_type"] = qpu_type
 
     # @staticmethod
     # def step_iqpe_zalo(q_prog, q_gate, q_aux, c_bits, l):
@@ -264,10 +261,10 @@ class IQPE:
             QLM implementation of the unitary operator. We want estimate
             the autovalue theta of this operator
         q_aux : QLM qbit
-            auxiliar qbit for IPE. This qbit will be the control
-            for application of the unitary operator to the principal qbits
-            of the program. Aditionally will be the target qbit for the
-            classical bit controlled rotation. This qbit will be reset at
+            auxiliary qubit for IPE. This qbit will be the control
+            for application of the unitary operator to the principal bits
+            of the program. Additionally will be the target qubit for the
+            classical bit controlled rotation. This qubit will be reset at
             the end of the step.
         c_bits : list
             list with the classical bits allocated for phase estimation
@@ -278,15 +275,15 @@ class IQPE:
 
         # print('VERSION EASY!!')
         q_prog.reset(q_aux)
-        # Getting the principal qbits
+        # Getting the principal bits
         q_bits = q_prog.registers[0]
-        # First apply a Haddamard Gate to auxiliar qbit
+        # First apply a Haddamard Gate to auxiliary qubit
         q_prog.apply(qlm.H, q_aux)
         # number of bits for codify phase
         number_cbits = len(c_bits)
 
-        # Number of controlled application of the unitary operator by auxiliar
-        # qbit over the principal qbits
+        # Number of controlled application of the unitary operator by auxiliary
+        # qubit over the principal bits
         unitary_applications = int(2 ** (number_cbits - l - 1))
         step_q_gate = load_qn_gate(q_gate, unitary_applications)
         q_prog.apply(step_q_gate.ctrl(), q_aux, q_bits)
@@ -312,7 +309,7 @@ class IQPE:
 
         q_prog : QLM Program
         q_aux : QLM qbit
-            auxiliar qbit for measuring during all ipe steps
+            auxiliary qubit for measuring during all ipe steps
         shots : int
             number of shots for simulation
         linalg_qpu : QLM solver
@@ -361,24 +358,29 @@ class IQPE:
     @staticmethod
     def measure_classical_bits(result):
         """
-        Post Proccess intermediate measurements from a qlm result.
+        Post-process intermediate measurements from a QLM result.
 
         Parameters
         ----------
 
-        result : list list with qlm results
+        result : list list with QLM results
 
         Returns
         ----------
 
         pdf : pandas DataFrame
-        contains extracted information from intermediate_measurements
-        from a qlm result. Columns:
-        BitString : str. String with the bits of the measurements done
-        during simulation of the circuit
-        BitInt : int. Integer representation of the BitString
-        Phi : float. Angle representation of the BitString between [0,1].
-        Probability : float. Probability of the measurement of the classsical bits.
+            contains extracted information from intermediate_measurements \\
+            from a qlm result. Columns:
+
+            BitString : str.
+              String with the bits of the measurements done during
+              simulation of the circuit
+            BitInt : int.
+              Integer representation of the BitString
+            Phi : float.
+              Angle representation of the BitString between [0,1].
+            Probability : float.
+              Probability of the measurement of the classical bits.
         """
         list_of_results = []
 
@@ -414,6 +416,17 @@ class IQPE:
         """
         This function uses the results property and add it additional
         columns that are useful for Amplitude Amplification procedure
+
+        Parameters
+        ----------
+
+        input_pdf : Pandas DataFrame.
+
+        Returns
+        ----------
+
+        final_results : Pandas DataFrame
+            DataFrame with complete information about the results
         """
         final_results = input_pdf.copy(deep=True)
         # Eigenvalue of the Grover-like operator
@@ -427,7 +440,7 @@ class IQPE:
             np.pi - final_results["theta_90"],
             inplace=True,
         )
-        # sorting dataframe by frequency
+        # sorting DataFrame by frequency
         final_results.sort_values("Frequency", ascending=False, inplace=True)
         # Expected value of the function f(x) when x follows a p(x)
         # distribution probability
@@ -436,6 +449,23 @@ class IQPE:
 
     @staticmethod
     def sumarize(input_pdf, columns=None):
+        """
+        This method summarize the results.
+
+        Parameters
+        ----------
+
+        input_pdf : Pandas DataFrame.
+        columns: list
+            list with the names of the input DataFrame for summarize
+
+        Returns
+        ----------
+
+        final_results : Pandas DataFrame
+            DataFrame with summary results
+
+        """
         pdf = input_pdf.copy(deep=True)
         if columns is None:
             pds = pdf.value_counts()

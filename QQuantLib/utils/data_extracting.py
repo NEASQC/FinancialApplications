@@ -1,6 +1,6 @@
 """
-This module contains auxiliar functions for executing QLM programs based
-on QLM QRoutines or QLM gates and for postproccessing results from QLM
+This module contains auxiliary functions for executing QLM programs based
+on QLM Routines or QLM gates and for post processing results from QLM
 qpu executions
 
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
@@ -18,9 +18,15 @@ pd.options.display.float_format = "{:.6f}".format
 np.set_printoptions(suppress=True)
 
 
-def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None):
+def get_results(
+    quantum_object,
+    linalg_qpu,
+    shots: int = 0,
+    qubits: list = None,
+    complete: bool = False
+):
     """
-    Function for testing an input gate. This fucntion creates the
+    Function for testing an input gate. This function creates the
     quantum program for an input gate, the correspondent circuit
     and job. Execute the job and gets the results
 
@@ -32,8 +38,11 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
         number of shots for the generated job.
         if 0 True probabilities will be computed
     qubits : list
-        list with the qbits for doing the measurement when simulating
-        if None measuremnt over all allocated qbits will be provided
+        list with the qubits for doing the measurement when simulating
+        if None measurement over all allocated qubits will be provided
+    complete : bool
+        for return the complete basis state. Useful when shots is not 0
+        and all the posible basis states are necessary.
 
     Returns
     ----------
@@ -42,9 +51,6 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
     circuit : QLM circuit
     q_prog : QLM Program.
     job : QLM job
-    pdf_time : pandas DataFrame
-        DataFrame with different times of the simulation proccess
-
     """
     # if type(quantum_object) == qlm.Program:
     if isinstance(quantum_object, qlm.Program):
@@ -52,9 +58,6 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
         arity = q_prog.qbit_count
     else:
         q_prog = create_qprogram(quantum_object)
-        # q_prog = qlm.Program()
-        # qbits = q_prog.qalloc(arity)
-        # q_prog.apply(quantum_object, qbits)
         arity = quantum_object.arity
 
     if qubits is None:
@@ -85,7 +88,7 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
     time_q_run = end - start
     # Process the results
     start = time.time()
-    pdf = proccess_qresults(result, qubits)
+    pdf = proccess_qresults(result, qubits, complete=complete)
     end = time.time()
     time_post_proccess = end - start
 
@@ -98,29 +101,6 @@ def get_results(quantum_object, linalg_qpu, shots: int = 0, qubits: list = None)
     pdf_time = pd.DataFrame([time_dict])
     pdf_time["time_total"] = pdf_time.sum(axis=1)
     pdf_time["qpu_type"] = qpu_type
-
-    # states = []
-    # list_int = []
-    # list_int_lsb = []
-    # for i in range(2**qubits.size):
-    #    reversed_i = int('{:0{width}b}'.format(i, width=qubits.size)[::-1], 2)
-    #    list_int.append(reversed_i)
-    #    list_int_lsb.append(i)
-    #    states.append("|"+ bin(i)[2:].zfill(qubits.size)+">")
-
-    # probability = np.zeros(2**qubits.size)
-    # amplitude = np.zeros(2**qubits.size, dtype=np.complex_)
-    # for samples in result:
-    #    probability[samples.state.lsb_int] = samples.probability
-    #    amplitude[samples.state.lsb_int] = samples.amplitude
-
-    # pdf = pd.DataFrame({
-    #    'States': states,
-    #    'Int_lsb': list_int_lsb,
-    #    'Probability': probability,
-    #    'Amplitude': amplitude,
-    #    'Int': list_int
-    # })
 
     return pdf, circuit, q_prog, job
 
@@ -148,6 +128,16 @@ def create_qprogram(quantum_gate):
 def create_qcircuit(prog_q):
     """
     Given a QLM program creates a QLM circuit
+
+    Parameters
+    ----------
+
+    prog_q : QLM QProgram
+
+    Returns
+    ----------
+
+    circuit : QLM circuit
     """
     q_prog = deepcopy(prog_q)
     circuit = q_prog.to_circ(submatrices_only=True)
@@ -157,6 +147,21 @@ def create_qcircuit(prog_q):
 def create_qjob(circuit, shots=0, qubits=None):
     """
     Given a QLM circuit creates a QLM job
+
+    Parameters
+    ----------
+
+    circuit : QLM circuit
+    shots : int
+        number of measurmentes
+    qubits : list
+        with the qubits to be measured
+
+    Returns
+    ----------
+
+    job : QLM job
+        job for submit to QLM QPU
     """
     dict_job = {"amp_threshold": 0.0}
     if qubits is None:
@@ -169,34 +174,58 @@ def create_qjob(circuit, shots=0, qubits=None):
     return job
 
 
-def proccess_qresults(result, qubits):
+def proccess_qresults(result, qubits, complete=False):
     """
-    PostProcces a QLM results for creating a pandas DataFrame
+    Post Process a QLM results for creating a pandas DataFrame
+
+    Parameters
+    ----------
+
+    result : QLM results from a QLM qpu.
+        returned object from a qpu submit
+    qubits : int
+        number of qubits
+    complete : bool
+        for return the complete basis state.
     """
 
     # Process the results
-    states = []
-    list_int = []
-    list_int_lsb = []
-    for i in range(2**qubits.size):
-        reversed_i = int("{:0{width}b}".format(i, width=qubits.size)[::-1], 2)
-        list_int.append(reversed_i)
-        list_int_lsb.append(i)
-        states.append("|" + bin(i)[2:].zfill(qubits.size) + ">")
+    if complete:
+        states = []
+        list_int = []
+        list_int_lsb = []
+        for i in range(2**qubits.size):
+            reversed_i = int("{:0{width}b}".format(i, width=qubits.size)[::-1], 2)
+            list_int.append(reversed_i)
+            list_int_lsb.append(i)
+            states.append("|" + bin(i)[2:].zfill(qubits.size) + ">")
 
-    probability = np.zeros(2**qubits.size)
-    amplitude = np.zeros(2**qubits.size, dtype=np.complex_)
-    for samples in result:
-        probability[samples.state.lsb_int] = samples.probability
-        amplitude[samples.state.lsb_int] = samples.amplitude
+        probability = np.zeros(2**qubits.size)
+        amplitude = np.zeros(2**qubits.size, dtype=np.complex_)
+        for samples in result:
+            probability[samples.state.lsb_int] = samples.probability
+            amplitude[samples.state.lsb_int] = samples.amplitude
 
-    pdf = pd.DataFrame(
-        {
-            "States": states,
-            "Int_lsb": list_int_lsb,
-            "Probability": probability,
-            "Amplitude": amplitude,
-            "Int": list_int,
-        }
-    )
+        pdf = pd.DataFrame(
+            {
+                "States": states,
+                "Int_lsb": list_int_lsb,
+                "Probability": probability,
+                "Amplitude": amplitude,
+                "Int": list_int,
+            }
+        )
+    else:
+        list_for_results = []
+        for sample in result:
+            list_for_results.append([
+                sample.state, sample.state.lsb_int, sample.probability,
+                sample.amplitude, sample.state.int,
+            ])
+
+        pdf = pd.DataFrame(
+            list_for_results,
+            columns=['States', "Int_lsb", "Probability", "Amplitude", "Int"]
+        )
+        pdf.sort_values(["Int_lsb"], inplace=True)
     return pdf
