@@ -9,6 +9,7 @@ from finance_benchmark import PriceEstimation
 from QQuantLib.utils.qlm_solver import get_qpu
 
 
+
 def combination_for_dictionary(input_dict):
     """
     Creates a list of dictionaries with all the posible combination of
