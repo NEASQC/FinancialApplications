@@ -72,7 +72,7 @@ class IQAE:
             self.linalg_qpu = get_default_qpu()
         self.epsilon = kwargs.get("epsilon", 0.01)
         self.alpha = kwargs.get("alpha", 0.05)
-        self.shots = kwargs.get("shots", 100)
+        self.shots = int(kwargs.get("shots", 100))
         self.mcz_qlm = kwargs.get("mcz_qlm", True)
 
         # Creating the grover operator

@@ -156,7 +156,7 @@ def ae_price_estimation(**kwargs):
         #Saving pdf
         if ae_problem["save"]:
             with open(ae_problem["file_name"], "a") as f_pointer:
-                pdf.to_csv(f_pointer, mode="a", header=f_pointer.tell() == 0)
+                pdf.to_csv(f_pointer, mode="a", header=f_pointer.tell() == 0, sep = ";")
         lista.append(pdf)
     complete_pdf = pd.concat(lista)
     return complete_pdf

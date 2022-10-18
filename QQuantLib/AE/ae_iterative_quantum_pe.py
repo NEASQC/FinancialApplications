@@ -70,7 +70,7 @@ class IQPEAE:
             print("Not QPU was provide. Default QPU will be used")
             self.linalg_qpu = get_default_qpu()
         self.cbits_number = kwargs.get("cbits_number", 8)
-        self.shots = kwargs.get("shots", 100)
+        self.shots = int(kwargs.get("shots", 100))
         self.mcz_qlm = kwargs.get("mcz_qlm", True)
         # First thing is create the grover operator from the oracle
         self._grover_oracle = grover(

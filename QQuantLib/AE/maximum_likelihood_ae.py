@@ -22,6 +22,7 @@ from qat.qpus import get_default_qpu
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.utils.utils import measure_state_probability, check_list_type, load_qn_gate
+from QQuantLib.AE.mlae_utils import likelihood, log_likelihood, cost_function
 
 class MLAE:
     """
@@ -285,10 +286,11 @@ class MLAE:
             Gives the Likelihood p(h_k with m_k amplifications|theta)
 
         """
-        theta_ = (2 * m_k + 1) * theta
-        p_0 = np.sin(theta_) ** 2
-        p_1 = np.cos(theta_) ** 2
-        l_k = (p_0**h_k) * (p_1 ** (n_k - h_k))
+        #theta_ = (2 * m_k + 1) * theta
+        #p_0 = np.sin(theta_) ** 2
+        #p_1 = np.cos(theta_) ** 2
+        #l_k = (p_0**h_k) * (p_1 ** (n_k - h_k))
+        l_k = likelihood(theta, m_k, n_k, h_k)
         return l_k
 
     @staticmethod
@@ -323,10 +325,11 @@ class MLAE:
             Gives the log Likelihood p(h_k with m_k amplifications|theta)
 
         """
-        theta_ = (2 * m_k + 1) * theta
-        p_0 = np.sin(theta_) ** 2
-        p_1 = np.cos(theta_) ** 2
-        l_k = h_k * np.log(p_0) + (n_k - h_k) * np.log(p_1)
+        #theta_ = (2 * m_k + 1) * theta
+        #p_0 = np.sin(theta_) ** 2
+        #p_1 = np.cos(theta_) ** 2
+        #l_k = h_k * np.log(p_0) + (n_k - h_k) * np.log(p_1)
+        l_k = log_likelihood(theta, m_k, n_k, h_k)
         return l_k
 
     @staticmethod
@@ -359,12 +362,13 @@ class MLAE:
         cost : float
             the aggregation of the individual likelihoods
         """
-        log_cost = 0
-        # for i in range(len(m_k)):
-        for i, _ in enumerate(m_k):
-            log_l_k = MLAE.log_likelihood(angle, m_k[i], n_k[i], h_k[i])
-            log_cost = log_cost + log_l_k
-        return -log_cost
+        #log_cost = 0
+        ## for i in range(len(m_k)):
+        #for i, _ in enumerate(m_k):
+        #    log_l_k = MLAE.log_likelihood(angle, m_k[i], n_k[i], h_k[i])
+        #    log_cost = log_cost + log_l_k
+        log_cost = cost_function(angle, m_k, n_k, h_k)
+        return log_cost
 
     def run_schedule(self, schedule):
         """

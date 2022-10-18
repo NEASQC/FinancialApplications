@@ -61,7 +61,7 @@ class MCAE:
         if self.linalg_qpu is None:
             print("Not QPU was provide. Default QPU will be used")
             self.linalg_qpu = get_default_qpu()
-        self.shots = kwargs.get("shots", 100)
+        self.shots = int(kwargs.get("shots", 100))
         self.mcz_qlm = kwargs.get("mcz_qlm", True)
 
         self.ae_l = None

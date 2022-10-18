@@ -211,6 +211,13 @@ if __name__ == "__main__":
         help="For adding IQPEAE staff",
     )
     parser.add_argument(
+        "--MCAE",
+        dest="mcae_var",
+        default=False,
+        action="store_true",
+        help="For adding MCAE staff",
+    )
+    parser.add_argument(
         "--save",
         dest="save",
         default=False,
@@ -243,9 +250,11 @@ if __name__ == "__main__":
         lista_ae.append("jsons/ae_pe_rqae_configuration.json")
     if args.cqpeae_var:
         lista_ae.append("jsons/ae_pe_cqpeae_configuration.json")
-
     if args.iqpeae_var:
         lista_ae.append("jsons/ae_pe_iqpeae_configuration.json")
+    if args.mcae_var:
+        lista_ae.append("jsons/ae_pe_mcae_configuration.json")
+
     ae_list = []
     for ae_json in lista_ae:
         with open(ae_json) as json_file:
