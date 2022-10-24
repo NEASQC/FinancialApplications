@@ -1,0 +1,27 @@
+[
+    {
+        "ae_type": ["IQPEAE"],
+
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+
+        "auxiliar_qbits_number": [null],
+
+        "cbits_number": [14],
+
+        "epsilon": [null],
+
+        "alpha": [null],
+
+        "gamma": [null],
+        "q": [null],
+
+        "integral" : [0, 1, 2],
+        "multiplexor":  [true],
+
+        "mcz_qlm": [false],
+        "shots": [100],
+        "number_of_tests": [10]
+    }
+]

@@ -1,0 +1,32 @@
+[
+    {
+        "ae_type": ["MLAE"],
+
+        "schedule": [
+            [
+                [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
+            ]
+         ],
+        "delta": [1.0e-8],
+        "ns": [100000],
+
+        "auxiliar_qbits_number": [null],
+
+        "cbits_number": [null],
+
+        "epsilon": [null],
+
+        "alpha": [null],
+
+        "gamma": [null],
+        "q": [null],
+
+        "integral" : [0, 1, 2],
+        "multiplexor":  [true],
+
+        "mcz_qlm": [false],
+        "shots": [null],
+        "number_of_tests": [10]
+    }
+]

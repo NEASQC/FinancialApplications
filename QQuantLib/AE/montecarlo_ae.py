@@ -136,6 +136,7 @@ class MCAE:
         """
 
         #Done Measurements on the oracle
+        start = time.time()
         results, circuit, _, _ = get_results(
             self.oracle,
             linalg_qpu=self.linalg_qpu,
@@ -143,6 +144,8 @@ class MCAE:
             qubits=self.index
         )
         self.ae = measure_state_probability(results, self.target)
+        end = time.time()
+        self.run_time = end - start
         self.schedule_pdf = pd.DataFrame(
             [[0, self.shots]],
             columns=['m_k', 'shots']
