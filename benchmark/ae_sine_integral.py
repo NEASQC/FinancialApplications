@@ -58,26 +58,22 @@ def sine_integral(n_qbits, interval, ae_dictionary):
     exact_integral = np.cos(a_) - np.cos(b_)
     #Discretizing the domain integration
     domain_x = np.linspace(a_, b_, 2 ** n_qbits + 1)
-    #Getting the lenthg of every discretization interval
-    delta_x = np.diff(domain_x)
     #Discretization of the sine function
     f_x = []
-    x_ = []
+    #x_ = []
     for i in range(1, len(domain_x)):
         step_f = (function(domain_x[i]) + function(domain_x[i-1]))/2.0
         f_x.append(step_f)
-        x_.append((domain_x[i] + domain_x[i-1])/2.0)
+        #x_.append((domain_x[i] + domain_x[i-1])/2.0)
     f_x = np.array(f_x)
-    x_ = np.array(x_)
-    #Array for Riemann sum
-    g_x = f_x*delta_x
+    #x_ = np.array(x_)
     #Normalisation constant
     normalization = np.max(np.abs(f_x)) + 1e-8
     #Normalization of the Riemann array
-    g_norm_x = g_x/normalization
+    f_norm_x = f_x/normalization
     #Encoding dictionary
     encoding_dict = {
-        "array_function" : g_norm_x,
+        "array_function" : f_norm_x,
         "array_probability" : None,
         "encoding" : 2
     }
@@ -86,7 +82,7 @@ def sine_integral(n_qbits, interval, ae_dictionary):
     #EXECUTE COMPUTATION
     solution, solver_object = q_solve_integral(**ae_dictionary)
     #Amplitude Estimation computed integral estimator
-    estimator_s = normalization * solution
+    estimator_s = normalization * (b_ - a_) * solution / (2 ** n_qbits)
     #Metrics computation
     absolute_error = np.abs(estimator_s["ae"] - exact_integral)
     relative_error = absolute_error / exact_integral
@@ -110,7 +106,7 @@ def sine_integral(n_qbits, interval, ae_dictionary):
     pdf[integral_columns] = estimator_s
     pdf["exact_integral"] = exact_integral
     #Sum of Riemann array
-    pdf["riemann_sum"] = np.sum(g_x)
+    pdf["riemann_sum"] = np.sum(f_x)
     pdf["normalization"] = normalization
     pdf["absolute_error"] = absolute_error
     pdf["relative_error"] = relative_error
