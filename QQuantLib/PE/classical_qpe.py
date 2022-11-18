@@ -119,15 +119,16 @@ class CQPE:
         # Create algorithm
         self.q_prog = self.apply_pe_wqft(self.q_prog, self.q_gate, self.q_aux)
         # Execute algorithm
+        
+        start = time.time()
         self.results, self.circuit = self.run_qprogram(
             self.q_prog, self.q_aux, self.shots, self.linalg_qpu,
             self.complete
         )
-        # Post-Process results
-        start = time.time()
-        self.final_results = self.post_proccess(self.results)
         end = time.time()
-        self.time_qpe_post_procces = end - start
+        self.quantum_times.append(end-start)
+        # Post-Process results
+        self.final_results = self.post_proccess(self.results)
 
     @staticmethod
     def apply_controlled_operations(q_prog_, q_gate, q_aux):
@@ -247,7 +248,6 @@ class CQPE:
         """
         start = q_aux.start
         lenght = q_aux.length
-        start_time = time.time()
         result, circuit, q_prog, job = get_results(
             q_prog,
             linalg_qpu=linalg_qpu,
@@ -255,8 +255,6 @@ class CQPE:
             qubits=list(range(start, start + lenght, 1)),
             complete=complete
         )
-        end_time = time.time()
-        self.quantum_times.append(end_time - start_time)
         del result["Amplitude"]
         result["Phi"] = result["Int"] / (2**lenght)
         return result, circuit
