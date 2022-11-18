@@ -116,6 +116,8 @@ class MLAE:
         self.schedule_pdf = None
         self.oracle_calls = None
         self.max_oracle_depth = None
+        self.quantum_times = []
+        self.quantum_time = None
 
     #####################################################################
     @property
@@ -236,6 +238,8 @@ class MLAE:
         h_k: int
             number of positive events
         """
+
+        start = time.time()
         routine = qlm.QRoutine()
         register = routine.new_wires(self.oracle.arity)
         routine.apply(self.oracle, register)
@@ -247,7 +251,8 @@ class MLAE:
         )
         h_k = int(measure_state_probability(result, self.target) * n_k)
         #h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)] * n_k)
-
+        end = time.time()
+        self.quantum_times.append(end-start)
         return h_k, circuit
 
     @staticmethod
@@ -474,6 +479,8 @@ class MLAE:
         result = self.ae
         end = time.time()
         self.run_time = end - start
+        self.quantum_time = sum(self.quantum_times)
+        
         #Number of oracle call calculation
         self.schedule_pdf = pd.DataFrame(
             [self.m_k, self.n_k, self.h_k],
