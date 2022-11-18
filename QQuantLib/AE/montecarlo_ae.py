@@ -77,6 +77,8 @@ class MCAE:
         self.oracle_calls = None
         self.max_oracle_depth = None
         self.schedule_pdf = None
+        self.quantum_times = []
+        self.quantum_time = None
 
     #####################################################################
     @property
@@ -143,8 +145,9 @@ class MCAE:
             shots=self.shots,
             qubits=self.index
         )
-        self.ae = measure_state_probability(results, self.target)
         end = time.time()
+        self.quantum_times.append(end-start)
+        self.ae = measure_state_probability(results, self.target)
         self.run_time = end - start
         self.schedule_pdf = pd.DataFrame(
             [[0, self.shots]],
@@ -153,4 +156,5 @@ class MCAE:
         self.oracle_calls = np.sum(
             self.schedule_pdf['shots'] * (2 * self.schedule_pdf['m_k'] + 1))
         self.max_oracle_depth = np.max(2 *  self.schedule_pdf['m_k']+ 1)
+        self.quantum_time = sum(self.quantum_times)
         return self.ae
