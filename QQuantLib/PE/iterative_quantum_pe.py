@@ -97,6 +97,8 @@ class IQPE:
         self.circuit = None
         self.job = None
         self.time_pdf = None
+        self.quantum_times = []
+        self.quantum_time = None
 
     def restart(self):
         """
@@ -184,16 +186,16 @@ class IQPE:
         self.apply_iqpe()
 
         # Execute quantum algorithm
+        start = time.time()
         results, self.circuit = self.run_qprogram(
             self.q_prog, self.q_aux, self.shots, self.linalg_qpu
         )
-        start = time.time()
+        end = time.time()
+        self.quantum_times.append(end-start)
         # Extract information of the classical bits measurements
         self.classical_bits = IQPE.measure_classical_bits(results)
         # Aggregating classical bits measurements
         self.final_results = IQPE.post_proccess(self.classical_bits)
-        end = time.time()
-        time_post_proccess = end - start
 
     # @staticmethod
     # def step_iqpe_zalo(q_prog, q_gate, q_aux, c_bits, l):
@@ -323,18 +325,12 @@ class IQPE:
         pdf_time : pandas DataFrame
             DataFrame with elapsed time of different parts of the simulation
         """
-        start = time.time()
         circuit = create_qcircuit(q_prog)
-        end = time.time()
-        time_q_circuit = end - start
         if shots == 0:
             shots = 10
             print("Number of shots can not be 0. It will be used: ", shots)
 
-        start = time.time()
         job = create_qjob(circuit, shots=shots, qubits=[q_aux])
-        end = time.time()
-        time_q_job = end - start
 
         job.aggregate_data = False
         start = time.time()
@@ -344,8 +340,6 @@ class IQPE:
             qpu_type = "QLM_QPU"
         else:
             qpu_type = "No QLM_QPU"
-        end = time.time()
-        time_q_run = end - start
         # time_dict = {
         #     "time_q_circuit": time_q_circuit,
         #     "time_q_job": time_q_job,

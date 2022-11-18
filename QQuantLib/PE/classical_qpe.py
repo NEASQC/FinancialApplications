@@ -86,6 +86,8 @@ class CQPE:
         self.results = None
         self.time_pdf = None
         self.time_qpe_post_procces = None
+        self.quantum_times = []
+        self.quantum_time = None
 
     def restart(self):
         """
@@ -245,6 +247,7 @@ class CQPE:
         """
         start = q_aux.start
         lenght = q_aux.length
+        start = time.time()
         result, circuit, q_prog, job = get_results(
             q_prog,
             linalg_qpu=linalg_qpu,
@@ -252,6 +255,8 @@ class CQPE:
             qubits=list(range(start, start + lenght, 1)),
             complete=complete
         )
+        end = time.time()
+        self.quantum_times.append(end-start)
         del result["Amplitude"]
         result["Phi"] = result["Int"] / (2**lenght)
         return result, circuit

@@ -239,20 +239,20 @@ class MLAE:
             number of positive events
         """
 
-        start = time.time()
         routine = qlm.QRoutine()
         register = routine.new_wires(self.oracle.arity)
         routine.apply(self.oracle, register)
         routine.apply(load_qn_gate(self._grover_oracle, m_k), register)
         # for i in range(m_k):
         #    routine.apply(self._grover_oracle, register)
+        start = time.time()
         result, circuit, _, job = get_results(
             routine, linalg_qpu=self.linalg_qpu, shots=n_k, qubits=self.index
         )
-        h_k = int(measure_state_probability(result, self.target) * n_k)
-        #h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)] * n_k)
         end = time.time()
         self.quantum_times.append(end-start)
+        h_k = int(measure_state_probability(result, self.target) * n_k)
+        #h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)] * n_k)
         return h_k, circuit
 
     @staticmethod

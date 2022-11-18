@@ -92,6 +92,8 @@ class RQAE:
         self.oracle_calls = None
         self.max_oracle_depth = None
         self.schedule_pdf = None
+        self.quantum_times = []
+        self.quantum_time = None
 
     #####################################################################
     @property
@@ -209,9 +211,12 @@ class RQAE:
         """
 
         self.shifted_oracle = 2 * shift
+        start = time.time()
         results, circuit, _, _ = get_results(
             self._shifted_oracle, self.linalg_qpu, shots=shots
         )
+        end = time.time()
+        self.quantum_times.append(end-start)
         start = time.time()
         step_circuit_stats = circuit.statistics()
         step_circuit_stats.update({"n_shots": shots})
@@ -281,13 +286,16 @@ class RQAE:
             np.arange(len(self.index) + 1),
             mcz_qlm=self.mcz_qlm,
         )
+
         routine = qlm.QRoutine()
         wires = routine.new_wires(self.shifted_oracle.arity)
         routine.apply(self.shifted_oracle, wires)
         for i in range(k):
             routine.apply(grover_oracle, wires)
-        results, circuit, _, _ = get_results(routine, self.linalg_qpu, shots=shots)
         start = time.time()
+        results, circuit, _, _ = get_results(routine, self.linalg_qpu, shots=shots)
+        end = time.time()
+        self.quantum_times.append(end-start)
         step_circuit_stats = circuit.statistics()
         step_circuit_stats.update({"n_shots": shots})
         self.circuit_statistics.update({k: step_circuit_stats})
@@ -306,7 +314,6 @@ class RQAE:
         angle_min = np.arcsin(np.sqrt(probability_min)) / (2 * k + 1)
         amplitude_max = np.sin(angle_max) - shift
         amplitude_min = np.sin(angle_min) - shift
-        end = time.time()
         first_step_time = end - start
 
         return [amplitude_min, amplitude_max]

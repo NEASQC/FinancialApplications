@@ -93,6 +93,8 @@ class IQAE:
         self.oracle_calls = None
         self.max_oracle_depth = None
         self.schedule_pdf = None
+        self.quantum_times = []
+        self.quantum_time = None
 
     #####################################################################
     @property
@@ -357,20 +359,22 @@ class IQAE:
         j = 0 # pure counter
 
         while theta_u - theta_l > 2 * epsilon:
-            start = time.time()
+            #start = time.time()
             i = i + 1
             k_old = k
             [k, flag] = self.find_next_k(k_old, theta_l, theta_u, flag)
             big_k = 4 * k + 2
-            end = time.time()
-            finding_time = end - start
+            #end = time.time()
+            #finding_time = end - start
 
             #####################################################
             routine = self.quantum_step(k)
+            start = time.time()
             results, circuit, _, _ = get_results(
                 routine, linalg_qpu=self.linalg_qpu, shots=shots, qubits=self.index
             )
-            start = time.time()
+            end = time.time()
+            self.quantum_times.append(end-start)
             # time_pdf["m_k"] = k
             a_ = measure_state_probability(results, self.target)
             #a_ = results["Probability"].iloc[bitfield_to_int(self.target)]
@@ -417,7 +421,6 @@ class IQAE:
             # If bounded limits are worse than step before limits use these ones
             theta_l = np.maximum(theta_l, theta_l_)
             theta_u = np.minimum(theta_u, theta_u_)
-            end = time.time()
             j = j + 1
         [a_l, a_u] = [np.sin(theta_l) ** 2, np.sin(theta_u) ** 2]
         return [a_l, a_u]
@@ -475,4 +478,5 @@ class IQAE:
         self.oracle_calls = np.sum(
             self.schedule_pdf['shots'] * (2 * self.schedule_pdf['m_k'] + 1))
         self.max_oracle_depth = np.max(2 *  self.schedule_pdf['m_k']+ 1)
+        self.quantum_time = sum(self.quantum_times)
         return self.ae

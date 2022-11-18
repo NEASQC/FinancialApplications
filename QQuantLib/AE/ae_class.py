@@ -66,6 +66,9 @@ class AE:
         self.oracle_calls = None
         self.max_oracle_depth = None
         self.schedule_pdf = None
+        self.quantum_times = []
+        self.quantum_time = None
+        self.run_time = None
 
     @property
     def ae_type(self):
@@ -182,3 +185,6 @@ class AE:
             [self.solver_ae.ae, self.solver_ae.ae_l, self.solver_ae.ae_u],
             index=["ae", "ae_l", "ae_u"],
         ).T
+        self.quantum_times = self.solver_ae.quantum_times
+        self.quantum_time = self.solver_ae.quantum_time
+        self.run_time = self.solver_ae.run_time

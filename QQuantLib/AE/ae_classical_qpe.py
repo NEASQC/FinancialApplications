@@ -92,6 +92,8 @@ class CQPEAE:
         self.oracle_calls = None
         self.max_oracle_depth = None
         self.schedule_pdf = None
+        self.quantum_times = []
+        self.quantum_time = None
 
     #####################################################################
     @property
@@ -206,4 +208,7 @@ class CQPEAE:
         )
         #Maximum number of oracle applications
         self.max_oracle_depth = 2 ** (int(self.auxiliar_qbits_number)-1) + 1
+        self.quantum_times = self.cqpe.quantum_times
+        self.quantum_time = self.cqpe.quantum_time 
+        
         return self.ae
