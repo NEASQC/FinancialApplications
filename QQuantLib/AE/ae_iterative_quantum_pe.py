@@ -201,5 +201,5 @@ class IQPEAE:
         #Maximum number of oracle applications
         self.max_oracle_depth = 2 ** (int(self.cbits_number)-1) + 1
         self.quantum_times = self.iqpe_object.quantum_times
-        self.quantum_time = self.iqpe_object.quantum_time
+        self.quantum_time = sum(self.iqpe_object.quantum_times)
         return self.ae
