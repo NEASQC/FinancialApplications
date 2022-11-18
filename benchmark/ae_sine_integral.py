@@ -112,8 +112,9 @@ def sine_integral(n_qbits, interval, ae_dictionary):
     pdf["relative_error"] = relative_error
     pdf["oracle_calls"] = oracle_calls
     pdf["elapsed_time"] = elapsed_time
+    pdf["quantum_time"] = solver_object.quantum_time
 
     metrics = pdf[
-        list(wanted_columns) + ["absolute_error", "oracle_calls", "elapsed_time"]
+        list(wanted_columns) + ["absolute_error", "relative_error", "oracle_calls", "elapsed_time", "quantum_time"]
     ]
     return metrics, pdf
