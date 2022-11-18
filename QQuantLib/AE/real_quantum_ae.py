@@ -487,4 +487,5 @@ class RQAE:
         self.oracle_calls = np.sum(
             self.schedule_pdf['shots'] * (2 * self.schedule_pdf['m_k'] + 1))
         self.max_oracle_depth = np.max(2 *  self.schedule_pdf['m_k']+ 1)
+        self.quantum_time = sum(self.quantum_times)
         return self.ae
