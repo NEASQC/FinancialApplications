@@ -106,15 +106,25 @@ def sine_integral(n_qbits, interval, ae_dictionary):
     pdf[integral_columns] = estimator_s
     pdf["exact_integral"] = exact_integral
     #Sum of Riemann array
-    pdf["riemann_sum"] = np.sum(f_x)
+    pdf["riemann_sum"] = (b_ - a_) * np.sum(f_x) / (2 ** n_qbits)
     pdf["normalization"] = normalization
-    pdf["absolute_error"] = absolute_error
-    pdf["relative_error"] = relative_error
+    #Error vs exact integral
+    pdf["absolute_error_exact"] = absolute_error
+    pdf["relative_error_exact"] = relative_error
+    #Error vs Riemann Sum
+    pdf["absolute_error_sum"] = np.abs(pdf["ae"] - pdf["riemann_sum"])
+    #Error by Riemann aproximation to Integral
+    pdf["absolute_riemann_error"] = np.abs(pdf["riemann_sum"] - pdf["exact_integral"])
     pdf["oracle_calls"] = oracle_calls
     pdf["elapsed_time"] = elapsed_time
     pdf["quantum_time"] = solver_object.quantum_time
 
+    columns_metrics = [
+        "absolute_error", "relative_error", "absolute_error_sum",
+        "absolute_riemann_error", "oracle_calls",
+        "elapsed_time", "quantum_time"
+    ]
     metrics = pdf[
-        list(wanted_columns) + ["absolute_error", "relative_error", "oracle_calls", "elapsed_time", "quantum_time"]
+        list(wanted_columns) + columns_metrics
     ]
     return metrics, pdf
