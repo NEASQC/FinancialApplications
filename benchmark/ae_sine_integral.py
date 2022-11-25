@@ -120,7 +120,7 @@ def sine_integral(n_qbits, interval, ae_dictionary):
     pdf["quantum_time"] = solver_object.quantum_time
 
     columns_metrics = [
-        "absolute_error", "relative_error", "absolute_error_sum",
+        "absolute_error_exact", "relative_error_exact", "absolute_error_sum",
         "absolute_riemann_error", "oracle_calls",
         "elapsed_time", "quantum_time"
     ]
