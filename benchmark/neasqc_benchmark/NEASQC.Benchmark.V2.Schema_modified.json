@@ -1,0 +1,436 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+    "$id" : "https://neasqc.eu/benchmark.V1.schema.json",
+    "title" : "NEASQC JSON reporting schema",
+    "description":"JSON Schema to help in the generation of reporting JSON of NEASQC benchmark suite",
+    "type": "object",
+    "properties": {
+        "ReportOrganization": {
+            "type": "string",
+            "description": "Name of the organisation which reports the results"
+        },
+        "MachineName": {
+            "type": "string"
+        },
+        "QPUModel": {
+            "type": "string",
+            "description": "Identification or model of the QPU"
+        },
+        "QPUDescription": {
+            "type": "array",
+            "description": "Description of capabilities of the Quantum Computer",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "NumberOfQPUs": {
+                        "type": "integer",
+                        "description": "Number of QPUs of this type",
+                        "minimum": 0,
+                        "exclusiveMinimum": 0
+                    },
+                    "QPUs": {
+                        "type": "array",
+                        "description": "Description of each QPU",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "BasicGates": {
+                                    "type": "array",
+                                    "uniqueItems": true,
+                                    "minItems": 2,
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "NumberOfQubits": {
+                                    "type": "integer",
+                                    "description": "Number of Qubits of the QPU"
+                                },
+                                "Qubits": {
+                                    "type": "array",
+                                    "description": "List with the properties of each qubit",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "QubitNumber": {
+                                                "type": "integer",
+                                                "description": "number Assigned to the qubit"
+                                            },
+                                            "T1": {
+                                                "type": "number",
+                                                "description": "T1 in ns",
+                                                "minimum": 0,
+                                                "exclusiveMinimum": 0
+                                            },
+                                            "T2": {
+                                                "type": "number",
+                                                "description": "T2 in ns",
+                                                "minimum": 0,
+                                                "exclusiveMinimum": 0
+                                            }
+                                        },
+                                        "required": [
+                                            "QubitNumber",
+                                            "T1",
+                                            "T2"
+                                        ]
+                                    }
+                                },
+                                "Gates": {
+                                    "type": "array",
+                                    "description": "List of the basic gates for each qubit",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "Gate": {
+                                                "type": "string",
+                                                "description": "Name of the gate"
+                                            },
+                                            "Type": {
+                                                "enum": [
+                                                    
+												  "Single", 
+												  "Entanglement",
+												  "GlobalEntanglement"
+						
+                                                ],
+                                                "description": "single qubit or entanglement qubit (more than 1 qubit)"
+                                            },
+                                            "Qubits": {
+                                                "type": "array",
+                                                "description": "Ordered list of qubits where is applied",
+                                                "uniqueItems": true,
+                                                "minItems": 1,
+                                                "items": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "MaxTime": {
+                                                "type": "number",
+                                                "description": "Maximum time for executing this gate (in ns)",
+                                                "minimum": 0,
+                                                "exclusiveMinimum": 0
+                                            },
+                                            "Symmetric": {
+                                                "type": "boolean",
+                                                "description": "If the gate can be applied in any order of qubits with the same timing"
+                                            }
+                                        },
+                                        "required": [
+                                            "Gate",
+                                            "Type",
+                                            "Qubits",
+                                            "MaxTime"
+                                        ]
+                                    }
+                                },
+                                "Technology": {
+                                    "enum": ["charge qubit","flux qubit","phase qubit","photon","ion","neutral atom","diamond","quantum dot","other"]
+                                },
+                                "Other": {
+                                    "type": "string",
+                                    "description": "If other, name or description of the technology"
+                                }
+                            },
+                            "required": [
+                                "BasicGates",
+                                "Qubits",
+                                "Gates",
+                                "Technology"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "NumberOfQPUs",
+                    "QPUs"
+                ]
+            }
+        },
+        "CPUModel": {
+            "type": "string",
+            "description": "model of the classical CPU"
+        },
+        "Frequency": {
+            "type": "number",
+            "description": "Frequency in GHz of the classical CPU"
+        },
+        "Network": {
+            "type": "object",
+            "properties": {
+                "Model": {
+                    "type": "string",
+                    "description": "Model of the interconnection between CPUs"
+                },
+                "Version": {
+                    "type": "string",
+                    "description": "Version"
+                },
+                "Topology": {
+                    "type": "string",
+                    "description": "Type of topology of the network"
+                }
+            },
+            "required": [
+                "Model",
+                "Version",
+                "Topology"
+            ]
+        },
+        "QPUCPUConnection": {
+            "type": "object",
+            "description": "Information about how the QPU is connected to the classical QPU",
+            "properties": {
+                "Type": {
+                    "type": "string",
+                    "description": "Type of connection as PCI"
+                },
+                "Version": {
+                    "type": "string",
+                    "description": "Version of the connection"
+                }
+            },
+            "required": [
+                "Type",
+                "Version"
+            ]
+        },
+        "Benchmarks": {
+            "type": "array",
+            "description": "Results of the different benchmarks",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "BenchmarkKernel": {
+                        "type": "string",
+                        "description": "Name or id of the benchmark"
+                    },
+                    "StartTime": {
+                        "type": "string",
+                        "description": "Start time for this benchmark following RFC 3339, section 5.6.",
+                        "format": "date-time"
+                    },
+                    "EndTime": {
+                        "type": "string",
+                        "description": "End time for this benchmark following RFC 3339, section 5.6.",
+                        "format": "date-time"
+                    },
+                    "ProgramLanguage": {
+                        "type": "string",
+                        "description": "Programming language"
+                    },
+                    "ProgramLanguageVersion": {
+                        "type": "string",
+                        "description": "Programming language version"
+                    },
+                    "ProgramLanguageVendor": {
+                        "type": "string",
+                        "description": "Name of the provider of the programming language"
+                    },
+                    "API": {
+                        "type": "array",
+                        "description": "List of APIs used by the benchmark",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "Name": {
+                                    "type": "string",
+                                    "description": "Name of the API"
+                                },
+                                "Version": {
+                                    "type": "string",
+                                    "description": "Version of the API"
+                                }
+                            },
+                            "required": [
+                                "Name",
+                                "Version"
+                            ]
+                        }
+                    },
+                    "QuantumCompililation": {
+                        "type": "array",
+                        "description": "List of steps for the transpilation of QPU code",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "Step": {
+                                    "type": "string",
+                                    "description": "Name of the step module"
+                                },
+                                "Version": {
+                                    "type": "string",
+                                    "description": "Version of this module"
+                                },
+                                "Flags": {
+                                    "type": "string",
+                                    "description": "Flag used for this step"
+                                }
+                            },
+                            "required": [
+                                "Step",
+                                "Version",
+                                "Flags"
+                            ]
+                        }
+                    },
+                    "ClassicalCompiler": {
+                        "type": "array",
+                        "description": "Ordered list of the steps for classical compilation",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "Step": {
+                                    "type": "string",
+                                    "description": "Step for classical compilation"
+                                },
+                                "Version": {
+                                    "type": "string",
+                                    "description": "version of this step"
+                                },
+                                "Flags": {
+                                    "type": "string",
+                                    "description": "Flags used for this step"
+                                }
+                            },
+                            "required": [
+                                "Step",
+                                "Version",
+                                "Flags"
+                            ]
+                        }
+                    },
+                    "TimeMethod": {
+                        "type": "string",
+                        "description": "Time routine for measuring execution time"
+                    },
+                    "Results": {
+                        "type": "array",
+                        "description": "Detailed report of the results",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "NumberOfQubits": {
+                                    "type": "integer",
+                                    "description": "Number of qubits used for this result",
+                                    "minimum": 0,
+                                    "exclusiveMinimum": 0
+                                },
+                                "QubitPlacement": {
+                                    "type": "array",
+                                    "description": "Ordered list of qubits used for executing this case",
+                                    "items": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "QPUs": {
+                                    "type": "array",
+                                    "description": "List of QPUs used for the benchmark",
+                                    "items": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "CPUs": {
+                                    "type": "array",
+                                    "description": "List of CPUs used in the benchmark",
+                                    "items": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "TotalTime": {
+                                    "type": "number",
+                                    "description": "Total elapsed time in seconds",
+                                    "minimum": 0,
+                                    "exclusiveMinimum": 0
+                                },
+                                "SigmaTotalTime": {
+                                    "type": "number",
+                                    "description": "Sigma of total execution time"
+                                },
+                                "QuantumTime": {
+                                    "type": "number",
+                                    "description": "Total time for executing the quantum algorithm in seconds",
+                                    "minimum": 0,
+                                    "exclusiveMinimum": 0
+                                },
+                                "SigmaQuantumTime": {
+                                    "type": "number",
+                                    "description": "Sigma of quantum time"
+                                },
+                                "ClassicalTime": {
+                                    "type": "number",
+                                    "description": "Total time for executing the classical part of the algorithm in seconds",
+                                    "minimum": 0,
+                                    "exclusiveMinimum": 0
+                                },
+                                "SigmaClassicalTime": {
+                                    "type": "number"
+                                },
+                                "Metrics": {
+                                    "type": "array",
+                                    "description": "Additional defined metrics for this benchmark",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "Metric": {
+                                                "type": "string",
+                                                "description": "Name of the metric"
+                                            },
+                                            "Value": {
+                                                "type": "number",
+                                                "description": "Value of the metric"
+                                            },
+											"STD": {
+                                                "type": "number",
+                                                "description": "Standard deviation"
+                                            }
+                                        },
+                                        "required": [
+                                            "Metric",
+                                            "Value",
+											"STD"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "NumberOfQubits",
+                                "QubitPlacement",
+                                "QPUs",
+                                "CPUs",
+                                "TotalTime",
+                                "SigmaTotalTime",
+                                "QuantumTime",
+                                "SigmaQuantumTime",
+                                "ClassicalTime",
+                                "SigmaClassicalTime"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "BenchmarkKernel",
+                    "StartTime",
+                    "EndTime",
+                    "ProgramLanguage",
+                    "ProgramLanguageVersion",
+                    "ProgramLanguageVendor",
+                    "API",
+                    "TimeMethod",
+                    "Results"
+                ]
+            }
+        }
+    },
+    "required": [
+        "ReportOrganization",
+        "MachineName",
+        "QPUModel",
+        "QPUDescription",
+        "CPUModel",
+        "Frequency",
+        "Network",
+        "QPUCPUConnection",
+        "Benchmarks"
+    ]
+}

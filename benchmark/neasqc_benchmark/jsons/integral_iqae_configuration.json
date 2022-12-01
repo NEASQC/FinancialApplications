@@ -1,0 +1,25 @@
+[
+    {
+        "ae_type": ["IQAE"],
+
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+
+        "auxiliar_qbits_number": [null],
+
+        "cbits_number": [null],
+
+        "epsilon": [0.001],
+
+        "alpha": [0.05],
+
+        "gamma": [null],
+        "q": [null],
+
+        "multiplexor":  [true],
+
+        "mcz_qlm": [false],
+        "shots": [100]
+    }
+]
