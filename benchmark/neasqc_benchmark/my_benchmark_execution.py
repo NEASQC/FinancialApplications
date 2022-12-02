@@ -9,7 +9,7 @@ from datetime import datetime
 from scipy.stats import norm
 import pandas as pd
 sys.path.append("../../")
-from benchmark.ae_sine_integral import sine_integral
+from benchmark.neasqc_benchmark.ae_sine_integral import sine_integral
 from benchmark.benchmark_utils import combination_for_list
 from QQuantLib.utils.qlm_solver import get_qpu
 

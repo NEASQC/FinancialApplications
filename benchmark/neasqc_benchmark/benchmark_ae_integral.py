@@ -9,7 +9,7 @@ import json
 import pandas as pd
 sys.path.append("../../")
 from benchmark.benchmark_utils import combination_for_list
-from benchmark.ae_sine_integral import sine_integral
+from benchmark.neasqc_benchmark.ae_sine_integral import sine_integral
 from QQuantLib.utils.qlm_solver import get_qpu
 
 
