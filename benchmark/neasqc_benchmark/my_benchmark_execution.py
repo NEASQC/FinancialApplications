@@ -103,7 +103,15 @@ def select_ae(ae_method):
             ae_list = ae_list + json.load(json_file)
     #Creates the complete configuration for AE solvers
     final_list = combination_for_list(ae_list)
-    return final_list
+    if len(final_list) > 1:
+        text = "There are more than 1 AE algorithm configuration. "\
+            "FOR BENCHMARK only 1 configuration should be given. "\
+            "Please change the correspondent json!!"
+        raise ValueError(text)
+    ae_configuration = final_list[0]            
+    del ae_configuration["integral"]
+    del ae_configuration["number_of_tests"]
+    return ae_configuration
 
 
 
@@ -285,7 +293,7 @@ class AE_BENCHMARK:
 if __name__ == "__main__":
 
     AE = "IQAE"
-    print(select_ae(AE)[0])
+    print(select_ae(AE))
     benchmark_arguments = {
         "pre_samples": 10,
         "pre_save": True,
@@ -293,8 +301,8 @@ if __name__ == "__main__":
         "relative_error": 0.1,
         "alpha": 0.05,
         "min_meas": 5,
-        "max_meas": 10,
-        "list_of_qbits": [4],
+        "max_meas": None,
+        "list_of_qbits": [4, 6, 8],
     }
-    ae_bench = AE_BENCHMARK(select_ae(AE)[0], **benchmark_arguments)
+    ae_bench = AE_BENCHMARK(select_ae(AE), **benchmark_arguments)
     ae_bench.exe()

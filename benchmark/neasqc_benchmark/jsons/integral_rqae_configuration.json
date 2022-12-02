@@ -17,9 +17,11 @@
         "gamma": [0.05],
         "q": [1.2],
 
+        "integral" : [0, 1, 2],
         "multiplexor":  [true],
 
         "mcz_qlm": [false],
-        "shots": [100]
+        "shots": [100],
+        "number_of_tests": [10]
     }
 ]
