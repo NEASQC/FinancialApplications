@@ -108,7 +108,7 @@ def select_ae(ae_method):
             "FOR BENCHMARK only 1 configuration should be given. "\
             "Please change the correspondent json!!"
         raise ValueError(text)
-    ae_configuration = final_list[0]            
+    ae_configuration = final_list[0]
     del ae_configuration["integral"]
     del ae_configuration["number_of_tests"]
     return ae_configuration

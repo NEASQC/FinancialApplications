@@ -25,8 +25,7 @@ def sine_integral(n_qbits, interval, ae_dictionary):
     interval: int
         Interval for integration: Only can be:
             0 : [0,3π/8]
-            1 : [3π/4, 9π/8]
-            2 : [π, 5π/4]
+            1 : [π, 5π/4]
     ae_dictionary : dict
         dictionary with the complete amplitude estimation
         algorithm configuration
@@ -43,13 +42,15 @@ def sine_integral(n_qbits, interval, ae_dictionary):
 
     start_time = time.time()
 
-    start = [0.0, 3.0*np.pi/4.0, np.pi]
-    end = [3.0*np.pi/8.0, 9.0*np.pi/8.0, 5.0*np.pi/4.0]
+    #start = [0.0, 3.0*np.pi/4.0, np.pi]
+    #end = [3.0*np.pi/8.0, 9.0*np.pi/8.0, 5.0*np.pi/4.0]
+    start = [0.0, np.pi]
+    end = [3.0*np.pi/8.0, 5.0*np.pi/4.0]
     #The sine function
     function = np.sin
 
-    if interval not in [0, 1, 2]:
-        raise ValueError("interval MUST BE 0, 1 or 2")
+    if interval not in [0, 1]:
+        raise ValueError("interval MUST BE 0 or 1")
 
     #Getting the domain integration limits
     a_ = start[interval]

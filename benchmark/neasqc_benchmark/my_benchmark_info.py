@@ -77,47 +77,47 @@ def my_classical_compilation():
     c_compilation["Flags"] = "None"
     return [c_compilation]
 
-def summarize_results(benchmark_file):
-
-
-    pdf = pd.read_csv(benchmark_file, index_col=0, sep=";")
-    n_qbits = list(set(pdf["n_qbits"]))
-    intervals = list(set(pdf["interval"]))
-    results = []
-    metrics = [
-        "absolute_error_exact", "relative_error_exact"
-        "absolute_error_sum", "oracle_calls"
-    ]
-
-    for n_ in n_qbits:
-        for interval in intervals:
-            result = OrderedDict()
-            result["NumberOfQubits"] = n_
-            result["QubitPlacement"] = list(range(n_))#[i for i in range(n_)]
-            result["QPUs"] = [1]
-            result["CPUs"] = psutil.Process().cpu_affinity()
-            result["Interval"] = interval
-            step_pdf = pdf[(pdf["interval"] == interval) & (pdf["n_qbits"] == n_)]
-            #print(step_pdf)
-            result["TotalTime"] = step_pdf["elapsed_time"].mean()
-            result["SigmaTotalTime"] = step_pdf["elapsed_time"].std()
-            result["QuantumTime"] = step_pdf["quantum_time"].mean()
-            result["SigmaQuantumTime"] = step_pdf["quantum_time"].std()
-            result["ClassicalTime"] = (step_pdf["elapsed_time"] - step_pdf["quantum_time"]).mean()
-            result["SigmaClassicalTime"] = (step_pdf["elapsed_time"] - step_pdf["quantum_time"]).std()
-            metrics = []
-            for metric_name in metrics:
-                metric = OrderedDict()
-                metric["Metric"] = metric_name
-                metric["Value"] = step_pdf[metric_name].mean()
-                metric["STD"] = step_pdf[metric_name].std()
-                metric["MIN"] = step_pdf[metric_name].min()
-                metric["MAX"] = step_pdf[metric_name].max()
-                metrics.append(metric)
-            result["Metrics"] = metrics
-            results.append(result)
-    return results
-
+#def summarize_results(benchmark_file):
+#
+#
+#    pdf = pd.read_csv(benchmark_file, index_col=0, sep=";")
+#    n_qbits = list(set(pdf["n_qbits"]))
+#    intervals = list(set(pdf["interval"]))
+#    results = []
+#    metrics = [
+#        "absolute_error_exact", "relative_error_exact"
+#        "absolute_error_sum", "oracle_calls"
+#    ]
+#
+#    for n_ in n_qbits:
+#        for interval in intervals:
+#            result = OrderedDict()
+#            result["NumberOfQubits"] = n_
+#            result["QubitPlacement"] = list(range(n_))#[i for i in range(n_)]
+#            result["QPUs"] = [1]
+#            result["CPUs"] = psutil.Process().cpu_affinity()
+#            result["Interval"] = interval
+#            step_pdf = pdf[(pdf["interval"] == interval) & (pdf["n_qbits"] == n_)]
+#            #print(step_pdf)
+#            result["TotalTime"] = step_pdf["elapsed_time"].mean()
+#            result["SigmaTotalTime"] = step_pdf["elapsed_time"].std()
+#            result["QuantumTime"] = step_pdf["quantum_time"].mean()
+#            result["SigmaQuantumTime"] = step_pdf["quantum_time"].std()
+#            result["ClassicalTime"] = (step_pdf["elapsed_time"] - step_pdf["quantum_time"]).mean()
+#            result["SigmaClassicalTime"] = (step_pdf["elapsed_time"] - step_pdf["quantum_time"]).std()
+#            metrics = []
+#            for metric_name in metrics:
+#                metric = OrderedDict()
+#                metric["Metric"] = metric_name
+#                metric["Value"] = step_pdf[metric_name].mean()
+#                metric["STD"] = step_pdf[metric_name].std()
+#                metric["MIN"] = step_pdf[metric_name].min()
+#                metric["MAX"] = step_pdf[metric_name].max()
+#                metrics.append(metric)
+#            result["Metrics"] = metrics
+#            results.append(result)
+#    return results
+#
 
 def my_other_info():
     import json

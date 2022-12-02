@@ -5,6 +5,7 @@ Authors: Gonzalo Ferro
 """
 import sys
 import json
+import jsonschema
 import pandas as pd
 import numpy as np
 import platform
@@ -62,8 +63,29 @@ class BENCHMARK:
     def set_benchmark_info(self, benchmark_info):
         self.report["Benchmarks"] = benchmark_info
 
+    def exe(self, info):
+        self.set_organisation(info["ReportOrganization"]) 
+        self.set_machine_name(info["MachineName"]) 
+        self.set_qpu_model(info["QPUModel"]) 
+        self.qpu_description(info["QPUDescription"]) 
+        self.set_cpu_model(info["CPUModel"]) 
+        self.set_frecuency(info["Frequency"]) 
+        self.set_network(info["Network"]) 
+        self.set_qpu_cpu_connection(info["QPUCPUConnection"]) 
+        self.set_benchmark_info(info["Benchmarks"]) 
 
-
+    def validate(self, info)
+        print("Validate REPORT")
+        try:
+            jsonschema.validate(
+                instance=self.report,
+                schema=self.schema["properties"]
+            )
+            print("\t REPORT is Valid")
+        except jsonschema.exceptions.ValidationError as ex:
+            print(ex)
+        #with open("./Results/IQAE_json_benchmark.json", "w") as outfile:
+        #    json.dump(benchmark.report, outfile)
 
 
 if __name__ == "__main__":
@@ -72,8 +94,22 @@ if __name__ == "__main__":
     #import my_benchmark_info
     import my_environment_info
     import my_benchmark_info
-    import jsonschema
-    import json
+
+    benchmark_stuff = {
+        "ReportOrganization": my_environment_info.my_organisation(),
+        "MachineName": my_environment_info.my_machine_name(),
+        "QPUModel": my_environment_info.my_qpu_model(),
+        "QPUDescription": my_environment_info.my_qpu(),
+        "CPUModel": my_environment_info.my_cpu_model(),
+        "Frequency": my_environment_info.my_frecuency(),
+        "Network": my_environment_info.my_network(),
+        "QPUCPUConnection":my_environment_info.my_QPUCPUConnection(),
+        "Benchmarks": my_benchmark_info.my_benchmark_info(
+            file_results="./Results/IQAE_SummaryResults.csv",
+            times_filename="./Results/IQAE_times_benchmark.csv"
+        )
+    }
+    
 
     benchmark = BENCHMARK()
     benchmark.set_organisation(my_environment_info.my_organisation())
@@ -93,14 +129,3 @@ if __name__ == "__main__":
     )
 
     #print(benchmark.report)
-    print("Validate REPORT")
-    try:
-        jsonschema.validate(
-            instance=benchmark.report,
-            schema=benchmark.schema["properties"]
-        )
-        print("\t REPORT is Valid")
-    except jsonschema.exceptions.ValidationError as ex:
-        print(ex)
-    with open("./Results/IQAE_json_benchmark.json", "w") as outfile:
-        json.dump(benchmark.report, outfile)
