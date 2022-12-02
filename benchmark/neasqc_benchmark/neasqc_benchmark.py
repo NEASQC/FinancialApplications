@@ -67,14 +67,16 @@ class BENCHMARK:
         self.set_organisation(info["ReportOrganization"]) 
         self.set_machine_name(info["MachineName"]) 
         self.set_qpu_model(info["QPUModel"]) 
-        self.qpu_description(info["QPUDescription"]) 
+        self.set_qpu_description(info["QPUDescription"]) 
         self.set_cpu_model(info["CPUModel"]) 
         self.set_frecuency(info["Frequency"]) 
         self.set_network(info["Network"]) 
         self.set_qpu_cpu_connection(info["QPUCPUConnection"]) 
         self.set_benchmark_info(info["Benchmarks"]) 
+        self.validate()
+        self.save(info["json_file_name"])
 
-    def validate(self, info)
+    def validate(self):
         print("Validate REPORT")
         try:
             jsonschema.validate(
@@ -84,8 +86,10 @@ class BENCHMARK:
             print("\t REPORT is Valid")
         except jsonschema.exceptions.ValidationError as ex:
             print(ex)
-        #with open("./Results/IQAE_json_benchmark.json", "w") as outfile:
-        #    json.dump(benchmark.report, outfile)
+
+    def save(self, filename):
+        with open(filename, "w") as outfile:
+            json.dump(benchmark.report, outfile)
 
 
 if __name__ == "__main__":
@@ -107,25 +111,31 @@ if __name__ == "__main__":
         "Benchmarks": my_benchmark_info.my_benchmark_info(
             file_results="./Results/IQAE_SummaryResults.csv",
             times_filename="./Results/IQAE_times_benchmark.csv"
-        )
+        ),
+        "json_file_name": "./json_stuff.json"
     }
     
 
     benchmark = BENCHMARK()
-    benchmark.set_organisation(my_environment_info.my_organisation())
-    benchmark.set_machine_name(my_environment_info.my_machine_name())
-    benchmark.set_qpu_model(my_environment_info.my_qpu_model())
-    benchmark.set_qpu_description(my_environment_info.my_qpu())
-    benchmark.set_cpu_model(my_environment_info.my_cpu_model())
-    benchmark.set_frecuency(my_environment_info.my_frecuency())
-    benchmark.set_network(my_environment_info.my_network())
-    benchmark.set_qpu_cpu_connection(my_environment_info.my_QPUCPUConnection())
-    #Execute Benchmark
-    benchmark.set_benchmark_info(
-        my_benchmark_info.my_benchmark_info(
-            file_results="./Results/IQAE_SummaryResults.csv",
-            times_filename="./Results/IQAE_times_benchmark.csv"
-        )
-    )
+    benchmark.exe(benchmark_stuff)
+
+    #benchmark = BENCHMARK()
+    #benchmark.set_organisation(my_environment_info.my_organisation())
+    #benchmark.set_machine_name(my_environment_info.my_machine_name())
+    #benchmark.set_qpu_model(my_environment_info.my_qpu_model())
+    #benchmark.set_qpu_description(my_environment_info.my_qpu())
+    #benchmark.set_cpu_model(my_environment_info.my_cpu_model())
+    #benchmark.set_frecuency(my_environment_info.my_frecuency())
+    #benchmark.set_network(my_environment_info.my_network())
+    #benchmark.set_qpu_cpu_connection(my_environment_info.my_QPUCPUConnection())
+    ##Execute Benchmark
+    #benchmark.set_benchmark_info(
+    #    my_benchmark_info.my_benchmark_info(
+    #        file_results="./Results/IQAE_SummaryResults.csv",
+    #        times_filename="./Results/IQAE_times_benchmark.csv"
+    #    )
+    #)
 
     #print(benchmark.report)
+    #benchmark.validate()
+    #benchmark.save("./json_stuff.json")
