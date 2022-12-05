@@ -268,7 +268,7 @@ class AE_BENCHMARK:
         start_time = datetime.now().astimezone().isoformat()
         for n_qbits in self.list_of_qbits:
             print("n_qbits: {}".format(n_qbits))
-            for interval in [0, 2]:
+            for interval in [0, 1]:
                 print("\t interval: {}".format(interval))
                 print("\t Executing Pre-Benchmark")
                 step_pre_metrics = self.pre_benchmark(n_qbits, interval)
@@ -292,7 +292,7 @@ class AE_BENCHMARK:
 
 if __name__ == "__main__":
 
-    AE = "IQAE"
+    AE = "RQAE"
     print(select_ae(AE))
     benchmark_arguments = {
         "pre_samples": 10,
