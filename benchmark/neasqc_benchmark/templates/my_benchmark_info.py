@@ -4,86 +4,71 @@ import psutil
 import pandas as pd
 from collections import OrderedDict
 
+if __package__ is None or __package__ == '':
+    from my_benchmark_summary import summarize_results
+else:
+    from .my_benchmark_summary import summarize_results
 
-def my_benchmark_kernel():
+
+def my_benchmark_kernel(**kwargs):
     """
     Name for the benchmark Kernel
     """
     return "AmplitudeEstimation"
 
-def my_starttime(times_filename="times_benchmark.csv"):
+def my_starttime(**kwargs):
     """
     Providing the start time of the benchmark
     """
-    pdf = pd.read_csv(times_filename, index_col=0)
-    return pdf["StartTime"][0]
+    start_time = "2022-12-12T16:46:57.268509+01:00"
+    return start_time
 
-def my_endtime(times_filename="times_benchmark.csv"):
+def my_endtime(**kwargs):
     """
     Providing the end time of the benchmark
     """
-    pdf = pd.read_csv(times_filename, index_col=0)
-    return pdf["EndTime"][0]
+    end_time = "2022-12-12T16:46:57.268509+01:00"
+    return end_time
 
-def my_timemethod():
+def my_timemethod(**kwargs):
     """
     Providing the method for getting the times
     """
-    return "time.time"
+    time_method = "None"
+    return time_method
 
-def my_programlanguage():
+def my_programlanguage(**kwargs):
     """
     Getting the programing language used for benchmark
     """
-    return platform.python_implementation()
+    program_language = "None"
+    return program_language
 
-def my_programlanguage_version():
+def my_programlanguage_version(**kwargs):
     """
     Getting the version of the programing language used for benchmark
     """
-    return platform.python_version()
+    language_version = "None"
+    return language_version
 
-def my_programlanguage_vendor():
+def my_programlanguage_vendor(**kwargs):
     """
     Getting the version of the programing language used for benchmark
     """
-    return "Unknow"
+    language_vendor = "None"
+    return language_vendor
 
-def my_api():
+def my_api(**kwargs):
     """
     Collect the information about the used APIs
     """
-    modules = []
-    list_of_apis = []
-    for module in list(sys.modules):
-        api = OrderedDict()
-        module = module.split('.')[0]
-        if module not in modules:
-            modules.append(module)
-            api["Name"] = module
-            try:
-                version = sys.modules[module].__version__
-            except AttributeError:
-                #print("NO VERSION: "+str(sys.modules[module]))
-                try:
-                    if  isinstance(sys.modules[module].version, str):
-                        version = sys.modules[module].version
-                        #print("\t Attribute Version"+version)
-                    else:
-                        version = sys.modules[module].version()
-                        #print("\t Methdod Version"+version)
-                except (AttributeError, TypeError) as error:
-                    #print('\t NO VERSION: '+str(sys.modules[module]))
-                    try:
-                        version = sys.modules[module].VERSION
-                    except AttributeError:
-                        #print('\t\t NO VERSION: '+str(sys.modules[module]))
-                        version = "Unknown"
-            api["Version"] = str(version)
-            list_of_apis.append(api)
+    api = OrderedDict()
+    api["Name"] = "None"
+    api["Version"] = "None"
+    list_of_apis = [api]
     return list_of_apis
 
-def my_quantum_compilation():
+def my_quantum_compilation(**kwargs):
     """
     Information about the quantum compilation part of the benchmark
     """
@@ -93,7 +78,7 @@ def my_quantum_compilation():
     q_compilation["Flags"] = "None"
     return [q_compilation]
 
-def my_classical_compilation():
+def my_classical_compilation(**kwargs):
     """
     Information about the classical compilation part of the benchmark
     """
@@ -103,69 +88,57 @@ def my_classical_compilation():
     c_compilation["Flags"] = "None"
     return [c_compilation]
 
-def my_other_info():
+def my_other_info(**kwargs):
     """
     Other important info user want to store in the final json.
     """
-    import json
-    sys.path.append("../../")
-    from benchmark.benchmark_utils import combination_for_list
-    lista_ae = [
-        "jsons/integral_mlae_configuration.json",
-        "jsons/integral_iqae_configuration.json",
-        "jsons/integral_rqae_configuration.json",
-        "jsons/integral_cqpeae_configuration.json",
-        "jsons/integral_iqpeae_configuration.json",
-    ]
-    info_json = lista_ae[1]
+
     other_info = OrderedDict()
-    with open(info_json) as json_file:
-        ae = json.load(json_file)
-    final_list = combination_for_list(ae)[0]
-    new_dict = {}
-    for key, value in final_list.items():
-        #print(key, value)
-        if value is not None:
-            other_info[key] = str(value)
-            #new_dict.update({key: str(value)})
+    other_info["None"] = None
+
     return other_info
 
 
-def my_benchmark_info(file_results, times_filename):
+def my_benchmark_info(**kwargs):
     """
     Complete WorkFlow for getting all the benchmar informated related info
     """
-    from my_benchmark_summary import summarize_results
     benchmark = OrderedDict()
-    benchmark["BenchmarkKernel"] = my_benchmark_kernel()
-    benchmark["StartTime"] = my_starttime(times_filename)
-    benchmark["EndTime"] = my_endtime(times_filename)
-    benchmark["ProgramLanguage"] = my_programlanguage()
-    benchmark["ProgramLanguageVersion"] = my_programlanguage_version()
-    benchmark["ProgramLanguageVendor"] = my_programlanguage_vendor()
-    benchmark["API"] = my_api()
-    benchmark["QuantumCompililation"] = my_quantum_compilation()
-    benchmark["ClassicalCompiler"] = my_classical_compilation()
-    benchmark["TimeMethod"] = my_timemethod()
-    benchmark["Results"] = summarize_results(file_results)
-    benchmark["OtherInfo"] = my_other_info()
+    benchmark["BenchmarkKernel"] = my_benchmark_kernel(**kwargs)
+    benchmark["StartTime"] = my_starttime(**kwargs)
+    benchmark["EndTime"] = my_endtime(**kwargs)
+    benchmark["ProgramLanguage"] = my_programlanguage(**kwargs)
+    benchmark["ProgramLanguageVersion"] = my_programlanguage_version(**kwargs)
+    benchmark["ProgramLanguageVendor"] = my_programlanguage_vendor(**kwargs)
+    benchmark["API"] = my_api(**kwargs)
+    benchmark["QuantumCompililation"] = my_quantum_compilation(**kwargs)
+    benchmark["ClassicalCompiler"] = my_classical_compilation(**kwargs)
+    benchmark["TimeMethod"] = my_timemethod(**kwargs)
+    benchmark["Results"] = summarize_results(**kwargs)
+    benchmark["OtherInfo"] = my_other_info(**kwargs)
     return benchmark
 
 if __name__ == "__main__":
     import json
     import jsonschema
-    json_file = open("NEASQC.Benchmark.V2.Schema_modified.json")
+    json_file = open("../NEASQC.Benchmark.V2.Schema_modified.json")
     schema = json.load(json_file)
     json_file.close()
+
+    ################## Configuration ##########################
+
+    configuration = {"None": None}
+
+    ######## Execute Validations #####################################
 
     schema_bench = schema['properties']['Benchmarks']['items']['properties']
     #print(schema_bench)
 
     print("Validate BenchmarkKernel")
-    print(my_benchmark_kernel())
+    print(my_benchmark_kernel(**configuration))
     try:
         jsonschema.validate(
-            instance=my_benchmark_kernel(),
+            instance=my_benchmark_kernel(**configuration),
             schema=schema_bench['BenchmarkKernel']
         )
         print("\t BenchmarkKernel is Valid")
@@ -173,10 +146,10 @@ if __name__ == "__main__":
         print(ex)
 
     print("Validate StartTime")
-    print(my_starttime())
+    print(my_starttime(**configuration))
     try:
         jsonschema.validate(
-            instance=my_starttime(),
+            instance=my_starttime(**configuration),
             schema=schema_bench['StartTime']
         )
         print("\t StartTime is Valid")
@@ -184,10 +157,10 @@ if __name__ == "__main__":
         print(ex)
 
     print("Validate EndTime")
-    print(my_endtime())
+    print(my_endtime(**configuration))
     try:
         jsonschema.validate(
-            instance=my_endtime(),
+            instance=my_endtime(**configuration),
             schema=schema_bench['EndTime']
         )
         print("\t EndTime is Valid")
@@ -195,10 +168,10 @@ if __name__ == "__main__":
         print(ex)
 
     print("Validate ProgramLanguage")
-    print(my_programlanguage())
+    print(my_programlanguage(**configuration))
     try:
         jsonschema.validate(
-            instance=my_programlanguage(),
+            instance=my_programlanguage(**configuration),
             schema=schema_bench['ProgramLanguage']
         )
         print("\t ProgramLanguage is Valid")
@@ -206,10 +179,10 @@ if __name__ == "__main__":
         print(ex)
 
     print("Validate ProgramLanguageVersion")
-    print(my_programlanguage_version())
+    print(my_programlanguage_version(**configuration))
     try:
         jsonschema.validate(
-            instance=my_programlanguage_version(),
+            instance=my_programlanguage_version(**configuration),
             schema=schema_bench['ProgramLanguageVersion']
         )
         print("\t ProgramLanguageVersion is Valid")
@@ -217,10 +190,10 @@ if __name__ == "__main__":
         print(ex)
 
     print("Validate ProgramLanguageVendor")
-    print(my_programlanguage_vendor())
+    print(my_programlanguage_vendor(**configuration))
     try:
         jsonschema.validate(
-            instance=my_programlanguage_vendor(),
+            instance=my_programlanguage_vendor(**configuration),
             schema=schema_bench['ProgramLanguageVendor']
         )
         print("\t ProgramLanguageVendor is Valid")
@@ -228,10 +201,10 @@ if __name__ == "__main__":
         print(ex)
 
     print("Validate API")
-    #print(my_api())
+    print(my_api(**configuration))
     try:
         jsonschema.validate(
-            instance=my_api(),
+            instance=my_api(**configuration),
             schema=schema_bench['API']
         )
         print("\t API is Valid")
@@ -239,11 +212,11 @@ if __name__ == "__main__":
         print(ex)
 
     print("Validate QuantumCompililation")
-    print(my_quantum_compilation())
-    #print(my_api())
+    print(my_quantum_compilation(**configuration))
+    #print(my_api(**configuration))
     try:
         jsonschema.validate(
-            instance=my_quantum_compilation(),
+            instance=my_quantum_compilation(**configuration),
             schema=schema_bench['QuantumCompililation']#['items']
         )
         print("\t QuantumCompililation is Valid")
@@ -251,10 +224,10 @@ if __name__ == "__main__":
         print(ex)
 
     print("Validate ClassicalCompiler")
-    print(my_classical_compilation())
+    print(my_classical_compilation(**configuration))
     try:
         jsonschema.validate(
-            instance=my_classical_compilation(),
+            instance=my_classical_compilation(**configuration),
             schema=schema_bench['ClassicalCompiler']#['items']
         )
         print("\t ClassicalCompiler is Valid")
@@ -265,7 +238,7 @@ if __name__ == "__main__":
     #print(summarize_results("Benchmark.csv"))
     try:
         jsonschema.validate(
-            instance=my_timemethod(),
+            instance=my_timemethod(**configuration),
             schema=schema_bench['TimeMethod']
         )
         print("\t TimeMethod is Valid")
@@ -273,13 +246,11 @@ if __name__ == "__main__":
         print(ex)
 
     print("Validate Benchmark INFO")
+    print(my_benchmark_info(**configuration))
     schema_bench = schema['properties']['Benchmarks']
     try:
         jsonschema.validate(
-            instance=my_benchmark_info(
-                file_results="SummaryResults.csv",
-                times_filename="times_benchmark.csv"
-            ),
+            instance=my_benchmark_info(**configuration),
             schema=schema_bench['items']
         )
         print("\t Benchmark is Valid")

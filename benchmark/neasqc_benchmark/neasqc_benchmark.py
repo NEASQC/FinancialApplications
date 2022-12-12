@@ -64,20 +64,21 @@ class BENCHMARK:
         self.report["Benchmarks"] = benchmark_info
 
     def exe(self, info):
-        self.set_organisation(info["ReportOrganization"]) 
-        self.set_machine_name(info["MachineName"]) 
-        self.set_qpu_model(info["QPUModel"]) 
-        self.set_qpu_description(info["QPUDescription"]) 
-        self.set_cpu_model(info["CPUModel"]) 
-        self.set_frecuency(info["Frequency"]) 
-        self.set_network(info["Network"]) 
-        self.set_qpu_cpu_connection(info["QPUCPUConnection"]) 
-        self.set_benchmark_info(info["Benchmarks"]) 
+        self.set_organisation(info["ReportOrganization"])
+        self.set_machine_name(info["MachineName"])
+        self.set_qpu_model(info["QPUModel"])
+        self.set_qpu_description(info["QPUDescription"])
+        self.set_cpu_model(info["CPUModel"])
+        self.set_frecuency(info["Frequency"])
+        self.set_network(info["Network"])
+        self.set_qpu_cpu_connection(info["QPUCPUConnection"])
+        self.set_benchmark_info(info["Benchmarks"])
         self.validate()
         self.save(info["json_file_name"])
 
     def validate(self):
         print("Validate REPORT")
+        print(self.report)
         try:
             jsonschema.validate(
                 instance=self.report,
@@ -95,47 +96,26 @@ class BENCHMARK:
 if __name__ == "__main__":
     print("OPA")
 
-    #import my_benchmark_info
-    import my_environment_info
-    import my_benchmark_info
+    from templates import my_environment_info, my_benchmark_info
+    #import templates
+
+    ################## Configuration ##########################
+
+    configuration = {"None": None}
 
     benchmark_stuff = {
-        "ReportOrganization": my_environment_info.my_organisation(),
-        "MachineName": my_environment_info.my_machine_name(),
-        "QPUModel": my_environment_info.my_qpu_model(),
-        "QPUDescription": my_environment_info.my_qpu(),
-        "CPUModel": my_environment_info.my_cpu_model(),
-        "Frequency": my_environment_info.my_frecuency(),
-        "Network": my_environment_info.my_network(),
-        "QPUCPUConnection":my_environment_info.my_QPUCPUConnection(),
-        "Benchmarks": my_benchmark_info.my_benchmark_info(
-            file_results="./Results/IQAE_SummaryResults.csv",
-            times_filename="./Results/IQAE_times_benchmark.csv"
-        ),
+        "ReportOrganization": my_environment_info.my_organisation(**configuration),
+        "MachineName": my_environment_info.my_machine_name(**configuration),
+        "QPUModel": my_environment_info.my_qpu_model(**configuration),
+        "QPUDescription": my_environment_info.my_qpu(**configuration),
+        "CPUModel": my_environment_info.my_cpu_model(**configuration),
+        "Frequency": my_environment_info.my_frecuency(**configuration),
+        "Network": my_environment_info.my_network(**configuration),
+        "QPUCPUConnection":my_environment_info.my_QPUCPUConnection(**configuration),
+        "Benchmarks": my_benchmark_info.my_benchmark_info(**configuration),
         "json_file_name": "./json_stuff.json"
     }
-    
 
     benchmark = BENCHMARK()
     benchmark.exe(benchmark_stuff)
 
-    #benchmark = BENCHMARK()
-    #benchmark.set_organisation(my_environment_info.my_organisation())
-    #benchmark.set_machine_name(my_environment_info.my_machine_name())
-    #benchmark.set_qpu_model(my_environment_info.my_qpu_model())
-    #benchmark.set_qpu_description(my_environment_info.my_qpu())
-    #benchmark.set_cpu_model(my_environment_info.my_cpu_model())
-    #benchmark.set_frecuency(my_environment_info.my_frecuency())
-    #benchmark.set_network(my_environment_info.my_network())
-    #benchmark.set_qpu_cpu_connection(my_environment_info.my_QPUCPUConnection())
-    ##Execute Benchmark
-    #benchmark.set_benchmark_info(
-    #    my_benchmark_info.my_benchmark_info(
-    #        file_results="./Results/IQAE_SummaryResults.csv",
-    #        times_filename="./Results/IQAE_times_benchmark.csv"
-    #    )
-    #)
-
-    #print(benchmark.report)
-    #benchmark.validate()
-    #benchmark.save("./json_stuff.json")
