@@ -17,7 +17,7 @@
         "gamma": [null],
         "q": [null],
 
-        "integral" : [0, 1, 2],
+        "integral" : [0],
         "multiplexor":  [true],
 
         "mcz_qlm": [false],

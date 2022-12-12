@@ -3,15 +3,27 @@ import psutil
 from collections import OrderedDict
 
 def my_organisation():
+    """
+    Given information about the organisation how uploads the benchmark
+    """
     return "CESGA"
 
 def my_machine_name():
+    """
+    Name of the machine where the benchmark was performed
+    """
     return platform.node()
 
 def my_qpu_model():
+    """
+    Name of the model of the QPU
+    """
     return "QLM"
 
 def my_qpu():
+    """
+    Complete info about the used QPU
+    """
     #Basic schema
     #QPUDescription = {
     #    "NumberOfQPUs": 1,
@@ -68,14 +80,23 @@ def my_qpu():
     return qpu_description
 
 def my_cpu_model():
+    """
+    model of the cpu used in the benchmark
+    """
     return platform.processor()
 
 def my_frecuency():
+    """
+    Frcuency of the used CPU
+    """
     #Use the nominal frequency. Here, it collects the maximum frequency
     #print(psutil.cpu_freq())
     return psutil.cpu_freq().max/1000
 
 def my_network():
+    """
+    Network connections if several QPUs are used
+    """
     network = OrderedDict()
     network["Model"] = "None"
     network["Version"] = "None"
@@ -83,6 +104,9 @@ def my_network():
     return network
 
 def my_QPUCPUConnection():
+    """
+    Connection between the QPU and the CPU used in the benchmark
+    """
     #
     # Provide the information about how the QPU is connected to the CPU
     #
@@ -92,6 +116,9 @@ def my_QPUCPUConnection():
     return qpuccpu_conn
 
 if __name__ == "__main__":
+    """
+    For comparing the results of the environment info vs the jsonschema
+    """
     import json
     import jsonschema
     json_file = open("NEASQC.Benchmark.V2.Schema_modified.json")

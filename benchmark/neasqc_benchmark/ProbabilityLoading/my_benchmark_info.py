@@ -6,26 +6,47 @@ from collections import OrderedDict
 
 
 def my_benchmark_kernel():
-    return "AmplitudeEstimation"
+    """
+    Name for the benchmark Kernel
+    """
+    return "ProbabilityLoading"
 
 def my_starttime(times_filename="times_benchmark.csv"):
+    """
+    Providing the start time of the benchmark
+    """
     pdf = pd.read_csv(times_filename, index_col=0)
     return pdf["StartTime"][0]
-    
+
 def my_endtime(times_filename="times_benchmark.csv"):
+    """
+    Providing the end time of the benchmark
+    """
     pdf = pd.read_csv(times_filename, index_col=0)
     return pdf["EndTime"][0]
 
 def my_timemethod():
+    """
+    Providing the method for getting the times
+    """
     return "time.time"
 
 def my_programlanguage():
+    """
+    Getting the programing language used for benchmark
+    """
     return platform.python_implementation()
 
 def my_programlanguage_version():
+    """
+    Getting the version of the programing language used for benchmark
+    """
     return platform.python_version()
 
 def my_programlanguage_vendor():
+    """
+    Getting the version of the programing language used for benchmark
+    """
     return "Unknow"
 
 def my_api():
@@ -63,7 +84,9 @@ def my_api():
     return list_of_apis
 
 def my_quantum_compilation():
-
+    """
+    Information about the quantum compilation part of the benchmark
+    """
     q_compilation = OrderedDict()
     q_compilation["Step"] = "None"
     q_compilation["Version"] = "None"
@@ -71,83 +94,28 @@ def my_quantum_compilation():
     return [q_compilation]
 
 def my_classical_compilation():
+    """
+    Information about the classical compilation part of the benchmark
+    """
     c_compilation = OrderedDict()
     c_compilation["Step"] = "None"
     c_compilation["Version"] = "None"
     c_compilation["Flags"] = "None"
     return [c_compilation]
 
-#def summarize_results(benchmark_file):
-#
-#
-#    pdf = pd.read_csv(benchmark_file, index_col=0, sep=";")
-#    n_qbits = list(set(pdf["n_qbits"]))
-#    intervals = list(set(pdf["interval"]))
-#    results = []
-#    metrics = [
-#        "absolute_error_exact", "relative_error_exact"
-#        "absolute_error_sum", "oracle_calls"
-#    ]
-#
-#    for n_ in n_qbits:
-#        for interval in intervals:
-#            result = OrderedDict()
-#            result["NumberOfQubits"] = n_
-#            result["QubitPlacement"] = list(range(n_))#[i for i in range(n_)]
-#            result["QPUs"] = [1]
-#            result["CPUs"] = psutil.Process().cpu_affinity()
-#            result["Interval"] = interval
-#            step_pdf = pdf[(pdf["interval"] == interval) & (pdf["n_qbits"] == n_)]
-#            #print(step_pdf)
-#            result["TotalTime"] = step_pdf["elapsed_time"].mean()
-#            result["SigmaTotalTime"] = step_pdf["elapsed_time"].std()
-#            result["QuantumTime"] = step_pdf["quantum_time"].mean()
-#            result["SigmaQuantumTime"] = step_pdf["quantum_time"].std()
-#            result["ClassicalTime"] = (step_pdf["elapsed_time"] - step_pdf["quantum_time"]).mean()
-#            result["SigmaClassicalTime"] = (step_pdf["elapsed_time"] - step_pdf["quantum_time"]).std()
-#            metrics = []
-#            for metric_name in metrics:
-#                metric = OrderedDict()
-#                metric["Metric"] = metric_name
-#                metric["Value"] = step_pdf[metric_name].mean()
-#                metric["STD"] = step_pdf[metric_name].std()
-#                metric["MIN"] = step_pdf[metric_name].min()
-#                metric["MAX"] = step_pdf[metric_name].max()
-#                metrics.append(metric)
-#            result["Metrics"] = metrics
-#            results.append(result)
-#    return results
-#
-
 def my_other_info():
-    import json
-    sys.path.append("../../")
-    from benchmark.benchmark_utils import combination_for_list
-    lista_ae = [
-        "jsons/integral_mlae_configuration.json",
-        "jsons/integral_iqae_configuration.json",
-        "jsons/integral_rqae_configuration.json",
-        "jsons/integral_cqpeae_configuration.json",
-        "jsons/integral_iqpeae_configuration.json",
-    ]
-    info_json = lista_ae[1]
+    """
+    Other important info user want to store in the final json.
+    """
     other_info = OrderedDict()
-    with open(info_json) as json_file:
-        ae = json.load(json_file)
-    final_list = combination_for_list(ae)[0]
-    
-    new_dict = {}
-    for key, value in final_list.items():
-        #print(key, value)
-        if value is not None:
-            other_info[key] = str(value)
-            #new_dict.update({key: str(value)})
+    other_info["load_method"] = "multiplexor"
     return other_info
 
 
-def my_benchmark_info(
-        file_results="./SummaryResults.csv", times_filename="./times_benchmark.csv"
-    ):
+def my_benchmark_info(file_results, times_filename):
+    """
+    Complete WorkFlow for getting all the benchmar informated related info
+    """
     from my_benchmark_summary import summarize_results
     benchmark = OrderedDict()
     benchmark["BenchmarkKernel"] = my_benchmark_kernel()
@@ -160,7 +128,7 @@ def my_benchmark_info(
     benchmark["QuantumCompililation"] = my_quantum_compilation()
     benchmark["ClassicalCompiler"] = my_classical_compilation()
     benchmark["TimeMethod"] = my_timemethod()
-    benchmark["Results"] = summarize_results(file_results)
+    #benchmark["Results"] = summarize_results(file_results)
     benchmark["OtherInfo"] = my_other_info()
     return benchmark
 
