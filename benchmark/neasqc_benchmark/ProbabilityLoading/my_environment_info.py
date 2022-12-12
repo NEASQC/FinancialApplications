@@ -2,25 +2,31 @@ import platform
 import psutil
 from collections import OrderedDict
 
-def my_organisation():
+def my_organisation(**kwargs):
     """
     Given information about the organisation how uploads the benchmark
     """
-    return "CESGA"
+    #name = "None"
+    name = "CESGA"
+    return name
 
-def my_machine_name():
+def my_machine_name(**kwargs):
     """
     Name of the machine where the benchmark was performed
     """
-    return platform.node()
+    #machine_name = "None"
+    machine_name = platform.node()
+    return machine_name
 
-def my_qpu_model():
+def my_qpu_model(**kwargs):
     """
     Name of the model of the QPU
     """
-    return "QLM"
+    #qpu_model = "None"
+    qpu_model = "QLM"
+    return qpu_model
 
-def my_qpu():
+def my_qpu(**kwargs):
     """
     Complete info about the used QPU
     """
@@ -79,21 +85,25 @@ def my_qpu():
 
     return qpu_description
 
-def my_cpu_model():
+def my_cpu_model(**kwargs):
     """
     model of the cpu used in the benchmark
     """
-    return platform.processor()
+    #cpu_model = "None"
+    cpu_model = platform.processor()
+    return cpu_model
 
-def my_frecuency():
+def my_frecuency(**kwargs):
     """
     Frcuency of the used CPU
     """
     #Use the nominal frequency. Here, it collects the maximum frequency
     #print(psutil.cpu_freq())
-    return psutil.cpu_freq().max/1000
+    #cpu_frec = 0
+    cpu_frec = psutil.cpu_freq().max/1000
+    return cpu_frec
 
-def my_network():
+def my_network(**kwargs):
     """
     Network connections if several QPUs are used
     """
@@ -103,7 +113,7 @@ def my_network():
     network["Topology"] = "None"
     return network
 
-def my_QPUCPUConnection():
+def my_QPUCPUConnection(**kwargs):
     """
     Connection between the QPU and the CPU used in the benchmark
     """
@@ -121,7 +131,7 @@ if __name__ == "__main__":
     """
     import json
     import jsonschema
-    json_file = open("NEASQC.Benchmark.V2.Schema_modified.json")
+    json_file = open("../NEASQC.Benchmark.V2.Schema_modified.json")
     schema = json.load(json_file)
     json_file.close()
 
@@ -221,6 +231,5 @@ if __name__ == "__main__":
         print("\tQPUCPUConnection is Valid")
     except jsonschema.exceptions.ValidationError as ex:
         print(ex)
-
 
 

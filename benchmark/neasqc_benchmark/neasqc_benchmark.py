@@ -78,7 +78,7 @@ class BENCHMARK:
 
     def validate(self):
         print("Validate REPORT")
-        print(self.report)
+        #print(self.report)
         try:
             jsonschema.validate(
                 instance=self.report,
@@ -96,12 +96,17 @@ class BENCHMARK:
 if __name__ == "__main__":
     print("OPA")
 
-    from templates import my_environment_info, my_benchmark_info
+    #from templates import my_environment_info, my_benchmark_info
+    from ProbabilityLoading import my_environment_info, my_benchmark_info
     #import templates
 
     ################## Configuration ##########################
 
-    configuration = {"None": None}
+    #configuration = {"None": None}
+    configuration = {
+        "times_filename" : "ProbabilityLoading/save_times_benchmark.csv",
+        "benchmark_file" : "ProbabilityLoading/save_SummaryResults.csv"
+    }
 
     benchmark_stuff = {
         "ReportOrganization": my_environment_info.my_organisation(**configuration),

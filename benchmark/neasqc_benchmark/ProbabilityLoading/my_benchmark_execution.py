@@ -1,35 +1,25 @@
 """
-Scripts for execute the complete Benchmar of an
-Amplitude Estimation Algorithm
+For executing Probability Loading kernel benchmark
 """
 
 import sys
 import json
 from datetime import datetime
-from scipy.stats import norm
 import pandas as pd
-sys.path.append("../../../")
-from QQuantLib.utils.qlm_solver import get_qpu
 
-
-
-
-def run_code(n_qbits, configuration, repetitions):
+def run_code(n_qbits, repetitions, **kwargs):
     """
-    This method computes the integral of the sine function using
-    a properly configured AE method, in a fixed interval integration
-    for a domain discretization in n qubits
+    For configuration and execution of the benchmark kernel.
 
     Parameters
     ----------
 
     n_qbits : int
         number of qubits used for domain discretization
-    configuration : dictionary
-        dictionary with the complete configuration of the
-        benchmarked algorihtm
     repetitions : list
-        number of repetitions
+        number of repetitions for the integral
+    kwargs : keyword arguments
+        for configuration of the benchmark kernel
 
     Returns
     _______
@@ -38,33 +28,37 @@ def run_code(n_qbits, configuration, repetitions):
         DataFrame with the desired metrics obtained for the integral computation
 
     """
-    from load_probabilities import LoadProbabilityDensity
-
     if n_qbits is None:
         raise ValueError("n_qbits CAN NOT BE None")
     if repetitions is None:
         raise ValueError("samples CAN NOT BE None")
 
+    #Here the code for configuring and execute the benchmark kernel
+
+    from load_probabilities import LoadProbabilityDensity
+    kernel_configuration = kwargs.get("kernel_configuration", None)
+    if kernel_configuration is None:
+        raise ValueError("kernel_configuration can not be None")
+
     list_of_metrics = []
-    configuration.update({"number_of_qbits": n_qbits})
+    kernel_configuration.update({"number_of_qbits": n_qbits})
     for i in range(repetitions[0]):
-        prob_dens = LoadProbabilityDensity(**configuration)
+        prob_dens = LoadProbabilityDensity(**kernel_configuration)
         prob_dens.exe()
         list_of_metrics.append(prob_dens.pdf)
     metrics = pd.concat(list_of_metrics)
     metrics.reset_index(drop=True, inplace=True)
+
     return metrics
 
-def compute_samples(metrics, **kwargs):
+def compute_samples(**kwargs):
     """
-    This functions computes the number of executions of the benchmark for
-    assure an error r with a confidence of alpha
+    This functions computes the number of executions of the benchmark
+    for assure an error r with a confidence of alpha
 
     Parameters
     ----------
 
-    metrics : pandas DataFrame
-        DataFrame with the results of pre-benchmark step
     kwargs : keyword arguments
         For configuring the sampling computation
 
@@ -75,19 +69,28 @@ def compute_samples(metrics, **kwargs):
         DataFrame with the number of executions for each integration interval
 
     """
-    
+
     #Configuration for sampling computations
 
     #Desired Error in the benchmark metrics
     relative_error = kwargs.get("relative_error", 0.1)
+
     #Desired Confidence level
     alpha = kwargs.get("alpha", 0.05)
-    #Minimum and Maximum number of samples
-    min_meas = kwargs.get("min_meas", 5)
-    max_meas = kwargs.get("max_meas", None)
+
+
+    #Code for computing the number of samples for getting the desired
+    #statististical significance. Depends on benchmark kernel
+
+    from scipy.stats import norm
     #Columns desired for sampling computing
     columns = kwargs.get("columns", None)
+    #geting the metrics from pre-benchmark step
+    metrics = kwargs.get("pre_metrics", None)
 
+    print("###############################")
+    print(metrics)
+    print("###############################")
     #Compute mean and sd by integration interval
     std_ = metrics.groupby("load_method").std()
     std_.reset_index(inplace=True)
@@ -102,7 +105,13 @@ def compute_samples(metrics, **kwargs):
     samples_ = samples_.max(axis=1).astype(int)
     print(samples_)
     samples_.name = "samples"
-    #samples_ = pd.concat([mean_["interval"], samples_], axis=1)
+
+    #If user wants limit the number of samples
+
+    #Minimum and Maximum number of samples
+    min_meas = kwargs.get("min_meas", 5)
+    max_meas = kwargs.get("max_meas", None)
+    print(samples_)
     samples_.clip(upper=max_meas, lower=min_meas, inplace=True)
     return list(samples_)
 
@@ -110,12 +119,16 @@ def summarize_resuts(csv_results):
     """
     Create summary with statistics
     """
+
+    #Code for summarize the benchamark results. Depending of the
+    #kernel of the benchmark
+
     pdf = pd.read_csv(csv_results, index_col=0, sep=";")
     pdf["classic_time"] = pdf["elapsed_time"] - pdf["quantum_time"]
     results = pdf.groupby(["load_method", "n_qbits"]).agg(
         ["mean", "std", "count"])
-    return results
 
+    return results
 
 class AE_BENCHMARK:
     """
@@ -124,17 +137,14 @@ class AE_BENCHMARK:
     """
 
 
-    def __init__(self, bench_conf=None, **kwargs):
+    def __init__(self, **kwargs):
         """
 
         Method for initializing the class
 
         """
         #Configurtion of benchmarked algorithm or routine
-        self.bench_conf = bench_conf
         self.kwargs = kwargs
-        if self.bench_conf is None:
-            raise ValueError("bench_conf CAN NOT BE None")
 
         #Benchmark Configuration
 
@@ -142,6 +152,9 @@ class AE_BENCHMARK:
         self.pre_samples = self.kwargs.get("pre_samples", 10)
         #Saving pre benchmark step results
         self.pre_save = self.kwargs.get("pre_save", True)
+        #For executing or not the benchmark step
+        self.pre_benchmark = self.kwargs.get("pre_benchmark", True)
+
         #Name for saving the pre benchmark step results
         self.save_name = self.kwargs.get("save_name", None)
         #NNumber of qbits
@@ -177,23 +190,27 @@ class AE_BENCHMARK:
         start_time = datetime.now().astimezone().isoformat()
         for n_qbits in self.list_of_qbits:
             print("n_qbits: {}".format(n_qbits))
-            print("\t Executing Pre-Benchmark")
-            #Pre benchmark step
-            pre_metrics = run_code(
-                n_qbits, self.bench_conf, self.pre_samples
-            )
-            print(pre_metrics)
-            #Save Pre-benchmark steps
-            post_name = "_qubits_{}_pre.csv".format(n_qbits)
-            pre_save_name = self.save_name + post_name
-            self.save(self.pre_save, pre_save_name, pre_metrics, "w")
+
+            if self.pre_benchmark:
+                print("\t Executing Pre-Benchmark")
+                #Pre benchmark step
+                pre_metrics = run_code(
+                    n_qbits, self.pre_samples, **self.kwargs
+                )
+                #Save Pre-benchmark steps
+                post_name = "_qubits_{}_pre.csv".format(n_qbits)
+                pre_save_name = self.save_name + post_name
+                self.save(self.pre_save, pre_save_name, pre_metrics, "w")
+                #Using pre benchmark results for computing the number of
+                #repetitions
+                self.kwargs.update({"pre_metrics": pre_metrics})
 
             #Compute needed samples for desired
             #statistical significance
-            samples_ = compute_samples(pre_metrics, **self.kwargs)
+            samples_ = compute_samples(**self.kwargs)
             print("\t step samples: {}".format(samples_))
             metrics = run_code(
-                n_qbits, self.bench_conf, samples_
+                n_qbits, samples_, **self.kwargs
             )
             self.save(self.save, self.csv_results, metrics, "a")
         end_time = datetime.now().astimezone().isoformat()
@@ -207,24 +224,31 @@ class AE_BENCHMARK:
         results = summarize_resuts(self.csv_results)
         results.to_csv(self.summary_results)
 
+
+
 if __name__ == "__main__":
 
     benchmark_arguments = {
+        "pre_benchmark": True,
         "pre_samples": [10],
         "pre_save": True,
-        "save_name": "./Results/LP",
+        "save_name": "./save",
         "relative_error": 0.1,
         "alpha": 0.05,
-        "min_meas": 10,
-        "max_meas": None,
-        "list_of_qbits": [4],
-        "columns":["elapsed_time"]
+        "min_meas": 5,
+        "max_meas": 10,
+        "list_of_qbits": [4],#, 6, 8],
     }
-    algorithm_configuration = {
-       "load_method" : "brute_force"
-    }
-    ae_bench = AE_BENCHMARK(algorithm_configuration, **benchmark_arguments)
+
+    #Columns for metrics
+    benchmark_arguments.update({
+        "columns":["elapsed_time", "KS", "KL", "chi2"]
+    })
+        
+
+    #Configuration for the benchmark kernel
+    kernel_configuration = {"load_method" : "brute_force"}
+    benchmark_arguments.update({"kernel_configuration": kernel_configuration})
+    ae_bench = AE_BENCHMARK(**benchmark_arguments)
     ae_bench.exe()
-
-
 
