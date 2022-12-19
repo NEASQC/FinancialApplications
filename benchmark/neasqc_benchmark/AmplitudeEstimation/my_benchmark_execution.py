@@ -39,7 +39,7 @@ def run_code(n_qbits, repetitions, **kwargs):
         raise ValueError("samples CAN NOT BE None")
 
     #Here the code for configuring and execute the benchmark kernel
-    ae_problem = kwargs.get("ae_problem")
+    ae_problem_ = kwargs.get("ae_problem")
     #metrics = pd.DataFrame()
     #return metrics
     linalg_qpu = get_qpu(False)
@@ -50,12 +50,10 @@ def run_code(n_qbits, repetitions, **kwargs):
     list_of_metrics = []
     for j, interval in enumerate([0, 1]):
         for i in range(repetitions[j]):
-            metrics, pdf = sine_integral(n_qbits, interval, ae_problem)
+            metrics, pdf = sine_integral(n_qbits, interval, ae_problem_)
             list_of_metrics.append(metrics[columns_])
     metrics = pd.concat(list_of_metrics)
-    print("##########################")
     print(metrics)
-    print("##########################")
     metrics.reset_index(drop=True, inplace=True)
     return metrics
 
@@ -112,13 +110,15 @@ def compute_samples(**kwargs):
     samples_.clip(upper=max_meas, lower=min_meas, inplace=True)
     return list(samples_)
 
-def summarize_resuts(csv_results):
+def summarize_results(**kwargs):
     """
     Create summary with statistics
     """
 
     #Code for summarize the benchamark results. Depending of the
     #kernel of the benchmark
+    folder = kwargs.get("saving_folder")
+    csv_results = folder + kwargs.get("csv_results")
 
     #results = pd.DataFrame()
     pdf = pd.read_csv(csv_results, index_col=0, sep=";")
@@ -158,9 +158,13 @@ class KERNEL_BENCHMARK:
         self.list_of_qbits = self.kwargs.get("list_of_qbits", [4])
 
         #Configure names for CSV files
-        self.benchmark_times = self.save_name + "_times_benchmark.csv"
-        self.csv_results = self.save_name + "_benchmark.csv"
-        self.summary_results = self.save_name + "_SummaryResults.csv"
+        self.saving_folder = self.kwargs.get("saving_folder")
+        self.benchmark_times = self.saving_folder + \
+            self.kwargs.get("benchmark_times")
+        self.csv_results = self.saving_folder + \
+            self.kwargs.get("csv_results")
+        self.summary_results = self.saving_folder + \
+            self.kwargs.get("summary_results")
 
         #Attributes for metrics
         self.pre_metrics = None
@@ -194,9 +198,9 @@ class KERNEL_BENCHMARK:
                 pre_metrics = run_code(
                     n_qbits, self.pre_samples, **self.kwargs
                 )
-                #Save Pre-benchmark steps
-                post_name = "_qubits_{}_pre.csv".format(n_qbits)
-                pre_save_name = self.save_name + post_name
+                #For saving pre-benchmark step results
+                pre_save_name = self.saving_folder + \
+                    "pre_benchmark_step_{}.csv".format(n_qbits)
                 self.save(self.pre_save, pre_save_name, pre_metrics, "w")
                 #Using pre benchmark results for computing the number of
                 #repetitions
@@ -218,7 +222,7 @@ class KERNEL_BENCHMARK:
         #Saving Time Info
         pdf_times.to_csv(self.benchmark_times)
         #Summarize Results
-        results = summarize_resuts(self.csv_results)
+        results = summarize_results(**self.kwargs)
         results.to_csv(self.summary_results)
 
 
@@ -229,19 +233,29 @@ if __name__ == "__main__":
 
     AE = "IQAE"
     benchmark_arguments = {
+        #Pre benchmark sttuff
         "pre_benchmark": True,
         "pre_samples": [10, 10],
         "pre_save": True,
-        "save_name": "Results/{}".format(AE),
+        #Saving stuff
+        "saving_folder": "./Results/",
+        "benchmark_times": "{}_times_benchmark.csv".format(AE),
+        "csv_results": "{}_benchmark.csv".format(AE),
+        "summary_results": "{}_SummaryResults.csv".format(AE),
+        #Computing Repetitions stuff
         "relative_error": 0.1,
         "alpha": 0.05,
         "min_meas": 5,
         "max_meas": 10,
-        "list_of_qbits": [4],#, 6, 8],
+        #List number of qubits tested
+        "list_of_qbits": [4],
     }
+    #Setting the AE algorithm configuration
     ae_problem = select_ae(AE)
     json_object = json.dumps(ae_problem)
-    with open("Results/benchmark_ae_conf.json", "w") as outfile:
+    #Writing the AE algorithm configuration
+    conf_file = benchmark_arguments["saving_folder"] + "benchmark_ae_conf.json"
+    with open(conf_file, "w") as outfile:
         outfile.write(json_object)
     #Columns for metrics
     columns = [
