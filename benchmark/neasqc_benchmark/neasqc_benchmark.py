@@ -94,18 +94,21 @@ class BENCHMARK:
 
 
 if __name__ == "__main__":
-    print("OPA")
 
     #from templates import my_environment_info, my_benchmark_info
-    from ProbabilityLoading import my_environment_info, my_benchmark_info
+    #from ProbabilityLoading import my_environment_info, my_benchmark_info
+    from AmplitudeEstimation import my_environment_info, my_benchmark_info
     #import templates
 
     ################## Configuration ##########################
 
     #configuration = {"None": None}
     configuration = {
-        "times_filename" : "ProbabilityLoading/save_times_benchmark.csv",
-        "benchmark_file" : "ProbabilityLoading/save_SummaryResults.csv"
+        #"times_filename" : "ProbabilityLoading/Results/PL_brute_force_times_benchmark.csv",
+        #"benchmark_file" : "ProbabilityLoading/Results/PL_brute_force_SummaryResults.csv"
+        "times_filename" : "AmplitudeEstimation/Results/IQAE_times_benchmark.csv",
+        "benchmark_file" : "AmplitudeEstimation/Results/IQAE_SummaryResults.csv",
+        "ae_config": "AmplitudeEstimation/Results/benchmark_ae_conf.json"
     }
 
     benchmark_stuff = {
@@ -118,7 +121,7 @@ if __name__ == "__main__":
         "Network": my_environment_info.my_network(**configuration),
         "QPUCPUConnection":my_environment_info.my_QPUCPUConnection(**configuration),
         "Benchmarks": my_benchmark_info.my_benchmark_info(**configuration),
-        "json_file_name": "./json_stuff.json"
+        "json_file_name": "AmplitudeEstimation/Results/IQAE_json_stuff.json"
     }
 
     benchmark = BENCHMARK()
