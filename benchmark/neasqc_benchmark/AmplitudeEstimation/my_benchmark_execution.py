@@ -127,12 +127,12 @@ def summarize_resuts(csv_results):
 
     return results
 
-class AE_BENCHMARK:
+
+class KERNEL_BENCHMARK:
     """
-    Class for execute an AE benchmark
+    Class for execute a Kernerl benchmark
 
     """
-
 
     def __init__(self, **kwargs):
         """
@@ -253,5 +253,5 @@ if __name__ == "__main__":
         "ae_problem": ae_problem,
         "columns":columns
     })
-    ae_bench = AE_BENCHMARK(**benchmark_arguments)
+    ae_bench = KERNEL_BENCHMARK(**benchmark_arguments)
     ae_bench.exe()

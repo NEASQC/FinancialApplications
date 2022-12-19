@@ -60,9 +60,6 @@ def compute_samples(**kwargs):
 
     #Configuration for sampling computations
 
-    #Desired Error in the benchmark metrics
-    relative_error = kwargs.get("relative_error", 0.1)
-
     #Desired Confidence level
     alpha = kwargs.get("alpha", 0.05)
 
@@ -92,9 +89,9 @@ def summarize_resuts(csv_results):
 
     return results
 
-class AE_BENCHMARK:
+class KERNEL_BENCHMARK:
     """
-    Class for execute an AE benchmark
+    Class for execute a Kernerl benchmark
 
     """
 
@@ -195,11 +192,10 @@ if __name__ == "__main__":
         "pre_samples": [10, 10],
         "pre_save": True,
         "save_name": "./save",
-        "relative_error": 0.1,
         "alpha": 0.05,
         "min_meas": 5,
         "max_meas": 10,
         "list_of_qbits": [4],#, 6, 8],
     }
-    ae_bench = AE_BENCHMARK(**benchmark_arguments)
-    ae_bench.exe()
+    kernel_bench = KERNEL_BENCHMARK(**benchmark_arguments)
+    kernel_bench.exe()

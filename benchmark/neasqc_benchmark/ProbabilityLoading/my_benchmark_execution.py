@@ -130,9 +130,9 @@ def summarize_resuts(csv_results):
 
     return results
 
-class AE_BENCHMARK:
+class KERNEL_BENCHMARK:
     """
-    Class for execute an AE benchmark
+    Class for execute a Kernerl benchmark
 
     """
 
@@ -232,12 +232,12 @@ if __name__ == "__main__":
         "pre_benchmark": True,
         "pre_samples": [10],
         "pre_save": True,
-        "save_name": "./save",
+        "save_name": "Results/PL_brute_force",
         "relative_error": 0.1,
         "alpha": 0.05,
         "min_meas": 5,
-        "max_meas": 10,
-        "list_of_qbits": [4],#, 6, 8],
+        "max_meas": None,
+        "list_of_qbits": [4, 6],
     }
 
     #Columns for metrics
@@ -249,6 +249,6 @@ if __name__ == "__main__":
     #Configuration for the benchmark kernel
     kernel_configuration = {"load_method" : "brute_force"}
     benchmark_arguments.update({"kernel_configuration": kernel_configuration})
-    ae_bench = AE_BENCHMARK(**benchmark_arguments)
+    ae_bench = KERNEL_BENCHMARK(**benchmark_arguments)
     ae_bench.exe()
 
