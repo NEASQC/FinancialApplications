@@ -52,17 +52,17 @@ def likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
 def log_likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
     r"""
     Calculates log of the likelihood from Suzuki paper.
-                                                                         
     Notes
+
     -----
     .. math::
         \log{l_k(\theta|h_k)} = 2h_k\log\big[\sin\left((2m_k+1) \
         \theta\right)\big] +2(n_k-h_k)\log\big[\cos\left((2m_k+1) \
         \theta\right)\big]
-                                                                         
+
     Parameters
     ----------
-                                                                         
+
     theta : float
         Angle (radians) for calculating the probability of measure a
         positive event.
@@ -72,13 +72,13 @@ def log_likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
         number of total events measured for the specific  m_k
     h_k : int
         number of positive events measured for each m_k
-                                                                         
+
     Returns
     ----------
-                                                                         
+
     float
         Gives the log Likelihood p(h_k with m_k amplifications|theta)
-                                                                         
+
     """
     theta_ = (2 * m_k + 1) * theta
     p_0 = np.sin(theta_) ** 2
@@ -91,15 +91,15 @@ def cost_function(angle: float, m_k: list, n_k: list, h_k: list) -> float:
     r"""
     This method calculates the -Likelihood of angle theta
     for a given schedule m_k,n_k
-                                                                           
+
     Notes
     -----
     .. math::
         L(\theta,\mathbf{h}) = -\sum_{k = 0}^M\log{l_k(\theta|h_k)}
-                                                                           
+
     Parameters
     ----------
-                                                                           
+
     angle: float
         Angle (radians) for calculating the probability of measure a
         positive event.
@@ -109,10 +109,10 @@ def cost_function(angle: float, m_k: list, n_k: list, h_k: list) -> float:
         number of total events measured for the specific  m_k
     h_k : list of ints
         number of positive events measured for each m_k
-                                                                           
+
     Returns
     ----------
-                                                                           
+
     cost : float
         the aggregation of the individual likelihoods
     """
