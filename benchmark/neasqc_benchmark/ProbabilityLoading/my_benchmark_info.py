@@ -3,11 +3,7 @@ import platform
 import psutil
 import pandas as pd
 from collections import OrderedDict
-
-if __package__ is None or __package__ == '':
-    from my_benchmark_summary import summarize_results
-else:
-    from .my_benchmark_summary import summarize_results
+from my_benchmark_summary import summarize_results
 
 
 def my_benchmark_kernel(**kwargs):
@@ -163,9 +159,13 @@ if __name__ == "__main__":
     ################## Configuration ##########################
 
     #configuration = {"None": None}
+    method = "brute_force"
+    name = "PL_{}".format(method)
+    folder = "Results/"
     configuration = {
-        "times_filename" : "save_times_benchmark.csv",
-        "benchmark_file" : "save_SummaryResults.csv"
+        "times_filename" : folder + "{}_times_benchmark.csv".format(name),
+        "benchmark_file" : folder + "{}_SummaryResults.csv".format(name),
+        "load_method" : method
     }
 
     ######## Execute Validations #####################################

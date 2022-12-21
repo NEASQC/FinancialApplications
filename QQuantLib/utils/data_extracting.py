@@ -52,6 +52,7 @@ def get_results(
     q_prog : QLM Program.
     job : QLM job
     """
+    print("BE AWARE!! linalg_qpu : {}".format(linalg_qpu))
     # if type(quantum_object) == qlm.Program:
     if isinstance(quantum_object, qlm.Program):
         q_prog = deepcopy(quantum_object)
