@@ -246,9 +246,9 @@ if __name__ == "__main__":
         "relative_error": 0.1,
         "alpha": 0.05,
         "min_meas": 5,
-        "max_meas": 10,
+        "max_meas": None,
         #List number of qubits tested
-        "list_of_qbits": [4],
+        "list_of_qbits": [4, 6, 8],
     }
     #Setting the AE algorithm configuration
     ae_problem = select_ae(AE)

@@ -252,7 +252,7 @@ if __name__ == "__main__":
         "max_meas": 10,
         "relative_error": 0.1,
         #List number of qubits tested
-        "list_of_qbits": [4],#, 6, 8],
+        "list_of_qbits": [4, 6, 8],
     }
 
     #Columns for metrics

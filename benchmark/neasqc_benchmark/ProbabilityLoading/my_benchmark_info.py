@@ -129,7 +129,7 @@ def my_other_info(**kwargs):
 
     other_info = OrderedDict()
     #other_info["None"] = None
-    other_info["load_method"] = "multiplexor"
+    other_info["load_method"] = kwargs.get("load_method")
 
     return other_info
 

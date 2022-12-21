@@ -214,4 +214,3 @@ if __name__ == "__main__":
     }
     kernel_bench = KERNEL_BENCHMARK(**benchmark_arguments)
     kernel_bench.exe()
-

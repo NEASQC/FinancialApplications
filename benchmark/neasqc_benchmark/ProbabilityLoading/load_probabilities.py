@@ -7,7 +7,7 @@ import time
 import random
 import numpy as np
 import pandas as pd
-from scipy.stats import norm, entropy, chisquare
+from scipy.stats import norm, entropy, chisquare, chi2
 from qat.lang.models import KPTree
 from qat.qpus import get_default_qpu
 sys.path.append("../../../")
@@ -115,6 +115,8 @@ class LoadProbabilityDensity:
         self.chi2 = None
         self.pvalue = None
         self.pdf = None
+        self.observed_frecuency = None
+        self.expeted_frecuency = None
 
     def loading_probability(self):
         """
@@ -146,10 +148,22 @@ class LoadProbabilityDensity:
         )
 
         #Chi square
-        self.chi2, self.pvalue = chisquare(
-            f_obs=np.round(self.result["Probability"] * self.shots, decimals=0),
-            f_exp=np.round(self.data * self.shots, decimals=0),
-        )
+        self.observed_frecuency = np.round(
+            self.result["Probability"] * self.shots, decimals=0)
+        self.expeted_frecuency = np.round(
+            self.data * self.shots, decimals=0)
+        try:
+            self.chi2, self.pvalue = chisquare(
+                f_obs=self.observed_frecuency,
+                f_exp=self.expeted_frecuency
+            )
+        except ValueError:
+            self.chi2 = np.sum(
+                (self.observed_frecuency - self.expeted_frecuency) **2 / \
+                    self.expeted_frecuency
+            )
+            count = len(self.observed_frecuency)
+            self.pvalue = chi2.sf(self.chi2, count -1)
 
     def exe(self):
         """
