@@ -237,6 +237,7 @@ class MLAE:
         ----------
         h_k: int
             number of positive events
+        routine : QLM Routine object
         """
 
         routine = qlm.QRoutine()
@@ -246,14 +247,14 @@ class MLAE:
         # for i in range(m_k):
         #    routine.apply(self._grover_oracle, register)
         start = time.time()
-        result, circuit, _, job = get_results(
+        result, _, _, job = get_results(
             routine, linalg_qpu=self.linalg_qpu, shots=n_k, qubits=self.index
         )
         end = time.time()
         self.quantum_times.append(end-start)
         h_k = int(measure_state_probability(result, self.target) * n_k)
         #h_k = int(result["Probability"].iloc[bitfield_to_int(self.target)] * n_k)
-        return h_k, circuit
+        return h_k, routine
 
     @staticmethod
     def likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
@@ -403,7 +404,7 @@ class MLAE:
         # for i in range(len(m_k)):
         for i, _ in enumerate(m_k):
             h_k[i], circuit = self.run_step(m_k[i], n_k[i])
-            step_circuit_stats = circuit.statistics()
+            step_circuit_stats = circuit.to_circ().statistics()
             step_circuit_stats.update({"n_shots": n_k[i]})
             step_circuit_stats.update({"h_k": h_k[i]})
             self.circuit_statistics.update({m_k[i]: step_circuit_stats})

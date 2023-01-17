@@ -187,12 +187,20 @@ class CQPEAE:
         }
 
         self.cqpe = CQPE(**dict_pe_qft)
-        self.cqpe.pe_qft()
-        step_circuit_stats = self.cqpe.circuit.statistics()
+        self.cqpe.run()
+        step_circuit_stats = self.cqpe.circuit.to_circ().statistics()
         step_circuit_stats.update({"n_shots": self.shots})
         self.circuit_statistics = {"CQPEAE": step_circuit_stats}
 
-        self.final_results = self.cqpe.final_results
+        self.final_results = self.cqpe.result
+        self.final_results["theta"] = np.pi * self.final_results["lambda"]
+        self.final_results["theta_90"] = self.final_results["theta"]
+        self.final_results['theta_90'].where(
+            self.final_results["theta_90"] < 0.5 * np.pi,
+            np.pi - self.final_results["theta_90"],
+            inplace=True,
+        )
+
         self.final_results.sort_values(
             "Probability",
             ascending=False,
@@ -204,11 +212,11 @@ class CQPEAE:
         self.run_time = end - start
         #Total number of oracle calls
         self.oracle_calls = self.shots * np.sum(
-            [2 * (2 ** i ) + 1 for i in range(self.auxiliar_qbits_number)]
+            [2 * (2 ** i) + 1 for i in range(self.auxiliar_qbits_number)]
         )
         #Maximum number of oracle applications
         self.max_oracle_depth = 2 ** (int(self.auxiliar_qbits_number)-1) + 1
         self.quantum_times = self.cqpe.quantum_times
         self.quantum_time = sum(self.cqpe.quantum_times)
-        
+
         return self.ae

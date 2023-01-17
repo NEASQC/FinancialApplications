@@ -76,6 +76,7 @@ class RQAE:
         # Amplification Ratio: q in the paper
         self.ratio = kwargs.get("q", 2)
         self.mcz_qlm = kwargs.get("mcz_qlm", True)
+        self.save_circuits = kwargs.get("save_circuits", False)
 
         # Creating the grover operator
         self._grover_oracle = grover(
@@ -94,6 +95,7 @@ class RQAE:
         self.schedule_pdf = None
         self.quantum_times = []
         self.quantum_time = None
+        self.circuit_dict = {}
 
     #####################################################################
     @property
@@ -215,6 +217,9 @@ class RQAE:
         results, circuit, _, _ = get_results(
             self._shifted_oracle, self.linalg_qpu, shots=shots
         )
+        if self.save_circuits:
+            self.circuit_dict.update({"first_step": self._shifted_oracle})
+
         end = time.time()
         self.quantum_times.append(end-start)
         start = time.time()
@@ -294,6 +299,10 @@ class RQAE:
             routine.apply(grover_oracle, wires)
         start = time.time()
         results, circuit, _, _ = get_results(routine, self.linalg_qpu, shots=shots)
+        if self.save_circuits:
+            self.circuit_dict.update(
+                {"step_{}".format(k): routine}
+            )
         end = time.time()
         self.quantum_times.append(end-start)
         step_circuit_stats = circuit.statistics()
