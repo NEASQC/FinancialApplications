@@ -18,7 +18,7 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 import time
 import numpy as np
 import qat.lang.AQASM as qlm
-from qat.qpus import get_default_qpu
+from QQuantLib.utils.qlm_solver import get_qpu
 from QQuantLib.utils.utils import load_qn_gate
 from QQuantLib.utils.data_extracting import get_results
 
@@ -66,14 +66,16 @@ class CQPE:
 
         # Number Of classical bits for estimating phase
         self.auxiliar_qbits_number = kwargs.get("auxiliar_qbits_number", 8)
+
         # Set the QPU to use
-        self.linalg_qpu = kwargs.get("qpu", None)  # , get_qpu())
+        self.linalg_qpu = kwargs.get("qpu", None)
         if self.linalg_qpu is None:
-            print("Not QPU was provide. Default QPU will be used")
-            self.linalg_qpu = get_default_qpu()
+            print("Not QPU was provide. PyLinalg will be used")
+            self.linalg_qpu = get_qpu("python")
+
         self.shots = kwargs.get("shots", 10)
         self.complete = kwargs.get("complete", False)
-        
+
         #Quantum Routine for QPE
         #Auxiliar qbits
         self.q_aux = None

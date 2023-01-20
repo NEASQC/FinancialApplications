@@ -315,3 +315,49 @@ def grover(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray, mcz_qlm=
         return routine
 
     return grover_gate()
+
+
+def grover_extended(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray, mcz_qlm=True):
+    r"""
+    This function creates a QLM AbstractGate that returns the grover
+    extended operator associated to a given oracle.
+
+    Notes
+    -----
+    .. math::
+        \mathcal{G} = \mathcal{U}(|\Psi\rangle)\mathcal{U0}(|\Psi_0\rangle)
+
+    Parameters
+    ----------
+    oracle : QLM routine/gate
+    target : list of ints
+        the state that we want to amplify
+    index : list of ints
+        index for the qubits that define the register
+    mcz_qlm: bool
+        If True QLM construction for multi-controlled Z will be used.
+
+    Returns
+    ----------
+    grover_gate : QLM gate
+    """
+    oracle_cp = deepcopy(oracle)
+    number_qubits = oracle_cp.arity
+    @qlm.build_gate("G'_" + str(time.time_ns()), [], arity=number_qubits)
+    def grover_extended_gate():
+        routine = qlm.QRoutine()
+        register = routine.new_wires(number_qubits)
+        #refection on |0>
+        routine.apply(
+            reflection(np.zeros(number_qubits, dtype=int), mcz_qlm),
+            register
+        )
+        routine.apply(oracle_cp, register)
+        routine.apply(
+            reflection(target, mcz_qlm),
+            [register[i] for i in index]
+        )
+        routine.apply(oracle_cp.dag(), register)
+        return routine
+
+    return grover_extended_gate()

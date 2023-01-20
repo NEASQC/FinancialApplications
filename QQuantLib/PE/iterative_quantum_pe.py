@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 import qat.lang.AQASM as qlm
 from qat.core import Result
-from qat.qpus import get_default_qpu
+from QQuantLib.utils.qlm_solver import get_qpu
 from QQuantLib.utils.data_extracting import (
     create_qprogram,
     create_qjob,
@@ -78,11 +78,13 @@ class IQPE:
 
         # Number Of classical bits for estimating phase
         self.cbits_number_ = kwargs.get("cbits_number", 8)
+
         # Set the QPU to use
-        self.linalg_qpu = kwargs.get("qpu", None)  # , get_qpu())
+        self.linalg_qpu = kwargs.get("qpu", None)
         if self.linalg_qpu is None:
-            print("Not QPU was provide. Default QPU will be used")
-            self.linalg_qpu = get_default_qpu()
+            print("Not QPU was provide. PyLinalg will be used")
+            self.linalg_qpu = get_qpu("python")
+
         self.shots = kwargs.get("shots", 10)
         # self.zalo = kwargs.get('zalo', False)
 

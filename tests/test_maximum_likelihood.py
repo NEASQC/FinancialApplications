@@ -3,6 +3,8 @@ Tests For maximum likelihood
 """
 import numpy as np
 import qat.lang.AQASM as qlm
+import sys
+sys.path.append("../")
 
 from QQuantLib.utils.utils import get_histogram
 from QQuantLib.DL.data_loading import load_probability, load_array, load_pf

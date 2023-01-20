@@ -8,8 +8,8 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 import sys
 import json
 import pandas as pd
-sys.path.append("../")
-from benchmark.benchmark_utils import create_pe_problem, combination_for_list,\
+sys.path.append("../../")
+from QQuantLib.utils.benchmark_utils import create_pe_problem, combination_for_list,\
 create_ae_pe_solution
 from QQuantLib.finance.ae_price_estimation import ae_price_estimation
 from QQuantLib.utils.qlm_solver import get_qpu
@@ -21,7 +21,7 @@ def run_id(
     id_name,
     file_name=None,
     folder_name=None,
-    qlmaas=False,
+    qpu=None,
     save=False
 ):
     """
@@ -58,7 +58,7 @@ def run_id(
         DataFrame with all the information of the price estimation
         problem, the configuration of the ae and the obtained results
     """
-    linalg_qpu = get_qpu(qlmaas)
+    linalg_qpu = get_qpu(qpu)
     solve_ae_pe.update({"qpu": linalg_qpu})
     solve_ae_pe.update({"save": save})
     if save:
@@ -76,7 +76,7 @@ def run_staff(
     solve_ae_pe_list,
     file_name="Todo.csv",
     folder_name=None,
-    qlmaas=False,
+    qpu=None,
     save=False
 ):
     """
@@ -113,7 +113,7 @@ def run_staff(
     """
     list_of_pdfs = []
     for i, step in enumerate(solve_ae_pe_list):
-        step_pdf = run_id(step, i, file_name, folder_name, qlmaas, save)
+        step_pdf = run_id(step, i, file_name, folder_name, qpu, save)
         list_of_pdfs.append(step_pdf)
     price_pdf = pd.concat(list_of_pdfs)
     return price_pdf
@@ -148,11 +148,11 @@ if __name__ == "__main__":
         "--list", dest="list", default=False, action="store_true", help="For listing "
     )
     parser.add_argument(
-        "--qlmass",
-        dest="qlmass",
-        default=False,
-        action="store_true",
-        help="For using or not QLM as a Service",
+        "-qpu",
+        dest="qpu",
+        type=str,
+        default="python",
+        help="QPU for simulation: [qlmass, python, c]",
     )
     parser.add_argument(
         "--all",
@@ -277,7 +277,7 @@ if __name__ == "__main__":
                 final_list,
                 file_name=args.file_name,
                 folder_name=args.folder_path,
-                qlmaas=args.qlmass,
+                qpu=args.qpu,
                 save=args.save,
             )
         else:
@@ -287,6 +287,6 @@ if __name__ == "__main__":
                     args.id,
                     file_name=args.file_name,
                     folder_name=args.folder_path,
-                    qlmaas=args.qlmass,
+                    qpu=args.qpu,
                     save=args.save,
                 ))

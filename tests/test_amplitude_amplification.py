@@ -2,6 +2,8 @@
 Tests For data_loading functions
 """
 
+import sys
+sys.path.append("../")
 import numpy as np
 import qat.lang.AQASM as qlm
 from qat.qpus import PyLinalg
@@ -9,8 +11,8 @@ from QQuantLib.utils.utils import get_histogram
 from QQuantLib.DL.data_loading import load_probability, load_array, load_pf
 from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.AA.amplitude_amplification import reflection, create_u0_gate, create_u_gate, grover
-
-linalg_qpu = PyLinalg()
+from qat.qpus import get_default_qpu
+linalg_qpu = get_default_qpu()
 
 
 # Prepare Data for loading

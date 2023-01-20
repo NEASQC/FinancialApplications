@@ -1,6 +1,8 @@
 """
 test for classical QPE
 """
+import sys
+sys.path.append("../")
 import numpy as np
 import qat.lang.AQASM as qlm
 
@@ -8,6 +10,8 @@ from QQuantLib.utils.utils import get_histogram
 from QQuantLib.DL.data_loading import load_probability, load_array, load_pf
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.PE.classical_qpe import CQPE
+from QQuantLib.utils.qlm_solver import get_qpu
+qpu = get_qpu("python")
 
 
 #### Phase Estimation Test-01: Phase of S Gate ###
@@ -30,16 +34,16 @@ def test_pe_s_gate():
         "shots": 100,
     }
     qft_pe = CQPE(**qft_pe_dict)
-    qft_pe.pe_qft()
-    phi_meas = qft_pe.final_results.iloc[qft_pe.final_results["Probability"].idxmax()][
-        "Phi"
+    qft_pe.run()
+    phi_meas = qft_pe.result.iloc[qft_pe.result["Probability"].idxmax()][
+        "lambda"
     ]
     assert np.isclose(phi_meas, 0.25)
-
-
-#### Phase Estimation Test-02: Phase of Controlled-T Gate ###
-
-
+#
+#
+##### Phase Estimation Test-02: Phase of Controlled-T Gate ###
+#
+#
 def test_pe_c_t_gate():
 
     n_qbits = 3
@@ -60,12 +64,11 @@ def test_pe_c_t_gate():
         "shots": 100,
     }
     qft_pe = CQPE(**qft_pe_dict)
-    qft_pe.pe_qft()
-    phi_meas = qft_pe.final_results.iloc[qft_pe.final_results["Probability"].idxmax()][
-        "Phi"
+    qft_pe.run()
+    phi_meas = qft_pe.result.iloc[qft_pe.result["Probability"].idxmax()][
+        "lambda"
     ]
     assert np.isclose(phi_meas, 0.125)
-
 
 ###Phase Estimation with classical QPE###
 from QQuantLib.AE.ae_classical_qpe import CQPEAE
@@ -84,7 +87,10 @@ def test_ae_w_qpe_qft():
     target = [0, 0, 1]
     index = range(oracle.arity)
 
-    ae_pe_qft_dict = {"auxiliar_qbits_number": 4, "shots": 10}
+    ae_pe_qft_dict = {
+        "auxiliar_qbits_number": 4, "shots": 10,
+        "qpu": qpu
+        }
 
     ae_pe_qft = CQPEAE(oracle=oracle, target=target, index=index, **ae_pe_qft_dict)
 
@@ -93,3 +99,4 @@ def test_ae_w_qpe_qft():
     classical_result = probability[1]
     error = abs(ae_pe_qft.ae - classical_result)
     assert error < 0.005
+

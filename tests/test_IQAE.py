@@ -1,16 +1,14 @@
-import numpy as np
 import sys
-
 sys.path.append("../")
-
+import numpy as np
+import qat.lang.AQASM as qlm
+from qat.core.console import display
+from QQuantLib.utils.qlm_solver import get_qpu
+from QQuantLib.utils.qlm_solver import get_qpu
 from QQuantLib.AE.iterative_quantum_ae import IQAE
 from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.utils.utils import bitfield_to_int
 import QQuantLib.DL.data_loading as dl
-
-import qat.lang.AQASM as qlm
-from qat.qpus import get_default_qpu
-from qat.core.console import display
 
 
 def test_iqae():
@@ -28,7 +26,9 @@ def test_iqae():
     epsilon = 0.01
     alpha = 0.05
     N_shots = 100
+    linalg_qpu = get_qpu("python")
     iqae_dict = {
+        "qpu": linalg_qpu,
         "epsilon": epsilon,
         "shots": N_shots,
         "alpha": alpha,

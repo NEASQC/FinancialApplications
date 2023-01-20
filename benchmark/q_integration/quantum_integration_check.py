@@ -12,12 +12,12 @@ import sys
 import numpy as np
 import pandas as pd
 sys.path.append("../../")
-from benchmark.benchmark_utils import list_of_dicts_from_jsons
+from QQuantLib.utils.benchmark_utils import list_of_dicts_from_jsons
 from QQuantLib.finance.quantum_integration import q_solve_integral
 from QQuantLib.utils.qlm_solver import get_qpu
 
 
-def problem(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None, save=False):
+def problem(ae_problem, id_name, qpu=None, file_name=None, folder_name=None, save=False):
     n_ = 6
     list_a = [0.0, np.pi - np.pi / 4.0, np.pi]
     list_b = [np.pi / 4.0, np.pi + np.pi / 8.0, np.pi + np.pi / 4.0]
@@ -59,7 +59,7 @@ def problem(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None,
                     ae_problem,
                     id_name,
                     encoding_dict,
-                    qlmaas=qlmaas,
+                    qpu=qpu,
                     file_name=file_name,
                     folder_name=folder_name,
                     save=save
@@ -67,11 +67,10 @@ def problem(ae_problem, id_name, qlmaas=False, file_name=None, folder_name=None,
                 opa.append(pdf)
     return opa
 
-def run_id(ae_problem, id_name, encoding_problem, qlmaas=False, file_name=None, folder_name=None, save=False):
+def run_id(ae_problem, id_name, encoding_problem, qpu=None, file_name=None, folder_name=None, save=False):
 
     ae_problem.update(encoding_problem)
-    linalg_qpu = get_qpu(qlmaas)
-    ae_problem.update({"qpu": linalg_qpu})
+    ae_problem.update({"qpu": get_qpu(qpu)})
 
     #EXECUTE COMPUTATION
     solution, solver_object = q_solve_integral(**ae_problem)
@@ -113,7 +112,7 @@ def run_id(ae_problem, id_name, encoding_problem, qlmaas=False, file_name=None, 
             pdf.to_csv(f_pointer, mode="a", header=f_pointer.tell() == 0, sep=';')
     return pdf, solver_object
 
-def run_staff(dict_list, file_name="Todo.csv", folder_name=None, qlmaas=False, save=False):
+def run_staff(dict_list, qpu=None, file_name="Todo.csv", folder_name=None, save=False):
     """
     run all problems
     """
@@ -122,9 +121,9 @@ def run_staff(dict_list, file_name="Todo.csv", folder_name=None, qlmaas=False, s
         problem(
             step,
             i,
+            qpu=qpu,
             file_name=file_name,
             folder_name=folder_name,
-            qlmaas=qlmaas,
             save=save
         )
 
@@ -157,11 +156,11 @@ if __name__ == "__main__":
         "--list", dest="list", default=False, action="store_true", help="For listing "
     )
     parser.add_argument(
-        "--qlmass",
-        dest="qlmass",
-        default=False,
-        action="store_true",
-        help="For using or not QLM as a Service",
+        "-qpu",
+        dest="qpu",
+        type=str,
+        default="python",
+        help="QPU for simulation: [qlmass, python, c]",
     )
     parser.add_argument(
         "--all",
@@ -231,7 +230,7 @@ if __name__ == "__main__":
 
     lista_ae = []
     if args.mlae_var:
-        lista_ae.append("json_tests/mlae_configuration.json")
+        lista_ae.append("json_checks/mlae_configuration.json")
     if args.iqae_var:
         lista_ae.append("json_checks/iqae_configuration.json")
     if args.rqae_var:
@@ -252,9 +251,9 @@ if __name__ == "__main__":
         if args.all:
             run_staff(
                 final_list,
+                qpu=args.qpu,
                 file_name=args.file_name,
                 folder_name=args.folder_path,
-                qlmaas=args.qlmass,
                 save=args.save,
             )
         else:
@@ -264,6 +263,6 @@ if __name__ == "__main__":
                     args.id,
                     file_name=args.file_name,
                     folder_name=args.folder_path,
-                    qlmaas=args.qlmass,
+                    qpu=args.qpu,
                     save=args.save,
                 )

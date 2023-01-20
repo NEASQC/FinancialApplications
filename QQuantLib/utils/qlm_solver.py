@@ -11,36 +11,45 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
 from qat.qpus import get_default_qpu
 
 
-def get_qpu(qlmass=False):
+def get_qpu(qpu=None):
     """
-    Function for selecting solver. User can chose between:
-    * LinAlg: for submitting jobs to a QLM server
-    * PyLinalg: for simulating jobs using myqlm lineal algebra.
+    Function for selecting solver.
 
     Parameters
     ----------
 
-    qlmass : bool
-        If True  try to use QLM as a Service connection to CESGA QLM
-        If False PyLinalg simulator will be used
+    qpu : str
+        * qlmass: for trying to use QLM as a Service connection to CESGA QLM
+        * python: for using PyLinalg simulator.
+        * c: for using CLinalg simulator
 
     Returns
     ----------
 
     linal_qpu : solver for quantum jobs
     """
-    if qlmass:
+
+    if qpu is None:
+        raise ValueError(
+            "qpu CAN NOT BE NONE. Please select one of the three" +
+            " following options: qlmass, python, c")
+    elif qpu == "qlmass":
         try:
             from qlmaas.qpus import LinAlg
-
             linalg_qpu = LinAlg()
-            print("Using: LinAlg")
         except (ImportError, OSError) as exception:
             raise ImportError(
-                """Problem Using QLMaaS.
-            Please create config file or use mylm solver"""
-            ) from exception
+                "Problem Using QLMaaS. Please create config file" +
+                "or use mylm solver") from exception
+    elif qpu == "python":
+        from qat.qpus import PyLinalg
+        linalg_qpu = PyLinalg()
+    elif qpu == "c":
+        from qat.qpus import CLinalg
+        linalg_qpu = CLinalg()
     else:
-        print("Using default qpu")
-        linalg_qpu = get_default_qpu()
+        raise ValueError(
+            "Invalid value for qpu. Please select one of the three "+
+            "following options: qlmass, python, c")
+    print("Following qpu will be used: {}".format(linalg_qpu))
     return linalg_qpu

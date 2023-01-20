@@ -52,7 +52,7 @@ def get_results(
     q_prog : QLM Program.
     job : QLM job
     """
-    print("BE AWARE!! linalg_qpu : {}".format(linalg_qpu))
+    #print("BE AWARE!! linalg_qpu : {}".format(linalg_qpu))
     # if type(quantum_object) == qlm.Program:
     if isinstance(quantum_object, qlm.Program):
         q_prog = deepcopy(quantum_object)
@@ -141,7 +141,7 @@ def create_qcircuit(prog_q):
     circuit : QLM circuit
     """
     q_prog = deepcopy(prog_q)
-    circuit = q_prog.to_circ(submatrices_only=True)
+    circuit = q_prog.to_circ(submatrices_only=True)#, inline=True)
     return circuit
 
 

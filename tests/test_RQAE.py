@@ -9,7 +9,7 @@ from QQuantLib.utils.utils import bitfield_to_int
 import QQuantLib.DL.data_loading as dl
 
 import qat.lang.AQASM as qlm
-from qat.qpus import get_default_qpu
+from QQuantLib.utils.qlm_solver import get_qpu
 from qat.core.console import display
 
 
@@ -29,7 +29,12 @@ def test_rqae():
     q = 2
     epsilon = 0.01
     gamma = 0.05
-    rqae_dict = {"epsilon": epsilon, "ratio": q, "gamma": gamma}
+    linalg_qpu = get_qpu("python")
+    rqae_dict = {
+        "qpu": linalg_qpu,
+        "epsilon": epsilon,
+        "ratio": q,
+        "gamma": gamma}
 
     rqae = RQAE(oracle, target, index, **rqae_dict)
     a_real = f[bitfield_to_int(target)]

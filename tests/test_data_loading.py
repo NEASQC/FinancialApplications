@@ -2,15 +2,15 @@
 Tests For data_loading functions
 """
 import sys
+sys.path.append("../")
 import numpy as np
 import qat.lang.AQASM as qlm
-from qat.qpus import PyLinalg
-
-linalg_qpu = PyLinalg()
 
 from QQuantLib.DL.data_loading import load_probability, uniform_distribution, load_array
 from QQuantLib.utils.data_extracting import get_results
 
+from qat.qpus import get_default_qpu
+linalg_qpu = get_default_qpu()
 
 def test_load_probability():
     """

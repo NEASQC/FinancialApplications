@@ -6,7 +6,7 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 """
 
 import pandas as pd
-from qat.qpus import get_default_qpu
+from QQuantLib.utils.qlm_solver import get_qpu
 from QQuantLib.AE.maximum_likelihood_ae import MLAE
 from QQuantLib.AE.ae_classical_qpe import CQPEAE
 from QQuantLib.AE.ae_iterative_quantum_pe import IQPEAE
@@ -55,9 +55,13 @@ class AE:
         #Processing kwargs
         self.kwargs = kwargs
         self.linalg_qpu = self.kwargs.get("qpu", None)
+
+        # Set the QPU to use
+        self.linalg_qpu = kwargs.get("qpu", None)
         if self.linalg_qpu is None:
-            print("Not QPU was provide. Default QPU will be used")
-            self.linalg_qpu = get_default_qpu()
+            print("Not QPU was provide. PyLinalg will be used")
+            self.linalg_qpu = get_qpu("python")
+
         self._ae_type = ae_type
         #attributes created
         self.solver_ae = None

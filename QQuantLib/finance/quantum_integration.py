@@ -99,10 +99,14 @@ def q_solve_integral(**kwargs):
             raise ValueError("Oracle was not created!!")
 
         #Mandatory kwargs for ae solver
-        linal_gpu = kwargs.get("qpu")
+        # Set the QPU to use
+        linalg_qpu = kwargs.get("qpu", None)
+        if linalg_qpu is None:
+            raise ValueError("qpu is None. Please provide a valid qpu")
         del kwargs['qpu']
+
         ae_dict = deepcopy(kwargs)
-        ae_dict.update({"qpu": linal_gpu})
+        ae_dict.update({"qpu": linalg_qpu})
         #Delete keys from encoding
         for step in ["array_function", "array_probability", "encoding", "multiplexor"]:
             ae_dict.pop(step, None)
