@@ -47,6 +47,8 @@ def get_qpu(qpu=None):
     elif qpu == "c":
         from qat.qpus import CLinalg
         linalg_qpu = CLinalg()
+    elif qpu == "default":
+        linalg_qpu = get_default_qpu()
     else:
         raise ValueError(
             "Invalid value for qpu. Please select one of the three "+
