@@ -14,7 +14,7 @@ The *jsons* files allows to configure the complete Price Estimation Problem (PEP
 * ae\_pe\_payoffs.json: for configuring the payoffs for the different derivatives.
 
 The program will created a combination of all the possible PEP from this possible. 
-Example: if the domain have 2 possible domains, 3 possible probability densities and 4 possible payoffs you will have: 2*3*4=24 possible PEP to solve.
+Example: if the domain have 2 possible domains, 3 possible probability densities and 4 possible payoffs you will have: 2\*3\*4=24 possible PEP to solve.
 
 For solving the PEP different AE algorithms can be used. The configuration can be provided by editing following jsons: 
 
@@ -27,7 +27,7 @@ For solving the PEP different AE algorithms can be used. The configuration can b
 
 **BE AWARE** These jsons have the configuration of the data loading into the key: **encoding**. Up to 3 types of encoding can be used. 
 
-For each AE several configurations can be set up into the correspondent json. All possible configurations can be used. The final configuration will be a total combination of the PEP and the AE. Example: If the AE algorithm have 9 possible configurations and the total PEP^problem have 24 possible configuration then the final number of total configurations will be: 9*24=216 total configurations.
+For each AE several configurations can be set up into the correspondent json. All possible configurations can be used. The final configuration will be a total combination of the PEP and the AE. Example: If the AE algorithm have 9 possible configurations and the total PEP problem have 24 possible configuration then the final number of total configurations will be: 9\*24=216 total configurations.
 
 ## Command Line usage
 

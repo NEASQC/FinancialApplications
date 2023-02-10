@@ -5,8 +5,8 @@ The *quantum_integration_check.py* is a script for testing the **q_solve_integra
 The integral to solve is a pure *sin* and three different intervals can be used:
 
 * positive\_function: $[0, \frac{\pi}{4}]$
-* positive\_integral: $[\frac{3 \pi}{4}, \fra{9 \pi}{8}]$
-* negative\_integral: $[\pi, \fra{5 \pi}{4}]$
+* positive\_integral: $[\frac{3 \pi}{4}, \frac{9 \pi}{8}]$
+* negative\_integral: $[\pi, \frac{5 \pi}{4}]$
 
 Three different data encoding can be used for loading the desired integral into the quantum final state: [0, 1, 2]. This configuration can be changed in the *json* files from **json_checks** folder. Additionally, this files can be edited for configuring the different AE algorithms that can be used. The default domain discretization is of 6 qubits (is hard-coded into the *problem* function of the script. 
 
