@@ -6,5 +6,5 @@ The **DL** or *Data Loading* package groups the python modules from **QQuantLib*
 
 .. toctree::
 
-   data_loading.rst 
-   encoding_protocols.rst
+   dl.data_loading.rst 
+   dl.encoding_protocols.rst

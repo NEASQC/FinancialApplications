@@ -5,6 +5,7 @@ The **utils** package groups python auxiliary modules used by the other packages
 
 .. toctree::
 
-    utils_utils.rst
-    data_extracting.rst
+    utils.utils_utils.rst
+    utils.data_extracting.rst
+    utils.benchmark_utils.rst
 

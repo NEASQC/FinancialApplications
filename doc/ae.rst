@@ -6,9 +6,12 @@ The **AE** or *Amplitude Estimation* package groups the python modules from **QQ
 
 .. toctree::
 
-   maximum_likelihood_ae.rst 
-   iterative_quantum_ae.rst 
-   real_quantum_ae.rst 
-   ae_classical_qpe.rst
-   ae_iterative_quantum_pe.rst
-   ae_class.rst
+   ae.maximum_likelihood_ae.rst 
+   ae.iterative_quantum_ae.rst 
+   ae.real_quantum_ae.rst 
+   ae.ae_classical_qpe.rst
+   ae.ae_iterative_quantum_pe.rst
+   ae.montecarlo_ae.rst
+   ae.ae_class.rst
+
+

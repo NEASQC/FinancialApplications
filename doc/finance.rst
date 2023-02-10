@@ -5,9 +5,9 @@ The **finance** package groups the python modules from **QQuantLib** related wit
 
 .. toctree::
 
-   classical_finance.rst
-   ae_price_estimation.rst
-   payoff_class.rst
-   probability_class.rst
-   quantum_integration.rst
+   finance.classical_finance.rst
+   finance.ae_price_estimation.rst
+   finance.payoff_class.rst
+   finance.probability_class.rst
+   finance.quantum_integration.rst
 

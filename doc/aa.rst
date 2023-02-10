@@ -6,4 +6,4 @@ The **AA** or *Amplitude Amplification* package groups the python modules from *
 
 .. toctree::
 
-   amplitude_amplification.rst 
+   aa.amplitude_amplification.rst 
