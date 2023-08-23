@@ -82,6 +82,9 @@ class CQPEAE:
 
         # For storing results
         self.theta = None
+        self.epsilon = None
+        self.epsilon_qpe = None
+        self.epsilon_prob = None
         self.ae = None
         self.ae_l = None
         self.ae_u = None
@@ -201,13 +204,28 @@ class CQPEAE:
             inplace=True,
         )
 
-        self.final_results.sort_values(
-            "Probability",
-            ascending=False,
-            inplace=True,
-        )
-        self.theta = self.final_results["theta_90"].iloc[0]
-        self.ae = np.cos(self.theta) ** 2
+        # self.final_results.sort_values(
+        #     "Probability",
+        #     ascending=False,
+        #     inplace=True,
+        # )
+
+        # Mean of the distribution probability of the angle
+        self.theta = self.final_results["theta_90"] @ \
+            self.final_results["Probability"]
+        self.final_results["a"] = np.cos(self.final_results['theta_90']) ** 2
+
+        self.ae = self.final_results["a"] @ \
+            self.final_results["Probability"]
+
+        # Error associated to the QPE algorithm
+        self.epsilon_qpe = 2 * np.pi / 2 ** self.auxiliar_qbits_number
+        # Error associated to the experimental distribution
+        self.epsilon_prob = (self.final_results["Probability"] @ \
+            (self.final_results["a"] - self.ae)**2) ** 0.5
+        self.epsilon = max([self.epsilon_qpe, self.epsilon_prob])
+        self.ae_l = self.ae - self.epsilon
+        self.ae_u = self.ae + self.epsilon
         end = time.time()
         self.run_time = end - start
         #Total number of oracle calls
