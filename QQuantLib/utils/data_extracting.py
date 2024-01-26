@@ -140,8 +140,8 @@ def create_qcircuit(prog_q):
 
     circuit : QLM circuit
     """
-    q_prog = deepcopy(prog_q)
-    circuit = q_prog.to_circ(submatrices_only=True)#, inline=True)
+    #q_prog = deepcopy(prog_q)
+    circuit = prog_q.to_circ(submatrices_only=True)#, inline=True)
     return circuit
 
 

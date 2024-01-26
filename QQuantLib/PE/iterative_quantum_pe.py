@@ -15,7 +15,7 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 """
 
 import time
-from copy import deepcopy
+#from copy import deepcopy
 import numpy as np
 import pandas as pd
 import qat.lang.AQASM as qlm
@@ -141,7 +141,7 @@ class IQPE:
         """
         self.restart()
         # Create quantum program based on initial state
-        self.q_prog = create_qprogram(deepcopy(self.initial_state))
+        self.q_prog = create_qprogram(self.initial_state)
         self.q_aux = self.q_prog.qalloc(1)
         self.c_bits = self.q_prog.calloc(self.cbits_number)
 

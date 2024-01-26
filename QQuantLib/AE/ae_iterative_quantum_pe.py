@@ -15,7 +15,7 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 """
 
 import time
-from copy import deepcopy
+#from copy import deepcopy
 import numpy as np
 import qat.lang.AQASM as qlm
 from QQuantLib.utils.qlm_solver import get_qpu
@@ -60,7 +60,7 @@ class IQPEAE:
 
         """
         # Setting attributes
-        self._oracle = deepcopy(oracle)
+        self._oracle = oracle
         self._target = check_list_type(target, int)
         self._index = check_list_type(index, int)
 
@@ -106,7 +106,7 @@ class IQPEAE:
         """
         setter of the oracle property
         """
-        self._oracle = deepcopy(value)
+        self._oracle = value
         self._grover_oracle = grover(
             self.oracle, self.target, self.index, mcz_qlm=self.mcz_qlm
         )

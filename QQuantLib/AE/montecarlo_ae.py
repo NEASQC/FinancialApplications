@@ -9,7 +9,7 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 """
 
 import time
-from copy import deepcopy
+#from copy import deepcopy
 import numpy as np
 import pandas as pd
 import qat.lang.AQASM as qlm
@@ -52,7 +52,7 @@ class MCAE:
         Method for initializing the class
         """
         # Setting attributes
-        self._oracle = deepcopy(oracle)
+        self._oracle = oracle
         self._target = check_list_type(target, int)
         self._index = check_list_type(index, int)
 
@@ -94,7 +94,7 @@ class MCAE:
         """
         setter of the oracle property
         """
-        self._oracle = deepcopy(value)
+        self._oracle = value
 
     @property
     def target(self):

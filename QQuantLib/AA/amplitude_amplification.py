@@ -13,7 +13,6 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 """
 
 import time
-from copy import deepcopy
 import numpy as np
 import qat.lang.AQASM as qlm
 
@@ -263,7 +262,6 @@ def create_u_gate(oracle: qlm.QRoutine, mcz_qlm=True):
     ----------
     u_gate : QLM gate
     """
-    oracle_cp = deepcopy(oracle)
     number_qubits = oracle.arity
 
     @qlm.build_gate("U_" + str(time.time_ns()), [], arity=number_qubits)
@@ -303,15 +301,14 @@ def grover(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray, mcz_qlm=
     ----------
     grover_gate : QLM gate
     """
-    oracle_cp = deepcopy(oracle)
-    number_qubits = oracle_cp.arity
+    number_qubits = oracle.arity
 
     @qlm.build_gate("G_" + str(time.time_ns()), [], arity=number_qubits)
     def grover_gate():
         routine = qlm.QRoutine()
         register = routine.new_wires(number_qubits)
-        routine.apply(create_u0_gate(oracle_cp, target, index, mcz_qlm), register)
-        routine.apply(create_u_gate(oracle_cp, mcz_qlm), register)
+        routine.apply(create_u0_gate(oracle, target, index, mcz_qlm), register)
+        routine.apply(create_u_gate(oracle, mcz_qlm), register)
         return routine
 
     return grover_gate()
@@ -341,8 +338,7 @@ def grover_extended(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray,
     ----------
     grover_gate : QLM gate
     """
-    oracle_cp = deepcopy(oracle)
-    number_qubits = oracle_cp.arity
+    number_qubits = oracle.arity
     @qlm.build_gate("G'_" + str(time.time_ns()), [], arity=number_qubits)
     def grover_extended_gate():
         routine = qlm.QRoutine()
@@ -352,12 +348,12 @@ def grover_extended(oracle: qlm.QRoutine, target: np.ndarray, index: np.ndarray,
             reflection(np.zeros(number_qubits, dtype=int), mcz_qlm),
             register
         )
-        routine.apply(oracle_cp, register)
+        routine.apply(oracle, register)
         routine.apply(
             reflection(target, mcz_qlm),
             [register[i] for i in index]
         )
-        routine.apply(oracle_cp.dag(), register)
+        routine.apply(oracle.dag(), register)
         return routine
 
     return grover_extended_gate()
