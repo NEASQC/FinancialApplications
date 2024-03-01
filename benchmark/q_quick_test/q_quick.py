@@ -13,6 +13,7 @@ from QQuantLib.utils.utils import bitfield
 from QQuantLib.AE.ae_class import AE
 
 from QQuantLib.utils.benchmark_utils import list_of_dicts_from_jsons
+from get_qpu import get_qpu
 
 
 def save(save, save_name, input_pdf, save_mode):
@@ -80,7 +81,7 @@ def test(**kwargs):
     return pdf
 
 
-def run_id(repetitions, id_, save_, **ae_configuration):
+def run_id(repetitions, id_, save_, qpu, base_name, **ae_configuration):
     #Domain configuration
 
     domain_configuration = {
@@ -97,13 +98,11 @@ def run_id(repetitions, id_, save_, **ae_configuration):
         'maturity': 1.0,
         'volatility': 0.2,
     }
-    QPU = ["qlmass", "python", "c"]
-    linalg_qpu = get_qpu(QPU[2])
     ae_configuration.update(domain_configuration)
     ae_configuration.update(probability_configuration)
-    ae_configuration.update({'qpu': linalg_qpu})
+    ae_configuration.update({"qpu": get_qpu(qpu)})
     
-    save_name = str(id_) + "_" + ae_configuration["file"] + ".csv"
+    save_name = str(id_) + "_" + ae_configuration["file"] + "_" + str(base_name) +  ".csv"
     
     for i in range(repetitions):
         step_pdf = test(**ae_configuration)
@@ -203,6 +202,20 @@ if __name__ == "__main__":
         "Default: 1",
         default=1,
     )
+    parser.add_argument(
+        "-name",
+        dest="base_name",
+        type=str,
+        help="Additional name for the generated files",
+        default="",
+    )
+    parser.add_argument(
+        "-qpu",
+        dest="qpu",
+        type=str,
+        default="python",
+        help="QPU for simulation: See function get_qpu in get_qpu module",
+    )
     args = parser.parse_args()
 
     combination_list = list_of_dicts_from_jsons(["./quick.json"])
@@ -210,6 +223,7 @@ if __name__ == "__main__":
     if args.print:
         if args.id is not None:
             print(combination_list[args.id])
+            print(args)
         elif args.all:
             print(combination_list)
         else:
@@ -217,10 +231,11 @@ if __name__ == "__main__":
     if args.count:
         print("Number of elements: {}".format(len(combination_list)))
 
+
     if args.execution:
         if args.id is not None:
             configuration = combination_list[args.id]
-            run_id(args.repetitions, args.id, args.save, **configuration)
+            run_id(args.repetitions, args.id, args.save, args.qpu, args.base_name, **configuration)
 
 
 
