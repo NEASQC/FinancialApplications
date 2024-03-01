@@ -68,7 +68,11 @@ def test(**kwargs):
     ae_obj.run()
     # Processing results
     pdf = pd.DataFrame.from_dict(kwargs, orient="index").T
-    pdf["Value"] = np.max(p_x)
+    ae_type = kwargs.get("ae_type")
+    if ae_type in ["RQAE", "mRQAE"]:
+        pdf["Value"] = np.sqrt(np.max(p_x))
+    else:
+        pdf["Value"] = np.max(p_x)
     pdf = pd.concat([pdf, ae_obj.ae_pdf], axis=1)
     pdf["oracle_calls"] = ae_obj.oracle_calls
     pdf["measured_epsilon"] = (pdf["ae_u"] - pdf["ae_l"]) / 2.0

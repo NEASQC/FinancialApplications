@@ -283,7 +283,7 @@ class IQAE:
             / (1 - 2 * np.sin(np.pi / 14)) ** 2
             * np.log(2 / alpha * np.log2(np.pi / (4 * epsilon)))
         )
-        n_oracle = 50 / epsilon * np.log(2 / alpha * np.log2(np.pi / (4 * epsilon)))
+        n_oracle = 50 * np.log(2 / alpha * np.log2(np.pi / (4 * epsilon))) / epsilon
         # This is L in the papper
         big_l = (np.arcsin(2 / shots * np.log(2 * big_t / epsilon))) ** 0.25
         k_max = big_l / epsilon / 2
@@ -359,6 +359,7 @@ class IQAE:
         # time_list = []
         j = 0 # pure counter
 
+        #print("shots: ", shots, "gamma_i: ", alpha / big_t)
         while theta_u - theta_l > 2 * epsilon:
             #start = time.time()
             i = i + 1

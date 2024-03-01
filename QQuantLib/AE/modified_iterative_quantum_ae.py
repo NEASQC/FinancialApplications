@@ -215,8 +215,9 @@ class mIQAE:
 
         # Upper bound for amplification: Kmax in paper
         bigk_max = np.pi / (4.0 * epsilon)
+        big_c = 1.0 / ((np.sin(np.pi / 21.0) * np.sin(8.0 * np.pi /21.0)) ** 2)
         # Number of Oracle Calls: equation 3.32
-        n_oracle = 123.0 * np.log(1.0 / alpha) / epsilon
+        n_oracle = 1.5 * bigk_max * big_c * np.log(np.sqrt(27) / alpha)
 
         print("-------------------------------------------------------------")
         print("Maximum amplification (Kmax)", int(bigk_max))
@@ -317,6 +318,7 @@ class mIQAE:
             #number of quadrants passed
             ri = np.floor(big_k_i * theta_l / (0.5 * np.pi))
 
+            #print("alpha_i: ", alpha_i, "n_i_max: ", n_i_max)
             while k_i == k:
                 #####################################################
                 shots_ = min(shots, n_i_max - n_)
@@ -339,6 +341,7 @@ class mIQAE:
                 n_ = n_ + shots_
                 a_ = measure_state_probability(results, self.target)
                 epsilon_a = mIQAE.chebysev_bound(n_, alpha_i)
+                #print("n_: ", n_, "alpha_i: ", alpha_i, "epsilon_a: ", epsilon_a)
                 a_max = np.minimum(a_ + epsilon_a, 1.0)
                 a_min = np.maximum(a_ - epsilon_a, 0.0)
 
