@@ -294,6 +294,7 @@ class IQAE:
         print("Maximum number of amplifications: ", int(k_max))
         print("Maximum number of calls to the oracle: ", int(n_oracle))
         print("-------------------------------------------------------------")
+        return n_oracle
 
     @staticmethod
     def chebysev_bound(n_samples: int, gamma: float):

@@ -21,7 +21,7 @@ from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.utils.utils import measure_state_probability, bitfield_to_int, check_list_type, mask
 
 
-class RQAE:
+class mRQAE:
     """
     Class for Real Quantum Amplitude Estimation (RQAE)
     algorithm
@@ -242,7 +242,7 @@ class RQAE:
         probability_diff = measure_state_probability(
             results, [1] + list(self.target)
         )
-        epsilon_probability = RQAE.chebysev_bound(shots, gamma)
+        epsilon_probability = mRQAE.chebysev_bound(shots, gamma)
 
         amplitude_max = np.minimum(
             (probability_sum - probability_diff) / (4 * shift)
@@ -317,7 +317,7 @@ class RQAE:
             results, [0] + list(self.target)
         )
 
-        epsilon_probability = RQAE.chebysev_bound(shots, gamma)
+        epsilon_probability = mRQAE.chebysev_bound(shots, gamma)
         probability_max = min(probability_sum + epsilon_probability, 1)
         probability_min = max(probability_sum - epsilon_probability, 0)
         angle_max = np.arcsin(np.sqrt(probability_max)) / (2 * k + 1)
@@ -346,32 +346,46 @@ class RQAE:
             accuracy
 
         """
-        theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
+
+        # Bounded for the error at each step
+        #theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
+        epsilon_p = 0.5 * np.sin(np.pi / (4 * (ratio + 2))) ** 2
+
+
+        # k_max = int(
+        #     np.ceil(
+        #         np.arcsin(np.sqrt(2 * theoretical_epsilon))
+        #         / np.arcsin(2 * epsilon)
+        #         * 0.5
+        #         - 0.5
+        #     )
+        # )
         k_max = int(
             np.ceil(
-                np.arcsin(np.sqrt(2 * theoretical_epsilon))
+                np.arcsin(np.sqrt(2 * epsilon_p))
                 / np.arcsin(2 * epsilon)
-                * 0.5
                 - 0.5
             )
         )
+        ########### First Step ##########################
         bigk_max = 2 * k_max + 1
         big_t = np.log(
             ratio
             * ratio
-            * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
+            * 2.0 * (np.arcsin(np.sqrt(2 * epsilon_p)))
             / (np.arcsin(2 * epsilon))
         ) / np.log(ratio)
-        gamma_i = gamma / big_t
-        # This is shots for each iteration: Ni in the paper
-        n_i = int(
-            np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
-        )
-        n_oracle = int(n_i / 2 * bigk_max * (1 + ratio / (ratio - 1)))
+        # Oracle Calls
+        c2 = (4.0 * np.sqrt(np.exp(1)) * ratio ** (ratio / (ratio -1)))\
+            / (ratio - 1)
+        c11 = np.pi * ratio
+        c12 = 2.0 * np.arcsin(2 *epsilon) * (ratio - 1) * epsilon_p ** 2
+        c1 = c11 / c12
+        n_oracle = c1 * np.log(c2 / gamma) / epsilon
+
         print("-------------------------------------------------------------")
         print("Maximum number of amplifications: ", k_max)
         print("Maximum number of rounds: ", int(big_t))
-        print("Number of shots per round: ", n_i)
         print("Maximum number of calls to the oracle: ", n_oracle)
         print("-------------------------------------------------------------")
         return n_oracle
@@ -395,7 +409,7 @@ class RQAE:
         """
         return np.sqrt(1 / (2 * n_samples) * np.log(2 / gamma))
 
-    def rqae(self, ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05):
+    def mrqae(self, ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05):
         """
         This function implements the first step of the RQAE paper. The
         result is an estimation of the desired amplitude with precision
@@ -424,44 +438,67 @@ class RQAE:
         # Always need to clean the circuit statistics property
         self.circuit_statistics = {}
         # time_list = []
-        theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
+
+
+        # Bounded error for each step
+        # theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
+        epsilon_p = 0.5 * np.sin(np.pi / (4 * (ratio + 2))) ** 2
+
+        # k_max = int(
+        #     np.ceil(
+        #         np.arcsin(np.sqrt(2 * theoretical_epsilon))
+        #         / np.arcsin(2 * epsilon)
+        #         * 0.5
+        #         - 0.5
+        #     )
+        # )
+
+        # Maximum circuit depth
         k_max = int(
             np.ceil(
-                np.arcsin(np.sqrt(2 * theoretical_epsilon))
+                np.arcsin(np.sqrt(2 * epsilon_p))
                 / np.arcsin(2 * epsilon)
-                * 0.5
                 - 0.5
             )
         )
-        bigk_max = 2 * k_max + 1
+        # Maximum number of iterations
         big_t = np.log(
             ratio
             * ratio
-            * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
+            * 2.0 * (np.arcsin(np.sqrt(2 * epsilon_p)))
             / (np.arcsin(2 * epsilon))
         ) / np.log(ratio)
-        gamma_i = gamma / big_t
-        # This is shots for each iteration: Ni in the paper
-        n_i = int(
-            np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
-        )
-        epsilon_probability = np.sqrt(1 / (2 * n_i) * np.log(2 / gamma_i))
-        shift = theoretical_epsilon / np.sin(np.pi / (2 * (ratio + 2)))
+
+        ############### First Step #######################
+
+        # gamma for first step
+        gamma_0 = 0.5 * gamma * (ratio - 1) / (ratio * (2 * k_max + 1))
+        # shots for first step
+        n_0 = int(np.ceil(np.log(2.0 / gamma_0) / (2 * epsilon_p ** 2)))
+        # shift for first step
+        shift_0 = 0.5 * np.sin(np.pi / (2 * (ratio + 2)))
         #print("First Step: {}".format(shift))
-        #####################################
-        # First step
         [amplitude_min, amplitude_max] = self.first_step(
-            shift=shift, shots=n_i, gamma=gamma_i
+            shift=shift_0, shots=n_0, gamma=gamma_0
         )
         epsilon_amplitude = (amplitude_max - amplitude_min) / 2
         # time_list.append(time_pdf)
-        # Consecutive steps
+
+        ############### Consecutive Steps #######################
+
         while epsilon_amplitude > epsilon:
+            # amplification of the step
             k = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
             k = min(k, k_max)
+            # shift of the step
             shift = -amplitude_min
             shift = min(shift, 0.5)
             #print("While Step: {}".format(shift))
+            # gamma of the step
+            gamma_i = 0.5 * gamma * (ratio - 1) * (2 * k + 1) \
+                / (ratio * (2 * k_max + 1))
+            # number of shots of the step
+            n_i = int(np.ceil(np.log(2.0 / gamma_i) / (2 * epsilon_p ** 2)))
             [amplitude_min, amplitude_max] = self.run_step(
                 shift=shift, shots=n_i, gamma=gamma_i, k=k
             )
@@ -482,7 +519,7 @@ class RQAE:
 
         """
         start = time.time()
-        [self.ae_l, self.ae_u] = self.rqae(
+        [self.ae_l, self.ae_u] = self.mrqae(
             ratio=self.ratio, epsilon=self.epsilon, gamma=self.gamma
         )
         self.ae = (self.ae_u + self.ae_l) / 2.0

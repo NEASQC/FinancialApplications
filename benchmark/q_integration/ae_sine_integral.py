@@ -245,9 +245,9 @@ def run_id(n_qbits, interval, ae_configuration, qpu, repetitions, save_name):
             ae_configuration
         )
         list_of_pdfs.append(step_pdf)
+        save(True, save_name, step_pdf, "a")
     pdf = pd.concat(list_of_pdfs)
     pdf.reset_index(drop=True, inplace=True)
-    save(True, save_name, pdf, "a")
     return pdf
 
 
@@ -354,6 +354,8 @@ if __name__ == "__main__":
     if args.count:
         print(len(final_list))
 
+    folder = "/home/cesga/gferro/Codigo/FinancialApplications/benchmark/q_integration/"
+
     if args.execution:
         if args.id is not None:
             pdf = run_id(
@@ -362,7 +364,7 @@ if __name__ == "__main__":
                 final_list[args.id],
                 args.qpu,
                 args.repetitions,
-                args.ae_type + "_"+str(args.id)+".csv"
+                folder + args.ae_type + "_"+str(args.id)+".csv"
             )
     #     list_of_pdfs = []
     #     for i in range(args.repetitions):
