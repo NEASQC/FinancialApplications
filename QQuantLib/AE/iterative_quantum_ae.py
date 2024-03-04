@@ -252,6 +252,50 @@ class IQAE:
         return [theta_min, theta_max]
 
     @staticmethod
+    def compute_info(
+        epsilon: float = 0.01, shots: int = 100, alpha: float = 0.05
+    ):
+        """
+        This function computes theoretical values of the IQAE algorithm.
+
+        Parameters
+        ----------
+        epsilon : float
+            precision
+        alpha : float
+            accuracy
+        shots : int
+            number of measurements on each iteration
+
+        Return
+        ------
+        info : dict
+            python dictionary with the computed information
+
+        """
+        # Maximum number of rounds: T in paper
+        big_t = np.ceil(np.log2(np.pi / (8 * epsilon)))
+        # Total number of Grover operator calls
+        n_grover = int(
+            50 * np.log(2 / alpha * np.log2(np.pi / (4 * epsilon))) / epsilon
+        )
+        # Maximum number of shots at each round
+        n_max = int(32 * np.log(2 / alpha * np.log2(np.pi / (4 * epsilon))) \
+            / (1 - 2 * np.sin(np.pi / 14)) ** 2)
+        # This is the number of calls to the oracle operator (A)
+        n_oracle = 2 * n_grover + n_max
+        # This is L in the papper
+        big_l = (np.arcsin(2 / shots * np.log(2 * big_t / epsilon))) ** 0.25
+        k_max = big_l / epsilon / 2
+
+        info = {
+            "big_t": big_t, "n_grover": n_grover, "n_max": n_max,
+            "n_oracle": n_oracle, "big_l": big_l, "k_max": k_max
+        }
+
+        return info
+
+    @staticmethod
     def display_information(
         epsilon: float = 0.01, shots: int = 100, alpha: float = 0.05
     ):
@@ -276,25 +320,15 @@ class IQAE:
         print("N: ", shots)
         print("-------------------------------------------------------------")
 
-        # This is T, number of rounds, in the papper
-        big_t = np.ceil(np.log2(np.pi / (8 * epsilon)))
-        n_max = (
-            32
-            / (1 - 2 * np.sin(np.pi / 14)) ** 2
-            * np.log(2 / alpha * np.log2(np.pi / (4 * epsilon)))
-        )
-        n_oracle = 50 * np.log(2 / alpha * np.log2(np.pi / (4 * epsilon))) / epsilon
-        # This is L in the papper
-        big_l = (np.arcsin(2 / shots * np.log(2 * big_t / epsilon))) ** 0.25
-        k_max = big_l / epsilon / 2
+        info_dict = IQAE.compute_info(epsilon, shots, alpha)
 
         print("-------------------------------------------------------------")
-        print("Maximum number of rounds: ", int(big_t))
-        print("Maximum number of shots per round needed: ", int(n_max))
-        print("Maximum number of amplifications: ", int(k_max))
-        print("Maximum number of calls to the oracle: ", int(n_oracle))
+        print("Maximum number of rounds: ", info_dict["big_t"])
+        print("Maximum number of shots per round needed: ", info_dict["n_max"])
+        print("Maximum number of amplifications: ", info_dict["k_max"])
+        print("Maximum number of Grover operator calls: ", info_dict["n_grover"])
+        print("Maximum number of Oracle operator calls: ", info_dict["n_oracle"])
         print("-------------------------------------------------------------")
-        return n_oracle
 
     @staticmethod
     def chebysev_bound(n_samples: int, gamma: float):
@@ -351,8 +385,6 @@ class IQAE:
         [theta_l, theta_u] = [0.0, np.pi / 2]
         # This is T the number of rounds in the paper
         big_t = int(np.ceil(np.log2(np.pi / (8 * epsilon))) + 1)
-        # This is L in the paper
-        big_l = (np.arcsin(2 / shots * np.log(2 * big_t / epsilon))) ** 0.25
         #####################################################
         h_k = 0
         n_effective = 0

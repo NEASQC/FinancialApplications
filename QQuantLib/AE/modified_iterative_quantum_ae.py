@@ -189,6 +189,51 @@ class mIQAE:
         return int(k)
 
     @staticmethod
+    def compute_info(
+        epsilon: float = 0.01, shots: int = 100, alpha: float = 0.05
+    ):
+        """
+        This function computes theoretical values of the IQAE algorithm.
+
+        Parameters
+        ----------
+        epsilon : float
+            precision
+        alpha : float
+            accuracy
+        shots : int
+            number of measurements on each iteration
+
+        Return
+        ------
+        info : dict
+            python dictionary with the computed information
+
+        """
+
+
+        # Upper bound for amplification: Kmax in paper
+        bigk_max = int(np.pi / (4.0 * epsilon))
+        # Maximum number of rounds: T in paper
+        big_t = int(np.ceil(np.log2(np.pi / (4 * epsilon)) / np.log2(3)))
+        # constant C in the paper
+        big_c = 1.0 / ((np.sin(np.pi / 21.0) * np.sin(8.0 * np.pi /21.0)) ** 2)
+        # Total number of Grover operator calls
+        n_grover = int(1.5 * bigk_max * big_c * np.log(np.sqrt(27) / alpha))
+        # Total number of oracle operator calls
+        c1 = np.log(3 * bigk_max / alpha) + big_t * np.log(3/alpha)
+        c2 = (big_t ** 3 - (big_t-1) ** 3 - 1.0) * np.log(3) / 6.0
+        n_oracle = 2.0 * n_grover + int(big_c * (c1 + c2))
+
+
+        info = {
+            "bigk_max": bigk_max, "big_t": big_t, "n_grover": n_grover,
+            "n_oracle": n_oracle
+        }
+
+        return info
+
+    @staticmethod
     def display_information(
         epsilon: float = 0.01, shots: int = 100, alpha: float = 0.05
     ):
@@ -213,17 +258,14 @@ class mIQAE:
         print("N: ", shots)
         print("-------------------------------------------------------------")
 
-        # Upper bound for amplification: Kmax in paper
-        bigk_max = np.pi / (4.0 * epsilon)
-        big_c = 1.0 / ((np.sin(np.pi / 21.0) * np.sin(8.0 * np.pi /21.0)) ** 2)
-        # Number of Oracle Calls: equation 3.32
-        n_oracle = 1.5 * bigk_max * big_c * np.log(np.sqrt(27) / alpha)
+        info_dict = mIQAE.compute_info(epsilon, shots, alpha)
 
         print("-------------------------------------------------------------")
-        print("Maximum amplification (Kmax)", int(bigk_max))
-        print("Maximum number of calls to the oracle: ", int(n_oracle))
+        print("Maximum amplification (Kmax)", info_dict["bigk_max"])
+        print("Maximum number of rounds: ", info_dict["big_t"])
+        print("Maximum number of Grover operator calls: ", info_dict["n_grover"])
+        print("Maximum number of Oracle operator calls: ", info_dict["n_oracle"])
         print("-------------------------------------------------------------")
-        return n_oracle
 
     @staticmethod
     def chebysev_bound(n_samples: int, gamma: float):
