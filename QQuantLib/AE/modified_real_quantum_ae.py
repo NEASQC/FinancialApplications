@@ -381,7 +381,8 @@ class mRQAE:
         c11 = np.pi * ratio
         c12 = 2.0 * (ratio - 1) * epsilon_p ** 2
         c1 = c11 / c12
-        n_oracle = c1 * np.log(c2 / gamma) / (np.arcsin(2 *epsilon))
+        #n_oracle = c1 * np.log(c2 / gamma) / (np.arcsin(2 *epsilon))
+        n_oracle = c1 * np.log(c2 / gamma) / epsilon
 
         print("-------------------------------------------------------------")
         print("Maximum number of amplifications: ", k_max)
@@ -439,10 +440,13 @@ class mRQAE:
         self.circuit_statistics = {}
         # time_list = []
 
+        # First step shift
+        shift_0 = 0.5
 
         # Bounded error for each step
         # theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
-        epsilon_p = 0.5 * np.sin(np.pi / (4 * (ratio + 2))) ** 2
+        #epsilon_p = 0.5 * np.sin(np.pi / (4 * (ratio + 2))) ** 2
+        epsilon_p = np.abs(shift_0) * np.sin(np.pi / (2 * (ratio + 2)))
 
         # k_max = int(
         #     np.ceil(
@@ -461,6 +465,7 @@ class mRQAE:
                 - 0.5
             )
         )
+        # print("k_max: ", k_max, "epsilon_p", epsilon_p)
         # Maximum number of iterations
         big_t = np.log(
             ratio
@@ -475,9 +480,8 @@ class mRQAE:
         gamma_0 = 0.5 * gamma * (ratio - 1) / (ratio * (2 * k_max + 1))
         # shots for first step
         n_0 = int(np.ceil(np.log(2.0 / gamma_0) / (2 * epsilon_p ** 2)))
+        # print("gamma_0: ", gamma_0, "n_0", n_0)
         # shift for first step
-        shift_0 = 0.5 * np.sin(np.pi / (2 * (ratio + 2)))
-        #print("First Step: {}".format(shift))
         [amplitude_min, amplitude_max] = self.first_step(
             shift=shift_0, shots=n_0, gamma=gamma_0
         )
@@ -492,13 +496,17 @@ class mRQAE:
             k = min(k, k_max)
             # shift of the step
             shift = -amplitude_min
-            shift = min(shift, 0.5)
+            if shift > 0:
+                shift = min(shift, 0.5)
+            if shift < 0:
+                shift = max(shift, -0.5)
             #print("While Step: {}".format(shift))
             # gamma of the step
             gamma_i = 0.5 * gamma * (ratio - 1) * (2 * k + 1) \
                 / (ratio * (2 * k_max + 1))
             # number of shots of the step
             n_i = int(np.ceil(np.log(2.0 / gamma_i) / (2 * epsilon_p ** 2)))
+            # print("gamma_i: ", gamma_i, "n_i", n_i)
             [amplitude_min, amplitude_max] = self.run_step(
                 shift=shift, shots=n_i, gamma=gamma_i, k=k
             )

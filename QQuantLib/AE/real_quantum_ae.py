@@ -329,6 +329,67 @@ class RQAE:
         return [amplitude_min, amplitude_max]
 
     @staticmethod
+    def compute_info(
+        ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05
+    ):
+        """
+        This function computes theoretical values of the IQAE algorithm.
+
+        Parameters
+        ----------
+        ratio: float
+            amplification ratio/policy
+        epsilon : float
+            precision
+        gamma : float
+            accuracy
+
+        Return
+        ------
+        info : dict
+            python dictionary with the computed information
+
+        """
+        epsilon = 0.5 * epsilon
+        # Bounded for the error at each step
+        theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
+        # Maximum amplification
+        k_max = int(
+            np.ceil(
+                np.arcsin(np.sqrt(2 * theoretical_epsilon))
+                / np.arcsin(2 * epsilon)
+                * 0.5
+                - 0.5
+            )
+        )
+        bigk_max = 2 * k_max + 1
+        # Maximum number of iterations
+        big_t = np.log(
+            ratio
+            * ratio
+            * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
+            / (np.arcsin(2 * epsilon))
+        ) / np.log(ratio)
+        # Maximum probability failure at each step
+        gamma_i = gamma / big_t
+        # This is shots for each iteration: Ni in the paper
+        n_i = int(
+            np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
+        )
+        # Total number of Grover operator calls
+        n_grover = int(n_i / 2 * bigk_max * (1 + ratio / (ratio - 1)))
+        # This is the number of calls to the oracle operator (A)
+        n_oracle = 2 * n_grover + n_i
+
+        info = {
+            "theoretical_epsilon": theoretical_epsilon, "k_max": k_max,
+            "big_t": big_t, "gamma_i": gamma_i, "n_i": n_i,
+            "n_grover": n_grover, "n_oracle": n_oracle,
+        }
+
+        return info
+
+    @staticmethod
     def display_information(
         ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05
     ):
@@ -346,35 +407,38 @@ class RQAE:
             accuracy
 
         """
-        theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
-        k_max = int(
-            np.ceil(
-                np.arcsin(np.sqrt(2 * theoretical_epsilon))
-                / np.arcsin(2 * epsilon)
-                * 0.5
-                - 0.5
-            )
-        )
-        bigk_max = 2 * k_max + 1
-        big_t = np.log(
-            ratio
-            * ratio
-            * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
-            / (np.arcsin(2 * epsilon))
-        ) / np.log(ratio)
-        gamma_i = gamma / big_t
+        # theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
+        #k_max = int(
+        #    np.ceil(
+        #        np.arcsin(np.sqrt(2 * theoretical_epsilon))
+        #        / np.arcsin(2 * epsilon)
+        #        * 0.5
+        #        - 0.5
+        #    )
+        #)
+        #bigk_max = 2 * k_max + 1
+        #big_t = np.log(
+        #    ratio
+        #    * ratio
+        #    * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
+        #    / (np.arcsin(2 * epsilon))
+        #) / np.log(ratio)
+        #gamma_i = gamma / big_t
         # This is shots for each iteration: Ni in the paper
-        n_i = int(
-            np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
-        )
-        n_oracle = int(n_i / 2 * bigk_max * (1 + ratio / (ratio - 1)))
+        #n_i = int(
+        #    np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
+        #)
+        #n_oracle = int(n_i / 2 * bigk_max * (1 + ratio / (ratio - 1)))
+
+        info_dict = RQAE.compute_info(ratio, epsilon, gamma)
+
         print("-------------------------------------------------------------")
-        print("Maximum number of amplifications: ", k_max)
-        print("Maximum number of rounds: ", int(big_t))
-        print("Number of shots per round: ", n_i)
-        print("Maximum number of calls to the oracle: ", n_oracle)
+        print("Maximum number of amplifications: ", info_dict["k_max"])
+        print("Maximum number of rounds: ", info_dict["big_t"])
+        print("Number of shots per round: ", info_dict["n_i"])
+        print("Maximum number of Grover operator calls: ", info_dict["n_grover"])
+        print("Maximum number of Oracle operator calls: ", info_dict["n_oracle"])
         print("-------------------------------------------------------------")
-        return n_oracle
 
     @staticmethod
     def chebysev_bound(n_samples: int, gamma: float):
@@ -460,7 +524,11 @@ class RQAE:
             k = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
             k = min(k, k_max)
             shift = -amplitude_min
-            shift = min(shift, 0.5)
+            shift = -amplitude_min
+            if shift > 0:
+                shift = min(shift, 0.5)
+            if shift < 0:
+                shift = max(shift, -0.5)
             #print("While Step: {}".format(shift))
             [amplitude_min, amplitude_max] = self.run_step(
                 shift=shift, shots=n_i, gamma=gamma_i, k=k
