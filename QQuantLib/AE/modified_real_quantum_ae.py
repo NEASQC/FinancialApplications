@@ -379,9 +379,9 @@ class mRQAE:
         c2 = (4.0 * np.sqrt(np.exp(1)) * ratio ** (ratio / (ratio -1)))\
             / (ratio - 1)
         c11 = np.pi * ratio
-        c12 = 2.0 * np.arcsin(2 *epsilon) * (ratio - 1) * epsilon_p ** 2
+        c12 = 2.0 * (ratio - 1) * epsilon_p ** 2
         c1 = c11 / c12
-        n_oracle = c1 * np.log(c2 / gamma) / epsilon
+        n_oracle = c1 * np.log(c2 / gamma) / (np.arcsin(2 *epsilon))
 
         print("-------------------------------------------------------------")
         print("Maximum number of amplifications: ", k_max)
