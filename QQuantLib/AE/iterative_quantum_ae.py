@@ -283,7 +283,7 @@ class IQAE:
         n_max = int(32 * np.log(2 / alpha * np.log2(np.pi / (4 * epsilon))) \
             / (1 - 2 * np.sin(np.pi / 14)) ** 2)
         # This is the number of calls to the oracle operator (A)
-        n_oracle = 2 * n_grover + n_max
+        n_oracle = 2 * n_grover + n_max * (big_t + 1)
         # This is L in the papper
         big_l = (np.arcsin(2 / shots * np.log(2 * big_t / epsilon))) ** 0.25
         k_max = big_l / epsilon / 2
@@ -412,6 +412,7 @@ class IQAE:
             # time_pdf["m_k"] = k
             a_ = measure_state_probability(results, self.target)
             #a_ = results["Probability"].iloc[bitfield_to_int(self.target)]
+            #print("k: ", k, "shots: ", shots)
             #####################################################
             # Aggregate results from different iterations
             if j == 0:

@@ -221,9 +221,10 @@ class mIQAE:
         # Total number of Grover operator calls
         n_grover = int(1.5 * bigk_max * big_c * np.log(np.sqrt(27) / alpha))
         # Total number of oracle operator calls
-        c1 = np.log(3 * bigk_max / alpha) + big_t * np.log(3/alpha)
-        c2 = (big_t ** 3 - (big_t-1) ** 3 - 1.0) * np.log(3) / 6.0
-        n_oracle = 2.0 * n_grover + int(big_c * (c1 + c2))
+        c1 = np.log(3 * bigk_max / alpha)
+        c2 = 0.5 * (big_t + 1) * big_t * np.log(3)
+        c3 = big_t * np.log(alpha)
+        n_oracle = 2.0 * n_grover + int(big_c * (c1 + c2 - c3))
 
 
         info = {
@@ -373,6 +374,7 @@ class mIQAE:
                     qubits=self.index
                 )
                 end = time.time()
+                #print("k: ", k_i, "shots: ", shots_)
                 self.quantum_times.append(end-start)
 
                 if k_i not in self.schedule:
@@ -393,8 +395,6 @@ class mIQAE:
                 theta_u = (0.5 * np.pi * ri + gamma_max) / big_k_i
 
                 k = mIQAE.find_next_k(k_i, theta_l, theta_u)
-                #print("i: {}, k_i: {}, k: {}, shots_:{}".format(
-                #    i, k_i, k, shots_))
 
         [a_l, a_u] = [np.sin(theta_l) ** 2, np.sin(theta_u) ** 2]
         return [a_l, a_u]

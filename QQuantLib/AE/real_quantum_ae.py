@@ -88,6 +88,7 @@ class RQAE:
         self.ae_u = None
         self.ae = None
         self.circuit_statistics = None
+        self.circuit_statistics = {}
         self.time_pdf = None
         self.run_time = None
         self.schedule = {}
@@ -257,7 +258,7 @@ class RQAE:
         end = time.time()
         first_step_time = end - start
 
-        return [amplitude_min, amplitude_max]
+        return [amplitude_min, amplitude_max], circuit
 
     def run_step(self, shift: float, shots: int, gamma: float, k: int):
         """
@@ -326,7 +327,7 @@ class RQAE:
         amplitude_min = np.sin(angle_min) - shift
         first_step_time = end - start
 
-        return [amplitude_min, amplitude_max]
+        return [amplitude_min, amplitude_max], circuit
 
     @staticmethod
     def compute_info(
@@ -512,9 +513,12 @@ class RQAE:
         epsilon_probability = np.sqrt(1 / (2 * n_i) * np.log(2 / gamma_i))
         shift = theoretical_epsilon / np.sin(np.pi / (2 * (ratio + 2)))
         #print("First Step: {}".format(shift))
+
+        #print("first step. Shift ", shift , "shots: ", n_i, "gamma_0: ", gamma_i)
+
         #####################################
         # First step
-        [amplitude_min, amplitude_max] = self.first_step(
+        [amplitude_min, amplitude_max], _ = self.first_step(
             shift=shift, shots=n_i, gamma=gamma_i
         )
         epsilon_amplitude = (amplitude_max - amplitude_min) / 2
@@ -524,13 +528,12 @@ class RQAE:
             k = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
             k = min(k, k_max)
             shift = -amplitude_min
-            shift = -amplitude_min
             if shift > 0:
                 shift = min(shift, 0.5)
             if shift < 0:
                 shift = max(shift, -0.5)
-            #print("While Step: {}".format(shift))
-            [amplitude_min, amplitude_max] = self.run_step(
+            #print("Step k: ", k, "Shift ", shift , "shots: ", n_i, "gamma_0: ", gamma_i)
+            [amplitude_min, amplitude_max], _ = self.run_step(
                 shift=shift, shots=n_i, gamma=gamma_i, k=k
             )
             # time_list.append(time_pdf)

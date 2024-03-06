@@ -329,6 +329,74 @@ class mRQAE:
         return [amplitude_min, amplitude_max]
 
     @staticmethod
+    def compute_info(
+        ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05
+    ):
+        """
+        This function computes theoretical values of the IQAE algorithm.
+
+        Parameters
+        ----------
+        ratio: float
+            amplification ratio/policy
+        epsilon : float
+            precision
+        gamma : float
+            accuracy
+
+        Return
+        ------
+        info : dict
+            python dictionary with the computed information
+
+        """
+        epsilon = 0.5 * epsilon
+        # First step shift
+        shift_0 = 0.5
+        # Bounded for the error at each step
+        epsilon_p = np.abs(shift_0) * np.sin(np.pi / (2 * (ratio + 2)))
+        # Maximum amplification
+        k_max = int(
+            np.ceil(
+                np.arcsin(np.sqrt(2 * epsilon_p))
+                / np.arcsin(2 * epsilon)
+                - 0.5
+            )
+        )
+        bigk_max = 2 * k_max + 1
+        # Maximum number of iterations
+        big_t = np.log(
+            ratio
+            * ratio
+            * 2.0 * (np.arcsin(np.sqrt(2 * epsilon_p)))
+            / (np.arcsin(2 * epsilon))
+        ) / np.log(ratio)
+        # Maximum probability failure at initial step
+        gamma_0 = 0.5 * gamma * (ratio - 1) / (ratio * (2 * k_max + 1))
+        # shots for first step
+        n_0 = int(np.ceil(np.log(2.0 / gamma_0) / (2 * epsilon_p ** 2)))
+        # Total number of Grover operator calls
+        c2 = (4.0 * np.sqrt(np.exp(1)) * ratio ** (ratio / (ratio -1)))\
+            / (ratio - 1)
+        c11 = np.pi * ratio
+        c12 = 2.0 * (ratio - 1) * epsilon_p ** 2
+        c1 = c11 / c12
+        n_grover = c1 * np.log(c2 / gamma) / np.arcsin(2 * epsilon)
+        # This is the number of calls to the oracle operator (A)
+        d_0 = np.log(4 * np.exp(1) * bigk_max * ratio / (gamma * (ratio - 1)))
+        d_1 = (big_t + 1) * np.log(4 * np.exp(1) * ratio / (gamma * (ratio - 1)))
+        d_2 = np.log(ratio) * big_t * (big_t + 1) / 2.0
+        sum_ni = (d_0 + d_1 + d_2) / (2 * epsilon_p ** 2)
+        n_oracle = 2 * n_grover + sum_ni
+
+        info = {
+            "epsilon_p": epsilon_p, "k_max": k_max,
+            "big_t": big_t, "gamma_0": gamma_0, "n_i": n_0,
+            "n_grover": n_grover, "n_oracle": n_oracle,
+        }
+
+        return info
+    @staticmethod
     def display_information(
         ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05
     ):
@@ -347,49 +415,50 @@ class mRQAE:
 
         """
 
-        # Bounded for the error at each step
-        #theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
-        epsilon_p = 0.5 * np.sin(np.pi / (4 * (ratio + 2))) ** 2
+        # # Bounded for the error at each step
+        # #theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
+        # epsilon_p = 0.5 * np.sin(np.pi / (4 * (ratio + 2))) ** 2
 
 
+        # # k_max = int(
+        # #     np.ceil(
+        # #         np.arcsin(np.sqrt(2 * theoretical_epsilon))
+        # #         / np.arcsin(2 * epsilon)
+        # #         * 0.5
+        # #         - 0.5
+        # #     )
+        # # )
         # k_max = int(
         #     np.ceil(
-        #         np.arcsin(np.sqrt(2 * theoretical_epsilon))
+        #         np.arcsin(np.sqrt(2 * epsilon_p))
         #         / np.arcsin(2 * epsilon)
-        #         * 0.5
         #         - 0.5
         #     )
         # )
-        k_max = int(
-            np.ceil(
-                np.arcsin(np.sqrt(2 * epsilon_p))
-                / np.arcsin(2 * epsilon)
-                - 0.5
-            )
-        )
-        ########### First Step ##########################
-        bigk_max = 2 * k_max + 1
-        big_t = np.log(
-            ratio
-            * ratio
-            * 2.0 * (np.arcsin(np.sqrt(2 * epsilon_p)))
-            / (np.arcsin(2 * epsilon))
-        ) / np.log(ratio)
-        # Oracle Calls
-        c2 = (4.0 * np.sqrt(np.exp(1)) * ratio ** (ratio / (ratio -1)))\
-            / (ratio - 1)
-        c11 = np.pi * ratio
-        c12 = 2.0 * (ratio - 1) * epsilon_p ** 2
-        c1 = c11 / c12
-        #n_oracle = c1 * np.log(c2 / gamma) / (np.arcsin(2 *epsilon))
-        n_oracle = c1 * np.log(c2 / gamma) / epsilon
+        # ########### First Step ##########################
+        # bigk_max = 2 * k_max + 1
+        # big_t = np.log(
+        #     ratio
+        #     * ratio
+        #     * 2.0 * (np.arcsin(np.sqrt(2 * epsilon_p)))
+        #     / (np.arcsin(2 * epsilon))
+        # ) / np.log(ratio)
+        # # Oracle Calls
+        # c2 = (4.0 * np.sqrt(np.exp(1)) * ratio ** (ratio / (ratio -1)))\
+        #     / (ratio - 1)
+        # c11 = np.pi * ratio
+        # c12 = 2.0 * (ratio - 1) * epsilon_p ** 2
+        # c1 = c11 / c12
+        # #n_oracle = c1 * np.log(c2 / gamma) / (np.arcsin(2 *epsilon))
+        # n_oracle = c1 * np.log(c2 / gamma) / epsilon
 
+        info_dict = mRQAE.compute_info(ratio, epsilon, gamma)
         print("-------------------------------------------------------------")
-        print("Maximum number of amplifications: ", k_max)
-        print("Maximum number of rounds: ", int(big_t))
-        print("Maximum number of calls to the oracle: ", n_oracle)
+        print("Maximum number of amplifications: ", info_dict["k_max"])
+        print("Maximum number of rounds: ", info_dict["big_t"])
+        print("Maximum number of Grover operator calls: ", info_dict["n_grover"])
+        print("Maximum number of Oracle operator calls: ", info_dict["n_oracle"])
         print("-------------------------------------------------------------")
-        return n_oracle
 
     @staticmethod
     def chebysev_bound(n_samples: int, gamma: float):
@@ -465,7 +534,6 @@ class mRQAE:
                 - 0.5
             )
         )
-        # print("k_max: ", k_max, "epsilon_p", epsilon_p)
         # Maximum number of iterations
         big_t = np.log(
             ratio
@@ -486,6 +554,7 @@ class mRQAE:
             shift=shift_0, shots=n_0, gamma=gamma_0
         )
         epsilon_amplitude = (amplitude_max - amplitude_min) / 2
+        #print("first step. Shift ", shift_0 , "shots: ", n_0, "gamma_0: ", gamma_0)
         # time_list.append(time_pdf)
 
         ############### Consecutive Steps #######################
@@ -500,16 +569,15 @@ class mRQAE:
                 shift = min(shift, 0.5)
             if shift < 0:
                 shift = max(shift, -0.5)
-            #print("While Step: {}".format(shift))
             # gamma of the step
             gamma_i = 0.5 * gamma * (ratio - 1) * (2 * k + 1) \
                 / (ratio * (2 * k_max + 1))
             # number of shots of the step
             n_i = int(np.ceil(np.log(2.0 / gamma_i) / (2 * epsilon_p ** 2)))
-            # print("gamma_i: ", gamma_i, "n_i", n_i)
             [amplitude_min, amplitude_max] = self.run_step(
                 shift=shift, shots=n_i, gamma=gamma_i, k=k
             )
+            #print("Step k: ", k, "Shift ", shift , "shots: ", n_i, "gamma_i: ", gamma_i)
             # time_list.append(time_pdf)
             epsilon_amplitude = (amplitude_max - amplitude_min) / 2
 
