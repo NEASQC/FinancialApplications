@@ -132,6 +132,9 @@ def q_solve_integral(**kwargs):
             else:
                 #Other algorithms return probability
                 ae_pdf = np.sqrt(solver_ae.ae_pdf)
+                # We need to provided the mean of the square root bounds
+                # as the measured ae
+                ae_pdf["ae"] = (ae_pdf["ae_l"] + ae_pdf["ae_u"]) / 2.0
         elif encoding == 2:
             if ae_type in ["RQAE", "eRQAE"]:
                 #RQAE provides amplitude directly.
@@ -139,6 +142,9 @@ def q_solve_integral(**kwargs):
             else:
                 #Other algorithms return probability
                 ae_pdf = np.sqrt(solver_ae.ae_pdf)
+                # We need to provided the mean of the square root bounds
+                # as the measured ae
+                ae_pdf["ae"] = (ae_pdf["ae_l"] + ae_pdf["ae_u"]) / 2.0
         else:
             raise ValueError("Not valid encoding key was provided!!!")
         #Now we need to deal with encoding normalisation
