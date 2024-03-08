@@ -82,7 +82,7 @@ def test(**kwargs):
     return pdf
 
 
-def run_id(repetitions, id_, save_, qpu, base_name, **ae_configuration):
+def run_id(repetitions, id_, save_, qpu, base_name, save_folder, **ae_configuration):
     #Domain configuration
 
     domain_configuration = {
@@ -103,7 +103,8 @@ def run_id(repetitions, id_, save_, qpu, base_name, **ae_configuration):
     ae_configuration.update(probability_configuration)
     ae_configuration.update({"qpu": get_qpu(qpu)})
     
-    save_name = str(id_) + "_" + ae_configuration["file"] + "_" + str(base_name) +  ".csv"
+    save_name = save_folder + str(id_) + "_" + ae_configuration["file"] + "_" + str(base_name) +  ".csv"
+    print(save_name)
     
     for i in range(repetitions):
         step_pdf = test(**ae_configuration)
@@ -224,6 +225,13 @@ if __name__ == "__main__":
         default="./quick.json",
         help="Json to use.",
     )
+    parser.add_argument(
+        "-folder",
+        dest="folder_path",
+        type=str,
+        help="Path for storing folder",
+        default="./",
+    )
     args = parser.parse_args()
 
     combination_list = list_of_dicts_from_jsons([args.json])
@@ -243,7 +251,9 @@ if __name__ == "__main__":
     if args.execution:
         if args.id is not None:
             configuration = combination_list[args.id]
-            run_id(args.repetitions, args.id, args.save, args.qpu, args.base_name, **configuration)
+            run_id(
+                args.repetitions, args.id, args.save, args.qpu,
+                args.base_name, args.folder_path, **configuration)
 
 
 
