@@ -76,6 +76,7 @@ def test(**kwargs):
         pdf["Value"] = np.max(p_x)
     pdf = pd.concat([pdf, ae_obj.ae_pdf], axis=1)
     pdf["oracle_calls"] = ae_obj.oracle_calls
+    pdf["schedule_pdf"] = [ae_obj.schedule_pdf.to_dict()]
     pdf["measured_epsilon"] = (pdf["ae_u"] - pdf["ae_l"]) / 2.0
     pdf["absolute_error"] = np.abs(pdf["ae"] - pdf["Value"])
     return pdf
@@ -216,9 +217,16 @@ if __name__ == "__main__":
         default="python",
         help="QPU for simulation: See function get_qpu in get_qpu module",
     )
+    parser.add_argument(
+        "-json",
+        dest="json",
+        type=str,
+        default="./quick.json",
+        help="Json to use.",
+    )
     args = parser.parse_args()
 
-    combination_list = list_of_dicts_from_jsons(["./quick.json"])
+    combination_list = list_of_dicts_from_jsons([args.json])
 
     if args.print:
         if args.id is not None:

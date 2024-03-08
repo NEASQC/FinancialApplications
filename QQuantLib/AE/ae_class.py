@@ -13,6 +13,7 @@ from QQuantLib.AE.ae_iterative_quantum_pe import IQPEAE
 from QQuantLib.AE.iterative_quantum_ae import IQAE
 from QQuantLib.AE.modified_iterative_quantum_ae import mIQAE
 from QQuantLib.AE.real_quantum_ae import RQAE
+from QQuantLib.AE.extended_real_quantum_ae import eRQAE
 from QQuantLib.AE.modified_real_quantum_ae import mRQAE
 from QQuantLib.AE.montecarlo_ae import MCAE
 from QQuantLib.utils.utils import text_is_none
@@ -55,11 +56,11 @@ class AE:
         self.index = index
 
         #Processing kwargs
-        self.kwargs = kwargs
-        self.linalg_qpu = self.kwargs.get("qpu", None)
+        self.solver_dict = kwargs
+        # self.kwargs = kwargs
+        self.linalg_qpu = self.solver_dict.get("qpu", None)
 
-        # Set the QPU to use
-        self.linalg_qpu = kwargs.get("qpu", None)
+        # # Set the QPU to use
         if self.linalg_qpu is None:
             print("Not QPU was provide. PyLinalg will be used")
             self.linalg_qpu = get_qpu("python")
@@ -68,7 +69,6 @@ class AE:
         #attributes created
         self.solver_ae = None
         self.ae_pdf = None
-        self.solver_dict = None
         self.oracle_calls = None
         self.max_oracle_depth = None
         self.schedule_pdf = None
@@ -91,7 +91,6 @@ class AE:
         self._ae_type = stringvalue
         self.solver_ae = None
         self.ae_pdf = None
-        self.solver_dict = None
         self.oracle_calls = None
 
     def create_ae_solver(self):
@@ -100,17 +99,8 @@ class AE:
         """
         text_is_none(self.ae_type, "ae_type attribute", variable_type=str)
         #common ae settings
-        self.solver_dict = {
-            "mcz_qlm" : self.kwargs.get("mcz_qlm", True),
-            "qpu" : self.kwargs.get("qpu", None)
-        }
-
 
         if self.ae_type == "MLAE":
-            for par in ["delta", "ns", "schedule"]:
-                val_par = self.kwargs.get(par)
-                if val_par is not None:
-                    self.solver_dict.update({par : val_par})
             self.solver_ae = MLAE(
                 self.oracle,
                 target=self.target,
@@ -118,10 +108,6 @@ class AE:
                 **self.solver_dict
             )
         elif self.ae_type == "CQPEAE":
-            for par in ["auxiliar_qbits_number", "shots"]:
-                val_par = self.kwargs.get(par)
-                if val_par is not None:
-                    self.solver_dict.update({par : val_par})
             self.solver_ae = CQPEAE(
                 self.oracle,
                 target=self.target,
@@ -129,10 +115,6 @@ class AE:
                 **self.solver_dict
             )
         elif self.ae_type == "IQPEAE":
-            for par in ["cbits_number", "shots"]:
-                val_par = self.kwargs.get(par)
-                if val_par is not None:
-                    self.solver_dict.update({par : val_par})
             self.solver_ae = IQPEAE(
                 self.oracle,
                 target=self.target,
@@ -140,10 +122,6 @@ class AE:
                 **self.solver_dict
             )
         elif self.ae_type == "IQAE":
-            for par in ["epsilon", "alpha", "shots"]:
-                val_par = self.kwargs.get(par)
-                if val_par is not None:
-                    self.solver_dict.update({par : val_par})
             self.solver_ae = IQAE(
                 self.oracle,
                 target=self.target,
@@ -151,10 +129,6 @@ class AE:
                 **self.solver_dict
             )
         elif self.ae_type == "mIQAE":
-            for par in ["epsilon", "alpha", "shots"]:
-                val_par = self.kwargs.get(par)
-                if val_par is not None:
-                    self.solver_dict.update({par : val_par})
             self.solver_ae = mIQAE(
                 self.oracle,
                 target=self.target,
@@ -162,10 +136,6 @@ class AE:
                 **self.solver_dict
             )
         elif self.ae_type == "RQAE":
-            for par in ["epsilon", "gamma", "q"]:
-                val_par = self.kwargs.get(par)
-                if val_par is not None:
-                    self.solver_dict.update({par : val_par})
             self.solver_ae = RQAE(
                 self.oracle,
                 target=self.target,
@@ -173,21 +143,20 @@ class AE:
                 **self.solver_dict
             )
         elif self.ae_type == "mRQAE":
-            for par in ["epsilon", "gamma", "q"]:
-                val_par = self.kwargs.get(par)
-                if val_par is not None:
-                    self.solver_dict.update({par : val_par})
             self.solver_ae = mRQAE(
                 self.oracle,
                 target=self.target,
                 index=self.index,
                 **self.solver_dict
             )
+        elif self.ae_type == "eRQAE":
+            self.solver_ae = eRQAE(
+                self.oracle,
+                target=self.target,
+                index=self.index,
+                **self.solver_dict
+            )
         elif self.ae_type == "MCAE":
-            for par in ["shots"]:
-                val_par = self.kwargs.get(par)
-                if val_par is not None:
-                    self.solver_dict.update({par : val_par})
             self.solver_ae = MCAE(
                 self.oracle,
                 target=self.target,

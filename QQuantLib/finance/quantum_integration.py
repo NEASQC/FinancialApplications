@@ -63,9 +63,9 @@ def q_solve_integral(**kwargs):
 
     encoding = kwargs.get("encoding", None)
     ae_type = kwargs.get("ae_type", None)
-    if (encoding == 0) and (ae_type == "RQAE"):
+    if (encoding == 0) and (ae_type in ["RQAE", "eRQAE"]):
         string_error = (
-            "RQAE method CAN NOT BE USED with encoding protocol: "+str(encoding)
+            "RQAEs methods CAN NOT BE USED with encoding protocol: "+str(encoding)
         )
 
         warnings.warn(string_error)
@@ -126,14 +126,14 @@ def q_solve_integral(**kwargs):
         if encoding == 0:
             ae_pdf = solver_ae.ae_pdf
         elif encoding == 1:
-            if ae_type == "RQAE":
+            if ae_type in ["RQAE", "eRQAE"]:
                 #Amplitude is provided directly by this algorithm
                 ae_pdf = solver_ae.ae_pdf
             else:
                 #Other algorithms return probability
                 ae_pdf = np.sqrt(solver_ae.ae_pdf)
         elif encoding == 2:
-            if ae_type == "RQAE":
+            if ae_type in ["RQAE", "eRQAE"]:
                 #RQAE provides amplitude directly.
                 ae_pdf = solver_ae.ae_pdf
             else:
