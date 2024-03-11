@@ -110,31 +110,26 @@ def ae_price_estimation(**kwargs):
         pdf[
             [col + "_expectation" for col in ae_expectation.columns]
         ] = ae_expectation
-
+        # Pure integration Absolute Error
+        pdf["absolute_error"] = np.abs(
+            pdf["ae_expectation"] - pdf["riemann_expectation"])
+        # Finance Info
+        #Exact option price under the Black-Scholes model
+        pdf["finance_exact_price"] = exact_solution
         #Option price estimation using expectation computed as Riemann sum
-        pdf["riemann_price_estimation"] = pdf["riemann_expectation"] * np.exp(
+        pdf["finance_riemann_price"] = pdf["riemann_expectation"] * np.exp(
             -pdf["risk_free_rate"] * pdf["maturity"]
         )
-        #Exact option price under the Black-Scholes model
-        pdf["exact_price"] = exact_solution
         #Option price estimation using expectation computed by AE integration
-        pdf[[col + "_price_estimation" for col in ae_expectation.columns]] = (
-            ae_expectation
-            * np.exp(-pdf["risk_free_rate"] * pdf["maturity"]).iloc[0]
-        )
-        #Computing Absolute: Rieman vs AE techniques
-        pdf["error_riemann"] = np.abs(
-            pdf["ae_price_estimation"] - pdf["riemann_price_estimation"]
-        )
-        #Computing Relative: Rieman vs AE techniques
-        pdf["relative_error_riemann"] = (
-            pdf["error_riemann"] / pdf["riemann_price_estimation"]
+        pdf["finance_price_estimation"] = pdf["ae_expectation"] * \
+            np.exp(-pdf["risk_free_rate"] * pdf["maturity"]).iloc[0]
+        #Computing Absolute with discount: Rieman vs AE techniques
+        pdf["finance_error_riemann"] = np.abs(
+            pdf["finance_price_estimation"] - pdf["finance_riemann_price"]
         )
         #Computing Absolute error: Exact BS price vs AE techniques
-        pdf["error_exact"] = np.abs(
-            pdf["ae_price_estimation"] - pdf["exact_price"])
-        #Computing Relative error: Exact BS price vs AE techniques
-        pdf["relative_error_exact"] = pdf["error_exact"] / pdf["exact_price"]
+        pdf["finance_error_exact"] = np.abs(
+            pdf["finance_price_estimation"] - pdf["finance_exact_price"])
         #Other interesting staff
         if solver_object is None:
             #Computation Fails Encoding 0 and RQAE

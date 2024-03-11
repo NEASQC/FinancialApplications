@@ -70,7 +70,7 @@ def test(**kwargs):
     # Processing results
     pdf = pd.DataFrame.from_dict(kwargs, orient="index").T
     ae_type = kwargs.get("ae_type")
-    if ae_type in ["RQAE", "mRQAE"]:
+    if ae_type in ["RQAE", "mRQAE", "eRQAE"]:
         pdf["Value"] = np.sqrt(np.max(p_x))
     else:
         pdf["Value"] = np.max(p_x)

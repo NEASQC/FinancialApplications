@@ -145,7 +145,7 @@ if __name__ == "__main__":
         help="For counting elements on the list",
     )
     parser.add_argument(
-        "--list", dest="list", default=False, action="store_true", help="For listing "
+        "--print", dest="list", default=False, action="store_true", help="For printing "
     )
     parser.add_argument(
         "-qpu",
