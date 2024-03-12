@@ -124,6 +124,10 @@ def q_solve_integral(**kwargs):
 
         # Recover amplitude estimation from ae_solver
         if encoding == 0:
+            # In the square encoding the np.sqrt(p_x * f_norm_x) is
+            # loaded in the amplitude of the state |x>^n|0>.
+            # The probability of measuring a |0> in the additional qubit
+            # is just sum_x(|p_x * f_norm_x|)
             ae_pdf = solver_ae.ae_pdf
         elif encoding == 1:
             if ae_type in ["RQAE", "eRQAE", "mRQAE"]:
@@ -137,16 +141,19 @@ def q_solve_integral(**kwargs):
                     # as the measured ae. Not valid for IQAE
                     ae_pdf["ae"] = (ae_pdf["ae_l"] + ae_pdf["ae_u"]) / 2.0
         elif encoding == 2:
+            # In the direct encoding we load the sum_x(p_x * f_norm_x)
+            # into the amplitude of the |0>^{n+1} state
             if ae_type in ["RQAE", "eRQAE", "mRQAE"]:
-                #RQAE provides amplitude directly.
+                # RQAE provides amplitude directly.
                 ae_pdf = solver_ae.ae_pdf
             else:
-                #Other algorithms return probability
+                # AE algorithms provide an estimation of the probability
+                # so they provide: sum_x(p_x * f_norm_x) ** 2
+                # we need to compute sqrt(sum_x(p_x * f_norm_x) ** 2)
                 ae_pdf = np.sqrt(solver_ae.ae_pdf)
-                if ae_type != "MLAE":
-                    # We need to provided the mean of the square root bounds
-                    # as the measured ae. Not valid for IQAE
-                    ae_pdf["ae"] = (ae_pdf["ae_l"] + ae_pdf["ae_u"]) / 2.0
+                # We need to provided the mean of the square root bounds
+                # as the measured ae.
+                ae_pdf["ae"] = (ae_pdf["ae_l"] + ae_pdf["ae_u"]) / 2.0
         else:
             raise ValueError("Not valid encoding key was provided!!!")
         #Now we need to deal with encoding normalisation

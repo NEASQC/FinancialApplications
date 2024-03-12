@@ -55,7 +55,10 @@ def test(**kwargs):
     # Creating oracle
     oracle = dl.load_probability(p_x)
     # Getting the target id and the target state
-    target_id = np.argmax(p_x)
+    # State 21 is the state with maximum probability
+    target_id = kwargs.get("target_id", 21)
+    if target_id > 2 ** n_qbits -1:
+        raise ValueError("target bigger than 2^n-1")
     target = bitfield(target_id, n_qbits)
     index = list(range(n_qbits))
     # Create AE object
@@ -70,11 +73,17 @@ def test(**kwargs):
     # Processing results
     pdf = pd.DataFrame.from_dict(kwargs, orient="index").T
     ae_type = kwargs.get("ae_type")
+    pdf["Value"] = p_x[target_id]
+    # The post-proccessng depends on the AE used.
     if ae_type in ["RQAE", "mRQAE", "eRQAE"]:
-        pdf["Value"] = np.sqrt(np.max(p_x))
+        # In the RQAE based methods theestimation of the amplitude i
+        # provided. But in this case we codify an amplitude so
+        # we need to obtain an estimation of the amplitude
+        result = ae_obj.ae_pdf ** 2
+        result["ae"] = (result["ae_u"] + result["ae_l"]) / 2.0
     else:
-        pdf["Value"] = np.max(p_x)
-    pdf = pd.concat([pdf, ae_obj.ae_pdf], axis=1)
+        result = ae_obj.ae_pdf
+    pdf = pd.concat([pdf, result], axis=1)
     pdf["oracle_calls"] = ae_obj.oracle_calls
     pdf["schedule_pdf"] = [ae_obj.schedule_pdf.to_dict()]
     pdf["measured_epsilon"] = (pdf["ae_u"] - pdf["ae_l"]) / 2.0
@@ -82,7 +91,7 @@ def test(**kwargs):
     return pdf
 
 
-def run_id(repetitions, id_, save_, qpu, base_name, save_folder, **ae_configuration):
+def run_id(repetitions, id_, save_, qpu, base_name, save_folder, target, **ae_configuration):
     #Domain configuration
 
     domain_configuration = {
@@ -102,6 +111,8 @@ def run_id(repetitions, id_, save_, qpu, base_name, save_folder, **ae_configurat
     ae_configuration.update(domain_configuration)
     ae_configuration.update(probability_configuration)
     ae_configuration.update({"qpu": get_qpu(qpu)})
+    ae_configuration.update({"target_id": target})
+
     
     save_name = save_folder + str(id_) + "_" + ae_configuration["file"] + "_" + str(base_name) +  ".csv"
     print(save_name)
@@ -232,6 +243,13 @@ if __name__ == "__main__":
         help="Path for storing folder",
         default="./",
     )
+    parser.add_argument(
+        "-target",
+        dest="target",
+        type=int,
+        help="Target State. Default will be 21.",
+        default=21,
+    )
     args = parser.parse_args()
 
     combination_list = list_of_dicts_from_jsons([args.json])
@@ -253,7 +271,8 @@ if __name__ == "__main__":
             configuration = combination_list[args.id]
             run_id(
                 args.repetitions, args.id, args.save, args.qpu,
-                args.base_name, args.folder_path, **configuration)
+                args.base_name, args.folder_path, args.target,
+                **configuration)
 
 
 

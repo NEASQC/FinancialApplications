@@ -477,6 +477,10 @@ class MLAE:
         )
         self.theta = self.theta[0]
         self.ae = np.sin(self.theta) ** 2
+        # MLAE does not provide upper and lower bounds. We fix to the
+        # estimated value
+        self.ae_l = self.ae
+        self.ae_u = self.ae
         result = self.ae
         end = time.time()
         self.run_time = end - start

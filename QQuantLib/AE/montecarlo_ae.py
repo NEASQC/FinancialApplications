@@ -149,6 +149,8 @@ class MCAE:
         end = time.time()
         self.quantum_times.append(end-start)
         self.ae = measure_state_probability(results, self.target)
+        self.ae_l = max(0.0, self.ae - 2.0 / np.sqrt(float(self.shots)))
+        self.ae_u = min(1.0, self.ae + 2.0 / np.sqrt(float(self.shots)))
         self.run_time = end - start
         self.schedule_pdf = pd.DataFrame(
             [[0, self.shots]],
