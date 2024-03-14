@@ -20,7 +20,7 @@ import time
 #from copy import deepcopy
 import numpy as np
 import qat.lang.AQASM as qlm
-from QQuantLib.utils.qlm_solver import get_qpu
+from QQuantLib.utils.get_qpu import get_qpu
 from QQuantLib.PE.classical_qpe import CQPE
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.utils import check_list_type

@@ -2,7 +2,9 @@
 *.out
 .ipynb_checkpoints/
 *.swp
+*.csv
 __pycache__/
+__*__/
 .eggs/
 *.egg-info/
 Results/

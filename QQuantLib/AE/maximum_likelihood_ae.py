@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 import scipy.optimize as so
 import qat.lang.AQASM as qlm
-from QQuantLib.utils.qlm_solver import get_qpu
+from QQuantLib.utils.get_qpu import get_qpu
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.utils.utils import measure_state_probability, check_list_type, load_qn_gate

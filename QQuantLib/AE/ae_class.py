@@ -6,7 +6,7 @@ Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 """
 
 import pandas as pd
-from QQuantLib.utils.qlm_solver import get_qpu
+from QQuantLib.utils.get_qpu import get_qpu
 from QQuantLib.AE.maximum_likelihood_ae import MLAE
 from QQuantLib.AE.ae_classical_qpe import CQPEAE
 from QQuantLib.AE.ae_iterative_quantum_pe import IQPEAE

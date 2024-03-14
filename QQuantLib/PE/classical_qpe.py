@@ -18,7 +18,7 @@ Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 import time
 import numpy as np
 import qat.lang.AQASM as qlm
-from QQuantLib.utils.qlm_solver import get_qpu
+from QQuantLib.utils.get_qpu import get_qpu
 from QQuantLib.utils.utils import load_qn_gate
 from QQuantLib.utils.data_extracting import get_results
 

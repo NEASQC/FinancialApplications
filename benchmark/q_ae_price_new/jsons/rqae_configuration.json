@@ -1,0 +1,30 @@
+[
+    {
+        "ae_type": ["RQAE"],
+        "file": ["RQAE"],
+
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+
+        "auxiliar_qbits_number": [null],
+
+        "cbits_number": [null],
+
+        "epsilon": [1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5, 1.0e-6],
+
+        "alpha": [null],
+
+        "gamma": [0.05],
+        "q": [2],
+
+        "erqae_schedule" :[null],
+
+        "encoding" : [1, 2],
+        "multiplexor":  [true],
+
+        "mcz_qlm": [false],
+        "shots": [100],
+        "number_of_tests": [5]
+    }
+]

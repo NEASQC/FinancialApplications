@@ -1,0 +1,7 @@
+[
+    {
+        "pay_off_type": ["European_Call_Option"],
+        "strike": [1.4, 2.6, 3.6, 4.4],
+        "coupon": [null]
+    }
+]

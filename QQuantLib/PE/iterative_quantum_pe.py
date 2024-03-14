@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 import qat.lang.AQASM as qlm
 from qat.core import Result
-from QQuantLib.utils.qlm_solver import get_qpu
+from QQuantLib.utils.get_qpu import get_qpu
 from QQuantLib.utils.data_extracting import (
     create_qprogram,
     create_qjob,

@@ -9,7 +9,7 @@ from QQuantLib.utils.utils import bitfield_to_int
 import QQuantLib.DL.data_loading as dl
 
 import qat.lang.AQASM as qlm
-from QQuantLib.utils.qlm_solver import get_qpu
+from QQuantLib.utils.get_qpu import get_qpu
 from qat.core.console import display
 
 

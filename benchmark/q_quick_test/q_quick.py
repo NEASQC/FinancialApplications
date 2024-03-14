@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import qat.lang.AQASM as qlm
 #This cell loads the QLM solver. QPU = [qlmass, python, c]
-from QQuantLib.utils.qlm_solver import get_qpu
+from QQuantLib.utils.get_qpu import get_qpu
 
 from QQuantLib.finance.probability_class import DensityProbability
 import QQuantLib.DL.data_loading as dl
@@ -13,7 +13,6 @@ from QQuantLib.utils.utils import bitfield
 from QQuantLib.AE.ae_class import AE
 
 from QQuantLib.utils.benchmark_utils import list_of_dicts_from_jsons
-from get_qpu import get_qpu
 
 
 def save(save, save_name, input_pdf, save_mode):
@@ -78,8 +77,14 @@ def test(**kwargs):
     if ae_type in ["RQAE", "mRQAE", "eRQAE"]:
         # In the RQAE based methods theestimation of the amplitude i
         # provided. But in this case we codify an amplitude so
-        # we need to obtain an estimation of the amplitude
-        result = ae_obj.ae_pdf ** 2
+        # we need to obtain an estimation of the probability
+
+        result = ae_obj.ae_pdf
+        p_l, p_u = get_probability_from_amplitude(
+            ae_obj.ae_pdf["ae_l"].values, ae_obj.ae_pdf["ae_u"].values
+        )
+        result["ae_l"] = p_l
+        result["ae_u"] = p_u
         result["ae"] = (result["ae_u"] + result["ae_l"]) / 2.0
     else:
         result = ae_obj.ae_pdf
@@ -89,6 +94,32 @@ def test(**kwargs):
     pdf["measured_epsilon"] = (pdf["ae_u"] - pdf["ae_l"]) / 2.0
     pdf["absolute_error"] = np.abs(pdf["ae"] - pdf["Value"])
     return pdf
+
+
+def get_probability_from_amplitude(a_l, a_u):
+    """
+    Transforming Amplitude into probability for RQAE algorithm like
+    """
+
+    if ((a_u >= 0) and (a_l >= 0)):
+        p_l = a_l ** 2
+        p_u = a_u ** 2
+        return p_l, p_u
+    if ((a_u < 0) and (a_l < 0)):
+        p_l = a_u ** 2
+        p_u = a_l ** 2
+        return p_l, p_u
+    if (a_u * a_l) < 0:
+        if np.abs(a_u) >= np.abs(a_l):
+            p_l = 0.0
+            p_u = a_u ** 2
+            return p_l, p_u
+        else:
+            p_l = 0.0
+            p_u = a_l ** 2
+            return p_l, p_u
+
+
 
 
 def run_id(repetitions, id_, save_, qpu, base_name, save_folder, target, **ae_configuration):

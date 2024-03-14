@@ -10,7 +10,7 @@ from QQuantLib.utils.utils import get_histogram
 from QQuantLib.DL.data_loading import load_probability, load_array, load_pf
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.PE.classical_qpe import CQPE
-from QQuantLib.utils.qlm_solver import get_qpu
+from QQuantLib.utils.get_qpu import get_qpu
 qpu = get_qpu("python")
 
 

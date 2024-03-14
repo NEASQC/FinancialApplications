@@ -12,7 +12,7 @@ from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.PE.iterative_quantum_pe import IQPE
 from QQuantLib.AE.ae_iterative_quantum_pe import IQPEAE
 from QQuantLib.utils.data_extracting import get_results
-from QQuantLib.utils.qlm_solver import get_qpu
+from QQuantLib.utils.get_qpu import get_qpu
 
 
 #### Phase Estimation Test-01: Phase of S Gate ###

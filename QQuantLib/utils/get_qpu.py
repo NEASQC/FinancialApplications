@@ -1,15 +1,6 @@
 """
-This project has received funding from the European Union’s Horizon 2020
-research and innovation programme under Grant Agreement No. 951821
-https://www.neasqc.eu/
-
-This module contains functions for calling QLM solver
-
-Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
+Selector for QPU.
 """
-
-from qat.qpus import get_default_qpu
-
 
 def get_qpu(qpu=None):
     """
@@ -19,9 +10,11 @@ def get_qpu(qpu=None):
     ----------
 
     qpu : str
-        * qlmass: for trying to use QLM as a Service connection to CESGA QLM
+        * qlmass: for trying to use QLM as a Service connection
+            to CESGA QLM
         * python: for using PyLinalg simulator.
         * c: for using CLinalg simulator
+        * mps: for using mps
 
     Returns
     ----------
@@ -33,10 +26,19 @@ def get_qpu(qpu=None):
         raise ValueError(
             "qpu CAN NOT BE NONE. Please select one of the three" +
             " following options: qlmass, python, c")
-    elif qpu == "qlmass":
+    if qpu == "qlmass_linalg":
         try:
             from qlmaas.qpus import LinAlg
             linalg_qpu = LinAlg()
+        except (ImportError, OSError) as exception:
+            raise ImportError(
+                "Problem Using QLMaaS. Please create config file" +
+                "or use mylm solver") from exception
+    elif qpu == "qlmass_mps":
+        try:
+            from qlmaas.qpus import MPS
+            #linalg_qpu = MPS(lnnize=True)
+            linalg_qpu = MPS()
         except (ImportError, OSError) as exception:
             raise ImportError(
                 "Problem Using QLMaaS. Please create config file" +
@@ -47,11 +49,10 @@ def get_qpu(qpu=None):
     elif qpu == "c":
         from qat.qpus import CLinalg
         linalg_qpu = CLinalg()
-    elif qpu == "default":
-        linalg_qpu = get_default_qpu()
-    else:
-        raise ValueError(
-            "Invalid value for qpu. Please select one of the three "+
-            "following options: qlmass, python, c")
-    print("Following qpu will be used: {}".format(linalg_qpu))
+    elif qpu == "linalg":
+        from qat.qpus import LinAlg
+        linalg_qpu = LinAlg()
+    elif qpu == "mps":
+        from qat.qpus import MPS
+        linalg_qpu = MPS()
     return linalg_qpu
