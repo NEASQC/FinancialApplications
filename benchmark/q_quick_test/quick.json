@@ -30,7 +30,7 @@
 
         "mcz_qlm": [false],
         "file": ["mIQAE"],
-        "shots": [100]
+        "shots": [1000]
     },
     {
         "ae_type": ["RQAE"],
@@ -49,9 +49,15 @@
         "shots": [100]
     },
     {
-        "ae_type": ["mRQAE"],
+        "ae_type": ["eRQAE"],
 
         "epsilon": [1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5, 1.0e-6],
+        "erqae_schedule" : [
+            {"type": "exp_const", "ratio_slope_k": 2, "ratio_slope_gamma": null},
+            {"type": "exp_exp", "ratio_slope_k": 2, "ratio_slope_gamma": 2},
+            {"type": "linear_const", "ratio_slope_k": 2, "ratio_slope_gamma": null},
+            {"type": "linear_linear", "ratio_slope_k": 2, "ratio_slope_gamma": 2}
+        ],
 
         "alpha": [null],
 

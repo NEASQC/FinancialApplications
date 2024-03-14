@@ -13,6 +13,7 @@ from QQuantLib.utils.utils import bitfield
 from QQuantLib.AE.ae_class import AE
 
 from QQuantLib.utils.benchmark_utils import list_of_dicts_from_jsons
+import time
 
 
 def save(save, save_name, input_pdf, save_mode):
@@ -145,11 +146,15 @@ def run_id(repetitions, id_, save_, qpu, base_name, save_folder, target, **ae_co
     ae_configuration.update({"target_id": target})
 
     
-    save_name = save_folder + str(id_) + "_" + ae_configuration["file"] + "_" + str(base_name) +  ".csv"
+    save_name = save_folder + str(id_) + "_" + ae_configuration["file"] + str(base_name) +  ".csv"
     print(save_name)
     
     for i in range(repetitions):
+        tick = time.time()
         step_pdf = test(**ae_configuration)
+        tack = time.time()
+        elapsed = tack - tick
+        step_pdf["elapsed_time"] = elapsed
         save(save_, save_name, step_pdf, "a")
 
 

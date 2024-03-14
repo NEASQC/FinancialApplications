@@ -187,6 +187,61 @@ def schedule_linear_linear(epsilon, gamma, slope_epsilon, slope_gamma):
         gamma_list.reverse()
     return k_list, gamma_list
 
+def schedule_linear_constant(epsilon, gamma, slope_epsilon):
+    """
+    Schedule for a lineal amplification schedule
+    and a lineal gamma schedule
+
+    Parameters
+    ----------
+    epsilon: float
+        Desired error for the estimation
+    gamma : float
+        confidence level: it will be expected that the probability
+        of getting an error higher than epsilon will be lower than alpha
+    slope_epsilon : float
+        amplification slope (slope for setting the k at each step).
+        Only positive slope.
+    slope_gamma : float
+        slope for selecting the gamma at each step of the extended RQAE
+        slope can be positive or negative
+
+    Returns
+    ----------
+
+    k_list : list
+        Schedule for the amplification at each step of the extended RQAE
+        (Grover operator applications)
+    gamma_list : list
+        Schedule for the confidence at each step of the extended RQAE
+    """
+    # This is the maximum amplification of the algorithm
+    # it depends of the desired epsilon
+    bigk_max_next = 0.5 / np.arcsin(2 * epsilon) - 2.0
+    k_max_next = np.ceil((bigk_max_next - 1) / 2)
+
+    # The first step allways must be 0 because in the first step
+    # we do not amplify. We want the sign
+    k_ = 0
+    big_k = 2 * k_ + 1
+    # We want a exponential schedule for the amplification
+    k_next = k_ + slope_epsilon
+    bigk_next = 2 * k_next + 1
+    k_list = [k_]
+
+    while bigk_next < bigk_max_next:
+        k_ = k_next
+        bigk = 2 * k_ + 1
+        k_next = k_ + slope_epsilon
+        bigk_next = 2 * k_next + 1
+        k_list.append(k_)
+
+    k_list.append(k_max_next)
+    # For the gamma we want a constant schedule
+    gamma_i = gamma / len(k_list)
+    gamma_list = [gamma_i] * len(k_list)
+    return k_list, gamma_list
+
 def select_schedule(erqae_schedule, epsilon, gamma):
     """
     Scheduler selector.
@@ -224,8 +279,13 @@ def select_schedule(erqae_schedule, epsilon, gamma):
     elif schedule_type == "linear_linear":
         k_list, gamma_list = schedule_linear_linear(
             epsilon, gamma, ratio_slope_k, ratio_slope_gamma)
+    elif schedule_type == "linear_const":
+        k_list, gamma_list = schedule_linear_constant(
+            epsilon, gamma, ratio_slope_k)
     else:
         raise ValueError("Not valid schedule_type provided")
+    k_list.append(k_list[-1])
+    gamma_list.append(gamma_list[-1])
     return k_list, gamma_list
 
 
@@ -628,6 +688,7 @@ class eRQAE:
         ############### Consecutive Steps #######################
         i = 1
         while epsilon_amplitude > epsilon:
+            #print("i: ", i)
             # This is the amplification for the current step
             k_exp = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
             bigk_exp = 2 * k_exp + 1
