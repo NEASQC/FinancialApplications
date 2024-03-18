@@ -284,8 +284,8 @@ def select_schedule(erqae_schedule, epsilon, gamma):
             epsilon, gamma, ratio_slope_k)
     else:
         raise ValueError("Not valid schedule_type provided")
-    k_list.append(k_list[-1])
-    gamma_list.append(gamma_list[-1])
+    # k_list.append(k_list[-1])
+    # gamma_list.append(gamma_list[-1])
     return k_list, gamma_list
 
 
@@ -351,6 +351,8 @@ class eRQAE:
 
         self.schedule_k, self.schedule_gamma = select_schedule(
             self.erqae_schedule, self.epsilon, self.gamma)
+        print(self.schedule_k)
+        print(self.schedule_gamma)
 
         # Creating the grover operator
         self._grover_oracle = grover(
@@ -686,9 +688,10 @@ class eRQAE:
         epsilon_amplitude = (amplitude_max - amplitude_min) / 2
 
         ############### Consecutive Steps #######################
+        print("i: ", 0, "epsilon_amplitude: ", epsilon_amplitude, "epsilon: ", epsilon)
         i = 1
-        while epsilon_amplitude > epsilon:
-            #print("i: ", i)
+        while (epsilon_amplitude > epsilon) and (i < len(schedule_k) - 1):
+
             # This is the amplification for the current step
             k_exp = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
             bigk_exp = 2 * k_exp + 1
@@ -700,7 +703,6 @@ class eRQAE:
             bigk_next = 2 * k_next + 1
             k_current = schedule_k[i]
             bigk_current = 2 * k_current + 1
-
             # We compute the desired epsilon for the current step
             epsilon_step_p = 0.5 * np.sin(
                 0.25 * np.pi * bigk_current / (bigk_next + 2)) ** 2
@@ -734,6 +736,47 @@ class eRQAE:
             )
             # time_list.append(time_pdf)
             epsilon_amplitude = (amplitude_max - amplitude_min) / 2
+            print("i: ", i, "epsilon_amplitude: ", epsilon_amplitude, "epsilon: ", epsilon)
+            i = i + 1
+
+        if epsilon_amplitude > epsilon:
+            print("Entrnado")
+            # This is the amplification for the current step
+            k_exp = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
+            k_current = schedule_k[i]
+            bigk_current = 2 * k_current + 1
+            bigk_exp = 2 * k_exp + 1
+            # Computation of the number of shots for the current iterative step
+
+            # We compute the maximum epsilon achievable in the step
+            epsilon_step_p = 0.5 * np.sin(
+                0.5 * bigk_exp * np.arcsin(2 * epsilon)) ** 2
+            #print("epsilon: ", epsilon_step_p, "epsilon min: ", epsilon_step_p_min)
+            # gamma used for first step
+            gamma_step = schedule_gamma[i]
+            # This is the mandatory number of shots of the step for
+            # achieving the gamma_step and the epsilon_step_pT
+            n_step = int(
+                np.ceil(1 / (2 * epsilon_step_p**2) * np.log(2 / gamma_step))
+            )
+            if bigk_exp < bigk_current:
+                print("Albeto fails!")
+
+            # Quantum routine for current step
+            shift = -amplitude_min
+            if shift > 0:
+                shift = min(shift, 0.5)
+            if shift < 0:
+                shift = max(shift, -0.5)
+            #print("step: epsilon_step_p: ", epsilon_step_p, "gamma_step: ",
+            #    gamma_step, "n_step: ", n_step, "k_exp: ", k_exp
+            #)
+            [amplitude_min, amplitude_max], _ = self.run_step(
+                shift=shift, shots=n_step, gamma=gamma_step, k=k_exp
+            )
+            # time_list.append(time_pdf)
+            epsilon_amplitude = (amplitude_max - amplitude_min) / 2
+            print("i: ", i, "epsilon_amplitude: ", epsilon_amplitude, "epsilon: ", epsilon)
             i = i + 1
 
         return [2 * amplitude_min, 2 * amplitude_max]
