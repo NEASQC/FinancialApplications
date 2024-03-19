@@ -94,14 +94,14 @@ def ae_price_estimation_step_po(**kwargs):
     # First compute errors of both contributions
     epsilon_p = (solution_p["ae_u"] - solution_p["ae_l"]) / 2.0
     epsilon_n = (solution_n["ae_u"] - solution_n["ae_l"]) / 2.0
-    epsilon_final = np.sqrt(epsilon_p ** 2 + epsilon_n ** 2)
+    #epsilon_final = np.sqrt(epsilon_p ** 2 + epsilon_n ** 2)
+    epsilon_final = epsilon_p + epsilon_n
     # Second compute the expected value
-    solution = solution_p - solution_n
-    # Fix the limits to the newer ones using the composed error
-    solution["ae_l"] = solution["ae"] - epsilon_final
-    solution["ae_u"] = solution["ae"] + epsilon_final
+    solution = solution_p["ae"] - solution_n["ae"]
     # Compute the expected value to compute
     ae_expectation = solution * pay_off_normalisation * p_x_normalisation
+    # Compute the associated error
+    measured_epsilon = epsilon_final * pay_off_normalisation * p_x_normalisation
     ###### Creation of the output ##########
     #The basis will be the input python dictionary for traceability
     pdf = pd.DataFrame([ae_problem])
@@ -116,14 +116,11 @@ def ae_price_estimation_step_po(**kwargs):
     # Negative part estimation
     pdf[[col + "_negative_part" for col in solution_p.columns]] = solution_n
     #Expectation calculation using AE integration techniques
-    pdf[
-        [col + "_expectation" for col in ae_expectation.columns]
-    ] = ae_expectation
+    pdf["ae_expectation"] = ae_expectation
     # Pure integration Absolute Error
     pdf["absolute_error"] = np.abs(
         pdf["ae_expectation"] - pdf["riemann_expectation"])
-    pdf["measured_epsilon"] = np.abs(
-        pdf["ae_u_expectation"] - pdf["ae_l_expectation"]) / 2.0
+    pdf["measured_epsilon"] = measured_epsilon
     # Finance Info
     #Exact option price under the Black-Scholes model
     pdf["finance_exact_price"] = exact_solution
@@ -133,6 +130,9 @@ def ae_price_estimation_step_po(**kwargs):
     )
     #Option price estimation using expectation computed by AE integration
     pdf["finance_price_estimation"] = pdf["ae_expectation"] * \
+        np.exp(-pdf["risk_free_rate"] * pdf["maturity"]).iloc[0]
+    # Associated error of the price estimation
+    pdf["finance_price_epsilon"] = pdf["measured_epsilon"] * \
         np.exp(-pdf["risk_free_rate"] * pdf["maturity"]).iloc[0]
     #Computing Absolute with discount: Rieman vs AE techniques
     pdf["finance_error_riemann"] = np.abs(
