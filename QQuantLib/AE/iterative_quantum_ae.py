@@ -446,16 +446,22 @@ class IQAE:
             a_max = np.minimum(a_ + epsilon_a, 1.0)
             a_min = np.maximum(a_ - epsilon_a, 0.0)
             [theta_min, theta_max] = self.invert_sector(a_min, a_max, flag)
+            #print("Step j: ", str(j), " theta_l_before: ", theta_l,
+            #   "theta_u_before", theta_u, "k:", k, "n_effective:", n_effective)
 
-            theta_l = (
+            theta_l_ = (
                 2 * np.pi * np.floor(big_k * theta_l / (2 * np.pi)) + theta_min
             ) / big_k
-            theta_u = (
+            theta_u_ = (
                 2 * np.pi * np.floor(big_k * theta_u / (2 * np.pi)) + theta_max
             ) / big_k
+            #print("Step j: ", str(j), " theta_l_new: ", theta_l_, "theta_u_new", theta_u_)
             # If bounded limits are worse than step before limits use these ones
-            #theta_l = np.maximum(theta_l, theta_l_)
-            #theta_u = np.minimum(theta_u, theta_u_)
+            theta_l = np.maximum(theta_l, theta_l_)
+            theta_u = np.minimum(theta_u, theta_u_)
+            #if theta_l > theta_u:
+            #    print("PROBLEM")
+            #    print("Step j: ", str(j), " theta_l_new: ", theta_l, "theta_u_new", theta_u)
             j = j + 1
         [a_l, a_u] = [np.sin(theta_l) ** 2, np.sin(theta_u) ** 2]
         return [a_l, a_u]
