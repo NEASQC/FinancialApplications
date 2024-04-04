@@ -20,6 +20,8 @@ from QQuantLib.utils.get_qpu import get_qpu
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.utils.utils import check_list_type, measure_state_probability
+import logging
+logger = logging.getLogger('__name__')
 
 
 class IQAE:
@@ -390,79 +392,118 @@ class IQAE:
         n_effective = 0
         # time_list = []
         j = 0 # pure counter
-
-        #print("shots: ", shots, "gamma_i: ", alpha / big_t)
-        while theta_u - theta_l > 2 * epsilon:
+        # For avoiding infinite loop
+        failure_test = True
+        while (theta_u - theta_l > 2 * epsilon) and (failure_test == True):
             #start = time.time()
             i = i + 1
             k_old = k
             [k, flag] = self.find_next_k(k_old, theta_l, theta_u, flag)
             big_k = 4 * k + 2
-            #end = time.time()
-            #finding_time = end - start
 
-            #####################################################
-            routine = self.quantum_step(k)
-            start = time.time()
-            results, circuit, _, _ = get_results(
-                routine, linalg_qpu=self.linalg_qpu, shots=shots, qubits=self.index
-            )
-            end = time.time()
-            self.quantum_times.append(end-start)
-            # time_pdf["m_k"] = k
-            a_ = measure_state_probability(results, self.target)
-            #a_ = results["Probability"].iloc[bitfield_to_int(self.target)]
-            #print("k: ", k, "shots: ", shots)
-            #####################################################
-            # Aggregate results from different iterations
-            if j == 0:
-                # In the first step we need to store the circuit statistics
-                step_circuit_stats = circuit.statistics()
-                step_circuit_stats.update({"n_shots": shots})
+            # The IQAE algorithm has a failure that can lead to infinite
+            # loops. In order to avoid it we are going to establish
+            # the following condition for executing it. The number of
+            # revolution of the 2 angles when apply k MUST BE the same
+
+            # Number of revolutions that the 2 angles will execute
+            rounds_theta_l = np.floor(big_k * theta_l / (2 * np.pi))
+            rounds_theta_u = np.floor(big_k * theta_u / (2 * np.pi))
+
+            if int(rounds_theta_l) == int(rounds_theta_u):
+                # If they are the same then we can execute the algorithm
+                #####################################################
+                # Quantum Routine and Measurement
+                routine = self.quantum_step(k)
+                start = time.time()
+                results, circuit, _, _ = get_results(
+                    routine, linalg_qpu=self.linalg_qpu, shots=shots, qubits=self.index
+                )
+                end = time.time()
+                self.quantum_times.append(end-start)
+                # time_pdf["m_k"] = k
+                a_ = measure_state_probability(results, self.target)
+                #####################################################
+                if j == 0:
+                    # In the first step we need to store the circuit statistics
+                    step_circuit_stats = circuit.statistics()
+                    step_circuit_stats.update({"n_shots": shots})
+                    self.circuit_statistics.update({k: step_circuit_stats})
+                    self.schedule.update({k:shots})
+
+                # Aggregate results from different iterations
+                if k == k_old:
+                    h_k = h_k + int(a_ * shots)
+                    n_effective = n_effective + shots
+                    a_ = h_k / n_effective
+                    i = i - 1
+                    # Only update shots for the k application
+                    step_circuit_stats = self.circuit_statistics[k]
+                    step_circuit_stats.update({"n_shots": n_effective})
+                    self.schedule.update({k:n_effective})
+
+                else:
+                    h_k = int(a_ * shots)
+                    n_effective = shots
+                    # Store the circuit statistics for new k
+                    step_circuit_stats = circuit.statistics()
+                    step_circuit_stats.update({"n_shots": shots})
+                    self.schedule.update({k:shots})
                 self.circuit_statistics.update({k: step_circuit_stats})
-                self.schedule.update({k:shots})
 
-            if k == k_old:
-                h_k = h_k + int(a_ * shots)
-                n_effective = n_effective + shots
-                a_ = h_k / n_effective
-                i = i - 1
-                # Only update shots for the k application
-                step_circuit_stats = self.circuit_statistics[k]
-                step_circuit_stats.update({"n_shots": n_effective})
-                self.schedule.update({k:n_effective})
+                # Compute the rest
+                epsilon_a = IQAE.chebysev_bound(n_effective, alpha / big_t)
+                a_max = np.minimum(a_ + epsilon_a, 1.0)
+                a_min = np.maximum(a_ - epsilon_a, 0.0)
 
+                [theta_min, theta_max] = self.invert_sector(a_min, a_max, flag)
+
+                #msg_txt = """Step j= {}. theta_l_before= {}. theta_u_before=
+                #    k= {}, n_effective={}""".format(
+                #        j, theta_l, theta_u, k, n_effective
+                #    )
+                #logger.warning(msg_txt)
+
+                theta_l_ = (
+                    2 * np.pi * np.floor(big_k * theta_l / (2 * np.pi)) + theta_min
+                ) / big_k
+
+                theta_u_ = (
+                    2 * np.pi * np.floor(big_k * theta_u / (2 * np.pi)) + theta_max
+                ) / big_k
+
+                #msg_txt = """Step j= {}. theta_l_new= {}.
+                #    theta_u_new= {}""".format(
+                #        j, theta_l_, theta_u_
+                #    )
+                #logger.warning(msg_txt)
+
+                # If bounded limits are worse than step before limits use these ones
+                #theta_l = np.maximum(theta_l, theta_l_)
+                #theta_u = np.minimum(theta_u, theta_u_)
+
+                #if (theta_l_ < theta_l) or (theta_u_ > theta_u):
+                #    logger.warning("PROBLEM")
+                #    msg_txt = """|_K * theta_l_|= {}.
+                #        |_K * theta_u_|= {}""".format(
+                #            np.floor(big_k * theta_l_ / (2 * np.pi)),
+                #            np.floor(big_k * theta_u_ / (2 * np.pi))
+                #        )
+                #    logger.warning(msg_txt)
+                theta_l = theta_l_
+                theta_u = theta_u_
+                j = j + 1
             else:
-                h_k = int(a_ * shots)
-                n_effective = shots
-                # Store the circuit statistics for new k
-                step_circuit_stats = circuit.statistics()
-                step_circuit_stats.update({"n_shots": shots})
-                self.schedule.update({k:shots})
-            self.circuit_statistics.update({k: step_circuit_stats})
-
-            # Compute the rest
-            epsilon_a = IQAE.chebysev_bound(n_effective, alpha / big_t)
-            a_max = np.minimum(a_ + epsilon_a, 1.0)
-            a_min = np.maximum(a_ - epsilon_a, 0.0)
-            [theta_min, theta_max] = self.invert_sector(a_min, a_max, flag)
-            #print("Step j: ", str(j), " theta_l_before: ", theta_l,
-            #   "theta_u_before", theta_u, "k:", k, "n_effective:", n_effective)
-
-            theta_l_ = (
-                2 * np.pi * np.floor(big_k * theta_l / (2 * np.pi)) + theta_min
-            ) / big_k
-            theta_u_ = (
-                2 * np.pi * np.floor(big_k * theta_u / (2 * np.pi)) + theta_max
-            ) / big_k
-            #print("Step j: ", str(j), " theta_l_new: ", theta_l_, "theta_u_new", theta_u_)
-            # If bounded limits are worse than step before limits use these ones
-            theta_l = np.maximum(theta_l, theta_l_)
-            theta_u = np.minimum(theta_u, theta_u_)
-            #if theta_l > theta_u:
-            #    print("PROBLEM")
-            #    print("Step j: ", str(j), " theta_l_new: ", theta_l, "theta_u_new", theta_u)
-            j = j + 1
+                # In this case algorithm will begin an infintie loop
+                # logger.warning("PROBLEM-2")
+                # msg_txt = """k= {} K= {}. Revolutions for theta_l: {}.
+                #     Revolutions for theta_u: {}""".format(
+                #         k, big_k, rounds_theta_l, rounds_theta_u)
+                # logger.warning(msg_txt)
+                # msg_txt = "Epsilon: {}".format(theta_u - theta_l)
+                # logger.warning(msg_txt)
+                # logger.warning("\n")
+                failure_test = False
         [a_l, a_u] = [np.sin(theta_l) ** 2, np.sin(theta_u) ** 2]
         return [a_l, a_u]
 

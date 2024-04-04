@@ -82,7 +82,7 @@ def ae_price_estimation_step_po(**kwargs):
     solution_p, solver_object_p = q_solve_integral(**ae_problem)
 
     #### Negative Pay Off part execution ####
-    npo_neagtive = np.abs(np.where(norm_pay_off > 0, 0.0, norm_pay_off))
+    npo_neagtive = np.abs(np.where(norm_pay_off >= 0, 0.0, norm_pay_off))
     ae_problem.update({
         "array_function" : npo_neagtive,
         "array_probability" : norm_p_x,
