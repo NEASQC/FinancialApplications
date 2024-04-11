@@ -164,7 +164,9 @@ class Encoding:
             warnings.warn('Some elements of the input array_function are negative')
         # Creation of function loading gate
         self.function_gate = dl.load_array(
-            np.sqrt(np.abs(self.function)), id_name="Function", method=self.multiplexor)
+            np.sqrt(np.abs(self.function)),
+            method=self.multiplexor
+        )
         self.registers = self.oracle.new_wires(self.function_gate.arity)
         # Step 1 of Procedure: apply loading probability gate
         self.oracle.apply(self.p_gate, self.registers[: self.p_gate.arity])
@@ -220,7 +222,6 @@ class Encoding:
         # Step 3 of Procedure: apply loading function operator for loading p(x)
         self.p_gate = dl.load_array(
             self.probability,
-            id_name="Probability",
             method=self.multiplexor
         )
         self.oracle.apply(
@@ -229,7 +230,6 @@ class Encoding:
         # Step 5 of Procedure: apply loading function operator for loading f(x)
         self.function_gate = dl.load_array(
             self.function,
-            id_name="Function",
             method=self.multiplexor
         )
         self.oracle.apply(
@@ -277,7 +277,6 @@ class Encoding:
         if self.probability is not None:
             self.p_gate = dl.load_probability(
                 self.probability,
-                id_name="Probability",
                 method=self.multiplexor
             )
         else:
@@ -286,7 +285,6 @@ class Encoding:
         # Creation of function loading gate
         self.function_gate = dl.load_array(
             self.function,
-            id_name="Function",
             method=self.multiplexor
             )
         self.registers = self.oracle.new_wires(self.function_gate.arity)

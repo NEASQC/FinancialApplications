@@ -198,7 +198,7 @@ def load_angles(angles: np.array, method: str = "multiplexor"):
 def load_array(
     function_array: np.array,
     method: str = "multiplexor",
-    id_name: str = str(time.time_ns()),
+    id_name: str = None,
 ):
     """
     Creates a QLM AbstractGate for loading a normalised array into a quantum
@@ -224,6 +224,9 @@ def load_array(
     """
     number_qubits = int(np.log2(function_array.size)) + 1
 
+    if id_name is None:
+        id_name = str(time.time_ns())
+
     @qlm.build_gate("F_{" + id_name + "}", [], arity=number_qubits)
     def load_array_gate():
         """
@@ -241,7 +244,8 @@ def load_array(
 def load_probability(
     probability_array: np.array,
     method: str = "multiplexor",
-    id_name: str = str(time.time_ns())
+    id_name: str = None,
+    #id_name: str = str(time.time_ns())
 ):
     """
     Creates a QLM Abstract gate for loading a given discretized probability
@@ -267,6 +271,8 @@ def load_probability(
         Quantum Multiplexors
     """
     number_qubits = int(np.log2(probability_array.size))
+    if id_name is None:
+        id_name = str(time.time_ns())
 
     @qlm.build_gate("P_{" + id_name + "}", [], arity=number_qubits)
     def load_probability_gate():
