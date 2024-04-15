@@ -353,20 +353,35 @@ class RQAE:
         """
         epsilon = 0.5 * epsilon
         # Bounded for the error at each step
-        theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
+        #theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
+        theoretical_epsilon = 0.5 * np.sin(np.pi / (4.0 * (ratio + 2))) ** 2
         # Maximum amplification
+        # k_max = int(
+        #     np.ceil(
+        #         np.arcsin(np.sqrt(2 * theoretical_epsilon))
+        #         / np.arcsin(2 * epsilon)
+        #         * 0.5
+        #         - 0.5
+        #     )
+        # )
         k_max = int(
             np.ceil(
                 np.arcsin(np.sqrt(2 * theoretical_epsilon))
                 / np.arcsin(2 * epsilon)
-                * 0.5
                 - 0.5
             )
         )
         bigk_max = 2 * k_max + 1
         # Maximum number of iterations
+        # big_t = np.log(
+        #     ratio
+        #     * ratio
+        #     * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
+        #     / (np.arcsin(2 * epsilon))
+        # ) / np.log(ratio)
         big_t = np.log(
-            ratio
+            2.0
+            * ratio
             * ratio
             * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
             / (np.arcsin(2 * epsilon))
@@ -489,18 +504,33 @@ class RQAE:
         # Always need to clean the circuit statistics property
         self.circuit_statistics = {}
         # time_list = []
-        theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
+        #theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
+        theoretical_epsilon = 0.5 * np.sin(np.pi / (4.0 * (ratio + 2))) ** 2
+        # k_max = int(
+        #     np.ceil(
+        #         np.arcsin(np.sqrt(2 * theoretical_epsilon))
+        #         / np.arcsin(2 * epsilon)
+        #         * 0.5
+        #         - 0.5
+        #     )
+        # )
         k_max = int(
             np.ceil(
                 np.arcsin(np.sqrt(2 * theoretical_epsilon))
                 / np.arcsin(2 * epsilon)
-                * 0.5
                 - 0.5
             )
         )
         bigk_max = 2 * k_max + 1
+        # big_t = np.log(
+        #     ratio
+        #     * ratio
+        #     * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
+        #     / (np.arcsin(2 * epsilon))
+        # ) / np.log(ratio)
         big_t = np.log(
-            ratio
+            2.0
+            * ratio
             * ratio
             * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
             / (np.arcsin(2 * epsilon))
