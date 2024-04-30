@@ -1,6 +1,5 @@
 """
-This module contains necessary functions and classes to implement
-Real Quantum Amplitude Estimation based on the paper:
+This module contains necessary functions and classes to implemeneal Quantum Amplitude Estimation based on the paper:
 
     Manzano, A., Musso, D., Leitao, A. et al.
     Real Quantum Amplitude Estimation
@@ -21,7 +20,7 @@ from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.utils.utils import measure_state_probability, bitfield_to_int, check_list_type, mask
 
 
-class RQAE:
+class sRQAE:
     """
     Class for Real Quantum Amplitude Estimation (RQAE)
     algorithm
@@ -75,7 +74,8 @@ class RQAE:
         self.epsilon = kwargs.get("epsilon", 0.01)
         self.gamma = kwargs.get("gamma", 0.05)
         # Amplification Ratio: q in the paper
-        self.ratio = kwargs.get("q", 2)
+        self.ratio = kwargs.get("q", 3)
+        self.shots = int(kwargs.get("shots", 100))
         self.mcz_qlm = kwargs.get("mcz_qlm", True)
         self.save_circuits = kwargs.get("save_circuits", False)
 
@@ -97,8 +97,8 @@ class RQAE:
         self.schedule_pdf = None
         self.quantum_times = []
         self.quantum_time = None
-        self.circuit_dict = {}
         self.info = None
+        self.circuit_dict = {}
 
     #####################################################################
     @property
@@ -225,37 +225,15 @@ class RQAE:
 
         end = time.time()
         self.quantum_times.append(end-start)
-        start = time.time()
 
-        #probability_sum = results["Probability"].iloc[
-        #    bitfield_to_int([0] + list(self.target))
-        #]
         probability_sum = measure_state_probability(
             results, [0] + list(self.target)
         )
 
-        #probability_diff = results["Probability"].iloc[
-        #    bitfield_to_int([1] + list(self.target))
-        #]
         probability_diff = measure_state_probability(
             results, [1] + list(self.target)
         )
-        epsilon_probability = RQAE.chebysev_bound(shots, gamma)
-
-        amplitude_max = np.minimum(
-            (probability_sum - probability_diff) / (4 * shift)
-            + epsilon_probability / (2 * np.abs(shift)),
-            1.0,
-        )
-        amplitude_min = np.maximum(
-            (probability_sum - probability_diff) / (4 * shift)
-            - epsilon_probability / (2 * np.abs(shift)),
-            -1.0,
-        )
-        end = time.time()
-        first_step_time = end - start
-
-        return [amplitude_min, amplitude_max], circuit
+        return probability_sum, probability_diff
 
     def run_step(self, shift: float, shots: int, gamma: float, k: int):
         """
@@ -310,21 +288,12 @@ class RQAE:
         probability_sum = measure_state_probability(
             results, [0] + list(self.target)
         )
+        return probability_sum
 
-        epsilon_probability = RQAE.chebysev_bound(shots, gamma)
-        probability_max = min(probability_sum + epsilon_probability, 1)
-        probability_min = max(probability_sum - epsilon_probability, 0)
-        angle_max = np.arcsin(np.sqrt(probability_max)) / (2 * k + 1)
-        angle_min = np.arcsin(np.sqrt(probability_min)) / (2 * k + 1)
-        amplitude_max = np.sin(angle_max) - shift
-        amplitude_min = np.sin(angle_min) - shift
-        first_step_time = end - start
-
-        return [amplitude_min, amplitude_max], circuit
 
     @staticmethod
     def compute_info(
-        ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05, **kwargs
+        ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05, shots: int = 100
     ):
         """
         This function computes theoretical values of the IQAE algorithm.
@@ -346,38 +315,36 @@ class RQAE:
         """
         epsilon = 0.5 * epsilon
         # Bounded for the error at each step
+        #theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
         theoretical_epsilon = 0.5 * np.sin(np.pi / (4.0 * (ratio + 2))) ** 2
-        # Maximum amplification
         k_max = int(
             np.ceil(
-                np.arcsin(np.sqrt(2 * theoretical_epsilon))
+                #np.arcsin(np.sqrt(2 * theoretical_epsilon))
+                0.5 * np.pi
                 / np.arcsin(2 * epsilon)
                 - 0.5
             )
         )
         bigk_max = 2 * k_max + 1
-        # Maximum number of iterations
-        big_t = np.log(
-            2.0
+        big_t = np.ceil(np.log(
+            ratio
             * ratio
-            * ratio
-            * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
+            #* (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
+            * np.pi
             / (np.arcsin(2 * epsilon))
-        ) / np.log(ratio)
+        ) / np.log(ratio))
         # Maximum probability failure at each step
         gamma_i = gamma / big_t
         # This is shots for each iteration: Ni in the paper
-        n_i = int(
-            np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
-        )
+        shots_max = int(np.ceil(1 / (2 * theoretical_epsilon ** 2) * np.log(2 * big_t / gamma)))
         # Total number of Grover operator calls
-        n_grover = int(n_i / 2 * bigk_max * (1 + ratio / (ratio - 1)))
+        n_grover = None #int(n_i / 2 * bigk_max * (1 + ratio / (ratio - 1)))
         # This is the number of calls to the oracle operator (A)
-        n_oracle = 2 * n_grover + n_i
+        n_oracle = None #2 * n_grover + n_i
 
         info = {
             "theoretical_epsilon": theoretical_epsilon, "k_max": k_max,
-            "big_t": big_t, "gamma_i": gamma_i, "n_i": n_i,
+            "big_t": big_t, "gamma_i": gamma_i, "shots_max": shots_max,
             "n_grover": n_grover, "n_oracle": n_oracle,
         }
 
@@ -385,7 +352,7 @@ class RQAE:
 
     @staticmethod
     def display_information(
-        ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05, **kwargs
+        ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05, shots: int = 100
     ):
         """
         This function displays information of the properties of the
@@ -402,12 +369,11 @@ class RQAE:
 
         """
 
-        info_dict = RQAE.compute_info(ratio, epsilon, gamma)
+        info_dict = sRQAE.compute_info(ratio, epsilon, gamma)
 
         print("-------------------------------------------------------------")
         print("Maximum number of amplifications: ", info_dict["k_max"])
         print("Maximum number of rounds: ", info_dict["big_t"])
-        print("Number of shots per round: ", info_dict["n_i"])
         print("Maximum number of Grover operator calls: ", info_dict["n_grover"])
         print("Maximum number of Oracle operator calls: ", info_dict["n_oracle"])
         print("-------------------------------------------------------------")
@@ -431,7 +397,7 @@ class RQAE:
         """
         return np.sqrt(1 / (2 * n_samples) * np.log(2 / gamma))
 
-    def rqae(self, ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05):
+    def srqae(self, epsilon: float = 0.01, gamma: float = 0.05, user_shots: int = 100, ratio: float = 2.0):
         """
         This function implements the first step of the RQAE paper. The
         result is an estimation of the desired amplitude with precision
@@ -445,6 +411,8 @@ class RQAE:
             precision
         gamma : float
             accuracy
+        shots : int
+            shots
 
         Returns
         ----------
@@ -455,66 +423,121 @@ class RQAE:
 
         """
         ######################################
-
+        
         epsilon = 0.5 * epsilon
-        # Always need to clean the circuit statistics property
+        # time_list = []
         theoretical_epsilon = 0.5 * np.sin(np.pi / (4.0 * (ratio + 2))) ** 2
         k_max = int(
             np.ceil(
-                np.arcsin(np.sqrt(2 * theoretical_epsilon))
+                #np.arcsin(np.sqrt(2 * theoretical_epsilon))
+                0.5 * np.pi
                 / np.arcsin(2 * epsilon)
                 - 0.5
             )
         )
         bigk_max = 2 * k_max + 1
-        big_t = np.log(
-            2.0
+        big_t = np.ceil(np.log(
+            ratio
             * ratio
-            * ratio
-            * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
+            #* (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
+            * np.pi
             / (np.arcsin(2 * epsilon))
-        ) / np.log(ratio)
+        ) / np.log(ratio))
         gamma_i = gamma / big_t
-        # This is shots for each iteration: Ni in the paper
-        n_i = int(
-            np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
-        )
-        epsilon_probability = np.sqrt(1 / (2 * n_i) * np.log(2 / gamma_i))
+        shots_max = int(np.ceil(1 / (2 * theoretical_epsilon ** 2) * np.log(2 * big_t / gamma)))
+
+        # Compute shift for first iteration
         shift = theoretical_epsilon / np.sin(np.pi / (2 * (ratio + 2)))
-        # print("first step. Shift ", shift , "shots: ", n_i, "gamma_0: ", gamma_i)
+        # Compute shots for first iteration
+        shots = min(shots_max, user_shots)
 
-        #####################################
-        # First step
-        [amplitude_min, amplitude_max], _ = self.first_step(
-            shift=shift, shots=n_i, gamma=gamma_i
-        )
-        epsilon_amplitude = (amplitude_max - amplitude_min) / 2
-        # Added step to schedule: m_k, shots
-        self.schedule.update({0 : n_i})
+        ################ FIRST STEP ###################
+        h_plus = 0 
+        h_minus = 0 
+        n_effective = 0 
+        k = 0
+        big_k = 2 * k + 1
+        epsilon_amplitude = 0.5
+        while ((big_k < ratio) and (epsilon_amplitude > epsilon)):
+            # First step: return probability of sum and rest
+            p_plus, p_minus =  self.first_step(
+                shift=shift, shots=shots, gamma=gamma_i
+            )
 
-        # time_list.append(time_pdf)
-        # Consecutive steps
+            # combine iterations
+            h_plus = h_plus + int(p_plus * shots)
+            h_minus = h_minus + int(p_minus * shots)
+            n_effective = n_effective + shots
+            p_plus = h_plus / n_effective
+            p_minus = h_minus / n_effective
+            epsilon_probability = sRQAE.chebysev_bound(n_effective, gamma_i)
+            amplitude_max = np.minimum(
+                (p_plus - p_minus) / (4 * shift)
+                + epsilon_probability / (2 * np.abs(shift)),
+                0.5,
+            )
+            amplitude_min = np.maximum(
+                (p_plus - p_minus) / (4 * shift)
+                - epsilon_probability / (2 * np.abs(shift)),
+                -0.5,
+            )
+            epsilon_amplitude = (amplitude_max - amplitude_min) / 2
+            self.schedule.update({k:n_effective})
+            k = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
+            big_k = 2 * k + 1
+            # print(
+            #     "first step. Shift ", shift , "shots: ", shots, "n_effective: ", n_effective,
+            #     "amplitude_max", amplitude_max, "amplitude_min", amplitude_min
+            # )
+            shots = min(shots_max - n_effective, user_shots)
+
+        ################ NEXT STEPS ###################
+
+        k_old = 0
+        big_k_old = 2 * k_old + 1
+        h_k = 0
+        n_effective = 0
+        shots = min(shots_max, user_shots)
         while epsilon_amplitude > epsilon:
             k = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
             k = min(k, k_max)
+            big_k = 2 *k + 1
+            
+            if big_k < big_k_old * ratio:
+                k = k_old
+                #print("DENTRO!")
+                shots = min(shots_max - n_effective, user_shots)
+            else:
+                h_k = 0
+                n_effective = 0
+                shots = min(shots_max, user_shots)
             shift = -amplitude_min
             if shift > 0:
                 shift = min(shift, 0.5)
             if shift < 0:
                 shift = max(shift, -0.5)
-            # print("Step k: ", k, "Shift ", shift , "shots: ", n_i, "gamma_0: ", gamma_i)
-            [amplitude_min, amplitude_max], _ = self.run_step(
-                shift=shift, shots=n_i, gamma=gamma_i, k=k
+            p_sum = self.run_step(
+                shift=shift, shots=shots, gamma=gamma_i, k=k
             )
-            # Added the shots for the k
-            if k not in self.schedule:
-                self.schedule.update({k:n_i})
-            else:
-                # If k exists sum the shots with the before number of shots
-                self.schedule.update({k:self.schedule[k] + n_i})
-            
-            # time_list.append(time_pdf)
+            h_k = h_k + int(p_sum * shots)
+            n_effective = n_effective + shots
+            p_sum = h_k / n_effective
+            self.schedule.update({k:n_effective})
+
+            epsilon_probability = sRQAE.chebysev_bound(n_effective, gamma_i)
+            probability_max = min(p_sum + epsilon_probability, 1)
+            probability_min = max(p_sum - epsilon_probability, 0)
+            angle_max = np.arcsin(np.sqrt(probability_max)) / (2 * k + 1)
+            angle_min = np.arcsin(np.sqrt(probability_min)) / (2 * k + 1)
+            amplitude_max = np.sin(angle_max) - shift
+            amplitude_min = np.sin(angle_min) - shift
+            # print(
+            #     "Step k: ", k, "Shift ", shift , "shots: ", shots, "n_effective: ", n_effective,
+            #     "amplitude_max", amplitude_max, "amplitude_min", amplitude_min
+            # )
             epsilon_amplitude = (amplitude_max - amplitude_min) / 2
+            k_old = k 
+            big_k_old = 2 * k_old + 1
 
         return [2 * amplitude_min, 2 * amplitude_max]
 
@@ -530,13 +553,16 @@ class RQAE:
 
         """
         start = time.time()
-        [self.ae_l, self.ae_u] = self.rqae(
-            ratio=self.ratio, epsilon=self.epsilon, gamma=self.gamma
+        # print("RUN")
+        # print(self.epsilon, self.gamma, self.shots, self.ratio)
+        # print("RUN")
+        [self.ae_l, self.ae_u] = self.srqae(
+            epsilon=self.epsilon, gamma=self.gamma, user_shots=self.shots, ratio=self.ratio
         )
-        # Here we write the bounds of the method
-        self.info = RQAE.compute_info(
-            ratio=self.ratio, epsilon=self.epsilon, gamma=self.gamma
+        self.info = self.compute_info(
+            epsilon=self.epsilon, gamma=self.gamma, ratio=self.ratio, shots=self.shots
         )
+             
         self.ae = (self.ae_u + self.ae_l) / 2.0
         end = time.time()
         self.run_time = end - start

@@ -235,7 +235,7 @@ if __name__ == "__main__":
 
     if args.execution:
         if args.id is not None:
-            print(run_id(
+            run_id(
                 final_list[args.id],
                 args.id,
                 args.repetitions,
@@ -243,4 +243,4 @@ if __name__ == "__main__":
                 folder_name=args.folder_path,
                 qpu=args.qpu,
                 save_=args.save,
-            ))
+            )

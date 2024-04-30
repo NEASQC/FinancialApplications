@@ -133,7 +133,6 @@ def ae_price_estimation(**kwargs):
         pdf["schedule_pdf"] = [None]
         pdf["oracle_calls"] = [None]
         pdf["max_oracle_depth"] = [None]
-        pdf["circuit_stasts"] = [None]
         pdf["run_time"] = [None]
     else:
         if solver_object.schedule_pdf is None:
@@ -142,7 +141,6 @@ def ae_price_estimation(**kwargs):
             pdf["schedule_pdf"] = [solver_object.schedule_pdf.to_dict()]
         pdf["oracle_calls"] = solver_object.oracle_calls
         pdf["max_oracle_depth"] = solver_object.max_oracle_depth
-        pdf["circuit_stasts"] = [solver_object.solver_ae.circuit_statistics]
         pdf["run_time"] = solver_object.solver_ae.run_time
 
     return pdf

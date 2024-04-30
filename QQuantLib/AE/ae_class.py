@@ -13,6 +13,7 @@ from QQuantLib.AE.ae_iterative_quantum_pe import IQPEAE
 from QQuantLib.AE.iterative_quantum_ae import IQAE
 from QQuantLib.AE.modified_iterative_quantum_ae import mIQAE
 from QQuantLib.AE.real_quantum_ae import RQAE
+from QQuantLib.AE.shots_real_quantum_ae import sRQAE
 from QQuantLib.AE.extended_real_quantum_ae import eRQAE
 from QQuantLib.AE.modified_real_quantum_ae import mRQAE
 from QQuantLib.AE.montecarlo_ae import MCAE
@@ -151,6 +152,13 @@ class AE:
             )
         elif self.ae_type == "eRQAE":
             self.solver_ae = eRQAE(
+                self.oracle,
+                target=self.target,
+                index=self.index,
+                **self.solver_dict
+            )
+        elif self.ae_type == "sRQAE":
+            self.solver_ae = sRQAE(
                 self.oracle,
                 target=self.target,
                 index=self.index,

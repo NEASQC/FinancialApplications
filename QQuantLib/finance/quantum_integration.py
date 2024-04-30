@@ -130,7 +130,7 @@ def q_solve_integral(**kwargs):
             # is just sum_x(|p_x * f_norm_x|)
             ae_pdf = solver_ae.ae_pdf
         elif encoding == 1:
-            if ae_type in ["RQAE", "eRQAE", "mRQAE"]:
+            if ae_type in ["RQAE", "eRQAE", "mRQAE", "sRQAE"]:
                 #Amplitude is provided directly by this algorithm
                 ae_pdf = solver_ae.ae_pdf
             else:
@@ -143,7 +143,7 @@ def q_solve_integral(**kwargs):
         elif encoding == 2:
             # In the direct encoding we load the sum_x(p_x * f_norm_x)
             # into the amplitude of the |0>^{n+1} state
-            if ae_type in ["RQAE", "eRQAE", "mRQAE"]:
+            if ae_type in ["RQAE", "eRQAE", "mRQAE", "sRQAE"]:
                 # RQAE provides amplitude directly.
                 ae_pdf = solver_ae.ae_pdf
             else:

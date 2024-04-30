@@ -372,6 +372,7 @@ class eRQAE:
         self.quantum_times = []
         self.quantum_time = None
         self.circuit_dict = {}
+        self.info = None
 
 
     #####################################################################
@@ -517,11 +518,6 @@ class eRQAE:
         end = time.time()
         self.quantum_times.append(end-start)
         start = time.time()
-        step_circuit_stats = circuit.statistics()
-        step_circuit_stats.update({"n_shots": shots})
-        self.circuit_statistics.update({0: step_circuit_stats})
-        self.schedule.update({0 : shots})
-
         #probability_sum = results["Probability"].iloc[
         #    bitfield_to_int([0] + list(self.target))
         #]
@@ -599,10 +595,6 @@ class eRQAE:
             )
         end = time.time()
         self.quantum_times.append(end-start)
-        step_circuit_stats = circuit.statistics()
-        step_circuit_stats.update({"n_shots": shots})
-        self.circuit_statistics.update({k: step_circuit_stats})
-        self.schedule.update({k : shots})
         #probability_sum = results["Probability"].iloc[
         #    bitfield_to_int([0] + list(self.target))
         #]
@@ -620,6 +612,98 @@ class eRQAE:
         first_step_time = end - start
 
         return [amplitude_min, amplitude_max], circuit
+
+    @staticmethod
+    def compute_info(
+        ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05, **kwargs
+    ):
+        """
+        This function computes theoretical values of the IQAE algorithm.
+
+        Parameters
+        ----------
+        ratio: float
+            amplification ratio/policy
+        epsilon : float
+            precision
+        gamma : float
+            accuracy
+
+        Return
+        ------
+        info : dict
+            python dictionary with the computed information
+
+        """
+        epsilon = 0.5 * epsilon
+        # Bounded for the error at each step
+        theoretical_epsilon = 0.5 * np.sin(np.pi / (4.0 * (ratio + 2))) ** 2
+        # Maximum amplification
+        k_max = int(
+            np.ceil(
+                np.arcsin(np.sqrt(2 * theoretical_epsilon))
+                / np.arcsin(2 * epsilon)
+                - 0.5
+            )
+        )
+        bigk_max = 2 * k_max + 1
+        # Maximum number of iterations
+        big_t = np.log(
+            2.0
+            * ratio
+            * ratio
+            * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
+            / (np.arcsin(2 * epsilon))
+        ) / np.log(ratio)
+        # Maximum probability failure at each step
+        gamma_i = gamma / big_t
+        # This is shots for each iteration: Ni in the paper
+        n_i = int(
+            np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
+        )
+        # Total number of Grover operator calls
+        n_grover = int(n_i / 2 * bigk_max * (1 + ratio / (ratio - 1)))
+        # This is the number of calls to the oracle operator (A)
+        n_oracle = 2 * n_grover + n_i
+
+        info = {
+            "theoretical_epsilon": theoretical_epsilon, "k_max": k_max,
+            "big_t": big_t, "gamma_i": gamma_i, "n_i": n_i,
+            "n_grover": n_grover, "n_oracle": n_oracle,
+        }
+
+        return info
+
+    @staticmethod
+    def display_information(
+        ratio: float = 2, epsilon: float = 0.01, gamma: float = 0.05, **kwargs
+    ):
+        """
+        This function displays information of the properties of the
+        method for a given set of parameters
+
+        Parameters
+        ----------
+        ratio: float
+            amplification ratio/policy
+        epsilon : float
+            precision
+        gamma : float
+            accuracy
+
+        """
+
+        info_dict = eRQAE.compute_info(ratio, epsilon, gamma)
+
+        print("-------------------------------------------------------------")
+        print("BE AWARE: In extended RQAE the bounds depend on the selected schedule")
+        print("Here the RQAE bounds are provided")
+        print("Maximum number of amplifications: ", info_dict["k_max"])
+        print("Maximum number of rounds: ", info_dict["big_t"])
+        print("Number of shots per round: ", info_dict["n_i"])
+        print("Maximum number of Grover operator calls: ", info_dict["n_grover"])
+        print("Maximum number of Oracle operator calls: ", info_dict["n_oracle"])
+        print("-------------------------------------------------------------")
 
     def erqae( self, epsilon: float = 0.01, gamma: float = 0.05, schedule_k: list = [], schedule_gamma: list = []):
         """
@@ -679,16 +763,21 @@ class eRQAE:
         n_first = int(
             np.ceil(np.log(2 / gamma_first) / (2 * epsilon_first_p**2))
         )
-        #print("first step: epsilon_first_p: ", epsilon_first_p, "gamma_first: ", gamma_first, "n_first: ", n_first)
         # Quantum routine for first step
         [amplitude_min, amplitude_max], _ = self.first_step(
             shift=shift, shots=n_first, gamma=gamma_first
         )
+        # print(
+        #     "first step: epsilon_first_p: ", epsilon_first_p,
+        #     "gamma_first: ", gamma_first, "n_first: ", n_first
+        # )
+        self.schedule.update({0 : n_first})
+
         # Real amplitude epsilon
         epsilon_amplitude = (amplitude_max - amplitude_min) / 2
 
         ############### Consecutive Steps #######################
-        print("i: ", 0, "epsilon_amplitude: ", epsilon_amplitude, "epsilon: ", epsilon)
+        #print("i: ", 0, "epsilon_amplitude: ", epsilon_amplitude, "epsilon: ", epsilon)
         i = 1
         while (epsilon_amplitude > epsilon) and (i < len(schedule_k) - 1):
 
@@ -720,7 +809,9 @@ class eRQAE:
                 np.ceil(1 / (2 * epsilon_step_p**2) * np.log(2 / gamma_step))
             )
             if bigk_exp < bigk_current:
-                print("Albeto fails!")
+                raise ValueError("bigk_exp: {} is lower than: bigk_current: {}".format(
+                    bigk_exp, bigk_current)
+                )
 
             # Quantum routine for current step
             shift = -amplitude_min
@@ -728,19 +819,24 @@ class eRQAE:
                 shift = min(shift, 0.5)
             if shift < 0:
                 shift = max(shift, -0.5)
-            #print("step: epsilon_step_p: ", epsilon_step_p, "gamma_step: ",
-            #    gamma_step, "n_step: ", n_step, "k_exp: ", k_exp
-            #)
+            # print("step: epsilon_step_p: ", epsilon_step_p, "gamma_step: ",
+            #     gamma_step, "n_step: ", n_step, "k_exp: ", k_exp
+            # )
             [amplitude_min, amplitude_max], _ = self.run_step(
                 shift=shift, shots=n_step, gamma=gamma_step, k=k_exp
             )
+            # Added the shots for the k
+            if k_exp not in self.schedule:
+                self.schedule.update({k_exp:n_step})
+            else:
+                # If k exists sum the shots with the before number of shots
+                self.schedule.update({k_exp:self.schedule[k_exp] + n_step})
             # time_list.append(time_pdf)
             epsilon_amplitude = (amplitude_max - amplitude_min) / 2
-            print("i: ", i, "epsilon_amplitude: ", epsilon_amplitude, "epsilon: ", epsilon)
+            #print("i: ", i, "epsilon_amplitude: ", epsilon_amplitude, "epsilon: ", epsilon)
             i = i + 1
 
         if epsilon_amplitude > epsilon:
-            print("Entrnado")
             # This is the amplification for the current step
             k_exp = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
             k_current = schedule_k[i]
@@ -760,7 +856,9 @@ class eRQAE:
                 np.ceil(1 / (2 * epsilon_step_p**2) * np.log(2 / gamma_step))
             )
             if bigk_exp < bigk_current:
-                print("Albeto fails!")
+                raise ValueError("bigk_exp: {} is lower than: bigk_current: {}".format(
+                    bigk_exp, bigk_current)
+                )
 
             # Quantum routine for current step
             shift = -amplitude_min
@@ -774,9 +872,15 @@ class eRQAE:
             [amplitude_min, amplitude_max], _ = self.run_step(
                 shift=shift, shots=n_step, gamma=gamma_step, k=k_exp
             )
+            # Added the shots for the k
+            if k_exp not in self.schedule:
+                self.schedule.update({k_exp:n_step})
+            else:
+                # If k exists sum the shots with the before number of shots
+                self.schedule.update({k_exp:self.schedule[k_exp] + n_step})
             # time_list.append(time_pdf)
             epsilon_amplitude = (amplitude_max - amplitude_min) / 2
-            print("i: ", i, "epsilon_amplitude: ", epsilon_amplitude, "epsilon: ", epsilon)
+            #print("i: ", i, "epsilon_amplitude: ", epsilon_amplitude, "epsilon: ", epsilon)
             i = i + 1
 
         return [2 * amplitude_min, 2 * amplitude_max]
