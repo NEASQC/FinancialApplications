@@ -1,0 +1,192 @@
+
+[
+    {
+        "qpu": ["ideal"],
+        "t_gate_1qb" : [null],
+        "t_gate_2qbs" : [null],
+        "t_readout": [null],
+        "depol_channel" : [{
+            "active": false,
+            "error_gate_1qb" : null,
+            "error_gate_2qbs" : null
+        }],
+        "idle" : [{
+            "amplitude_damping": false,
+            "dephasing_channel": false,
+            "t1" : null,
+            "t2" : null
+        }],
+        "meas": [{
+            "active":false,
+            "readout_error": null
+        }]
+    },
+    {
+        "qpu": ["noisy"],
+        "t_gate_1qb" : [35],
+        "t_gate_2qbs" : [660],
+        "t_readout": [4000],
+        "depol_channel" : [{
+            "active": true,
+            "error_gate_1qb" : 1.0e-4,
+            "error_gate_2qbs" : 1.0e-3
+        }],
+        "idle" : [{
+            "amplitude_damping": false,
+            "dephasing_channel": false,
+            "t1" : null,
+            "t2" : null
+        }],
+        "meas": [{
+            "active":false,
+            "readout_error": null
+        }]
+    },
+    {
+        "qpu": ["noisy"],
+        "t_gate_1qb" : [35],
+        "t_gate_2qbs" : [660],
+        "t_readout": [4000],
+        "depol_channel" : [{
+            "active": true,
+            "error_gate_1qb" : 1.0e-4,
+            "error_gate_2qbs" : 1.0e-3
+        }],
+        "idle" : [{
+            "amplitude_damping": true,
+            "dephasing_channel": false,
+            "t1" : 0.2e6,
+            "t2" : null
+        }],
+        "meas": [{
+            "active":false,
+            "readout_error": null
+        }]
+    },
+    {
+        "qpu": ["noisy"],
+        "t_gate_1qb" : [35],
+        "t_gate_2qbs" : [660],
+        "t_readout": [4000],
+        "depol_channel" : [{
+            "active": true,
+            "error_gate_1qb" : 1.0e-4,
+            "error_gate_2qbs" : 1.0e-3
+        }],
+        "idle" : [{
+            "amplitude_damping": false,
+            "dephasing_channel": true,
+            "t1" : 0.2e6,
+            "t2" : 0.1e6
+        }],
+        "meas": [{
+            "active":false,
+            "readout_error": null
+        }]
+    },
+    {
+        "qpu": ["noisy"],
+        "t_gate_1qb" : [35],
+        "t_gate_2qbs" : [660],
+        "t_readout": [4000],
+        "depol_channel" : [{
+            "active": true,
+            "error_gate_1qb" : 1.0e-4,
+            "error_gate_2qbs" : 1.0e-3
+        }],
+        "idle" : [{
+            "amplitude_damping": true,
+            "dephasing_channel": true,
+            "t1" : 0.2e6,
+            "t2" : 0.1e6
+        }],
+        "meas": [{
+            "active":false,
+            "readout_error": null
+        }]
+    },
+    {
+        "qpu": ["noisy"],
+        "t_gate_1qb" : [35],
+        "t_gate_2qbs" : [660],
+        "t_readout": [4000],
+        "depol_channel" : [{
+            "active": true,
+            "error_gate_1qb" : 1.0e-4,
+            "error_gate_2qbs" : 1.0e-3
+        }],
+        "idle" : [{
+            "amplitude_damping": false,
+            "dephasing_channel": false,
+            "t1" : null,
+            "t2" : null
+        }],
+        "meas": [{
+            "active":true,
+            "readout_error": 1.370e-2
+        }]
+    },
+    {
+        "qpu": ["noisy"],
+        "t_gate_1qb" : [35],
+        "t_gate_2qbs" : [660],
+        "t_readout": [4000],
+        "depol_channel" : [{
+            "active": true,
+            "error_gate_1qb" : 1.0e-4,
+            "error_gate_2qbs" : 1.0e-3
+        }],
+        "idle" : [{
+            "amplitude_damping": true,
+            "dephasing_channel": true,
+            "t1" : 0.2e6,
+            "t2" : 0.1e6
+        }],
+        "meas": [{
+            "active":true,
+            "readout_error": 1.370e-2
+        }]
+    },
+    {
+        "qpu": ["noisy"],
+        "t_gate_1qb" : [35],
+        "t_gate_2qbs" : [660],
+        "t_readout": [4000],
+        "depol_channel" : [{
+            "active": false,
+            "error_gate_1qb" : null,
+            "error_gate_2qbs" : null
+        }],
+        "idle" : [{
+            "amplitude_damping": true,
+            "dephasing_channel": true,
+            "t1" : 0.2e6,
+            "t2" : 0.1e6
+        }],
+        "meas": [{
+            "active":true,
+            "readout_error": 1.370e-2
+        }]
+    },
+    {
+        "qpu": ["noisy"],
+        "t_gate_1qb" : [35],
+        "t_gate_2qbs" : [660],
+        "t_readout": [4000],
+        "depol_channel" : [{
+            "active": false,
+            "error_gate_1qb" : null,
+            "error_gate_2qbs" : null
+        }],
+        "idle" : [{
+            "amplitude_damping": false,
+            "dephasing_channel": false,
+            "t1" : null,
+            "t2" : null
+        }],
+        "meas": [{
+            "active":true,
+            "readout_error": 1.370e-2
+        }]
+    }
+]
