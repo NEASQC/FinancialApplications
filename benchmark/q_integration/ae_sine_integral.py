@@ -11,7 +11,7 @@ import time
 import numpy as np
 import pandas as pd
 from copy import deepcopy
-from get_qpu import get_qpu
+from QQuantLib.qpu.get_qpu import get_qpu
 
 from QQuantLib.utils.benchmark_utils import combination_for_list
 from QQuantLib.finance.quantum_integration import q_solve_integral

@@ -3,7 +3,7 @@ sys.path.append("../")
 import numpy as np
 import qat.lang.AQASM as qlm
 from qat.core.console import display
-from QQuantLib.utils.get_qpu import get_qpu
+from QQuantLib.qpu.get_qpu import get_qpu
 from QQuantLib.AE.iterative_quantum_ae import IQAE
 from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.utils.utils import bitfield_to_int

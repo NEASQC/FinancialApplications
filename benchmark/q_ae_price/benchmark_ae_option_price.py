@@ -12,7 +12,7 @@ sys.path.append("../../")
 from QQuantLib.utils.benchmark_utils import create_pe_problem, combination_for_list,\
 create_ae_pe_solution
 from QQuantLib.finance.ae_price_estimation import ae_price_estimation
-from QQuantLib.utils.get_qpu import get_qpu
+from QQuantLib.qpu.get_qpu import get_qpu
 
 
 def save(save, save_name, input_pdf, save_mode):

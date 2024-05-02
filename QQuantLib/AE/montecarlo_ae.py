@@ -13,7 +13,7 @@ import time
 import numpy as np
 import pandas as pd
 import qat.lang.AQASM as qlm
-from QQuantLib.utils.get_qpu import get_qpu
+from QQuantLib.qpu.get_qpu import get_qpu
 from QQuantLib.utils.data_extracting import get_results
 from QQuantLib.utils.utils import check_list_type, measure_state_probability
 

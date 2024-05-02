@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import qat.lang.AQASM as qlm
 #This cell loads the QLM solver. QPU = [qlmass, python, c]
-from QQuantLib.utils.get_qpu import get_qpu
+from QQuantLib.qpu.get_qpu import get_qpu
 
 from QQuantLib.finance.probability_class import DensityProbability
 import QQuantLib.DL.data_loading as dl

@@ -14,7 +14,7 @@ import pandas as pd
 sys.path.append("../../")
 from QQuantLib.utils.benchmark_utils import list_of_dicts_from_jsons
 from QQuantLib.finance.quantum_integration import q_solve_integral
-from QQuantLib.utils.qlm_solver import get_qpu
+from QQuantLib.utils.get_qpu import get_qpu
 
 
 def problem(ae_problem, id_name, qpu=None, file_name=None, folder_name=None, save=False):
