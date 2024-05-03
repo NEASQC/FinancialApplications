@@ -1,0 +1,26 @@
+[
+    {
+        "ae_type": ["RQAE"],
+
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+
+        "auxiliar_qbits_number": [null],
+
+        "cbits_number": [null],
+
+        "epsilon": [1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5, 1.0e-6],
+
+        "alpha": [null],
+        "shots": [null],
+
+        "gamma": [0.05],
+        "q": [2.0],
+        "erqae_schedule" : [null],
+
+        "multiplexor":  [true],
+        "mcz_qlm": [false],
+        "file": ["IQAE"]
+    }
+]

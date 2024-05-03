@@ -402,7 +402,8 @@ class RQAE:
 
         """
 
-        info_dict = RQAE.compute_info(ratio, epsilon, gamma)
+        info_dict = RQAE.compute_info(
+            ratio = ratio, epsilon = epsilon, gamma=gamma)
 
         print("-------------------------------------------------------------")
         print("Maximum number of amplifications: ", info_dict["k_max"])

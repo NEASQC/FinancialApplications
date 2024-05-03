@@ -343,23 +343,8 @@ class mRQAE:
 
         """
         epsilon = 0.5 * epsilon
-
-        # Maximum number of grover calls
-        epsilon_p = 0.5 * np.sin(np.pi / (4 * (ratio + 2))) ** 2
-        part1 = 1./np.arcsin(2 * epsilon)
-        part2 = np.pi/(2 * epsilon_p * epsilon_p) * ratio/(ratio - 1)
-        part3 = np.log(
-            4 * np.sqrt(np.e) * ratio**(ratio/(ratio - 1))/(gamma * (ratio - 1))
-        )
-        n_grover = epsilon_p * part1 * part2 * part3
-        
-        epsilon_infinity = 0.5 * np.sin(np.pi / (4 * ratio )) ** 2
-        #Maximum number of iterations
-        big_t = np.log(
-            ratio * ratio * 2 
-            * np.arcsin(np.sqrt(2 * epsilon_infinity))/np.arcsin(2 * epsilon)
-        )/np.log(ratio)
         # Maximum amplification
+        epsilon_infinity = 0.5 * np.sin(np.pi / (4 * ratio)) ** 2
         k_max = int(
             np.ceil(
                 np.arcsin(np.sqrt(2 * epsilon_infinity))
@@ -368,13 +353,30 @@ class mRQAE:
             )
         )
         bigk_max = 2 * k_max + 1
-
-        n_oracle = None #2 * n_grover + sum_ni
+        # Maximum number of grover calls
+        epsilon_p = 0.5 * np.sin(np.pi / (4 * (ratio + 2))) ** 2
+        coef_0 = bigk_max * (ratio / (ratio - 1)) / (4 * epsilon_p ** 2)
+        inside_log = ratio ** (ratio / (ratio - 1)) / (gamma * (ratio - 1))
+        n_grover = coef_0 * np.log(4 * np.sqrt(np.e) * inside_log)
+        # Shots for first iteration
+        epsilon_0 = 0.5 * np.sin(np.pi/(2 * (ratio + 2)))
+        gamma_0 = 0.5 * gamma * (ratio - 1) / (ratio * (2 * k_max + 1))
+        shots_first_step = np.ceil(np.log(2 / gamma_0) / (2 * epsilon_0 ** 2))
+        # Maximum number of oracle calls
+        n_oracle = 2 * n_grover + shots_first_step
+        # Maximum number of iterations
+        big_t = np.log(
+            2.0 * ratio * ratio
+            * np.arcsin(np.sqrt(2.0 * epsilon_infinity))
+            / np.arcsin(2.0 * epsilon)
+        ) / np.log(ratio)
 
         info = {
-            "epsilon_p": epsilon_p, "epsilon_infinity": epsilon_infinity, 
-            "k_max": k_max, "big_t": big_t, 
+            "epsilon_infinity": epsilon_infinity,
+            "epsilon_p": epsilon_p, "epsilon_0": epsilon_0,
+            "k_max": k_max, "n_0": shots_first_step,
             "n_grover": n_grover, "n_oracle": n_oracle,
+            "big_t": big_t
         }
 
         return info
@@ -398,12 +400,15 @@ class mRQAE:
         """
 
 
-        info_dict = mRQAE.compute_info(ratio, epsilon, gamma)
+        info_dict = mRQAE.compute_info(
+            ratio = ratio, epsilon = epsilon, gamma=gamma)
         print("-------------------------------------------------------------")
         print("Maximum number of amplifications: ", info_dict["k_max"])
         print("Maximum number of rounds: ", info_dict["big_t"])
         print("Maximum number of Grover operator calls: ", info_dict["n_grover"])
         print("Maximum number of Oracle operator calls: ", info_dict["n_oracle"])
+        print("epsilon infinity: ", info_dict["epsilon_infinity"])
+        print("Maximum number of shots for first step: ", info_dict["n_0"])
         print("-------------------------------------------------------------")
 
     @staticmethod
@@ -453,7 +458,7 @@ class mRQAE:
         epsilon = 0.5 * epsilon
 
         # General parameters
-        epsilon_infinity = 0.5 * np.sin(np.pi / (4 * ratio )) ** 2
+        epsilon_infinity = 0.5 * np.sin(np.pi / (4 * ratio)) ** 2
         k_max = int(
             np.ceil(
                 np.arcsin(np.sqrt(2 * epsilon_infinity))
@@ -465,17 +470,17 @@ class mRQAE:
         ############### First Step #######################
         # First step shift
         shift_0 = 0.5
-        # Bounded error for each step
-        epsilon_p = np.abs(shift_0) * np.sin(np.pi / (2 * (ratio + 2)))
-        if epsilon_p < 2 * epsilon * np.abs(shift_0):
-            epsilon_p = 2 * epsilon * np.abs(shift_0)
+        # Bounded error first step
+        epsilon_0 = np.abs(shift_0) * np.sin(np.pi / (2 * (ratio + 2)))
+        if epsilon_0 < 2 * epsilon * np.abs(shift_0):
+            epsilon_0 = 2 * epsilon * np.abs(shift_0)
             gamma_0 = gamma
-        else: 
+        else:
             # Maximum circuit depth
             # gamma for first step
             gamma_0 = 0.5 * gamma * (ratio - 1) / (ratio * (2 * k_max + 1))
         # shots for first step
-        n_0 = int(np.ceil(np.log(2.0 / gamma_0) / (2 * epsilon_p ** 2)))
+        n_0 = int(np.ceil(np.log(2.0 / gamma_0) / (2 * epsilon_0 ** 2)))
         # first step execution
         [amplitude_min, amplitude_max] = self.first_step(
             shift=shift_0, shots=n_0, gamma=gamma_0
@@ -489,7 +494,7 @@ class mRQAE:
         while epsilon_amplitude > epsilon:
             # amplification of the step
             k = int(np.floor(np.pi / (4 * np.arcsin(2 * epsilon_amplitude)) - 0.5))
-            # maximum k for step 
+            # maximum k for step
             k = min(k, k_max)
             # new epsilon for step
             epsilon_p = 0.5 * np.sin(

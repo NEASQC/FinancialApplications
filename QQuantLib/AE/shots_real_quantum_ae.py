@@ -316,31 +316,18 @@ class sRQAE:
         epsilon = 0.5 * epsilon
         # Bounded for the error at each step
         #theoretical_epsilon = 0.5 * np.sin(np.pi / (2 * (ratio + 2))) ** 2
-        theoretical_epsilon = 0.5 * np.sin(np.pi / (4.0 * (ratio + 2))) ** 2
-        k_max = int(
-            np.ceil(
-                #np.arcsin(np.sqrt(2 * theoretical_epsilon))
-                0.5 * np.pi
-                / np.arcsin(2 * epsilon)
-                - 0.5
-            )
-        )
-        bigk_max = 2 * k_max + 1
-        big_t = np.ceil(np.log(
-            ratio
-            * ratio
-            #* (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
-            * np.pi
-            / (np.arcsin(2 * epsilon))
-        ) / np.log(ratio))
+        theoretical_epsilon = None
+        k_max = None
+        bigk_max = None
+        big_t = None
         # Maximum probability failure at each step
-        gamma_i = gamma / big_t
+        gamma_i = None
         # This is shots for each iteration: Ni in the paper
-        shots_max = int(np.ceil(1 / (2 * theoretical_epsilon ** 2) * np.log(2 * big_t / gamma)))
+        shots_max = None
         # Total number of Grover operator calls
-        n_grover = None #int(n_i / 2 * bigk_max * (1 + ratio / (ratio - 1)))
+        n_grover = None
         # This is the number of calls to the oracle operator (A)
-        n_oracle = None #2 * n_grover + n_i
+        n_oracle = None
 
         info = {
             "theoretical_epsilon": theoretical_epsilon, "k_max": k_max,
@@ -369,9 +356,12 @@ class sRQAE:
 
         """
 
-        info_dict = sRQAE.compute_info(ratio, epsilon, gamma)
+        info_dict = sRQAE.compute_info(
+            ratio = ratio, epsilon=epsilon, gamma=gamma)
 
         print("-------------------------------------------------------------")
+        print("BE AWARE: In RQAE with shots the bounds depend on the shots")
+        print("Here Not info is provided.")
         print("Maximum number of amplifications: ", info_dict["k_max"])
         print("Maximum number of rounds: ", info_dict["big_t"])
         print("Maximum number of Grover operator calls: ", info_dict["n_grover"])

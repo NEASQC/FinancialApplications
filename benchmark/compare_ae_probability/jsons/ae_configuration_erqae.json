@@ -1,0 +1,30 @@
+[
+    {
+        "ae_type": ["eRQAE"],
+
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+
+        "auxiliar_qbits_number": [null],
+
+        "cbits_number": [null],
+
+        "epsilon": [1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5, 1.0e-6],
+
+        "alpha": [null],
+        "shots": [null],
+
+        "gamma": [0.05],
+        "q": [2.0],
+        "erqae_schedule" : [
+            {"type": "exp_const", "ratio_slope_k": 10, "ratio_slope_gamma": null},
+            {"type": "linear_const", "ratio_slope_k": 2, "ratio_slope_gamma": null},
+            {"type": "linear_const", "ratio_slope_k": 10, "ratio_slope_gamma": null}
+        ],
+
+        "multiplexor":  [true],
+        "mcz_qlm": [false],
+        "file": ["IQAE"]
+    }
+]

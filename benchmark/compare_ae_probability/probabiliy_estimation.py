@@ -1,19 +1,20 @@
+"""
+Script for using AE algorithms in a pure estimation problem.
+A probability is loading in the quantum circuit and the AE algorithm
+tries to estimate the ampliutude of an input provided state.
+"""
+
 import sys
-sys.path.append("../../")
+import time
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import qat.lang.AQASM as qlm
-#This cell loads the QLM solver. QPU = [qlmass, python, c]
+sys.path.append("../../")
 from QQuantLib.qpu.get_qpu import get_qpu
-
 from QQuantLib.finance.probability_class import DensityProbability
 import QQuantLib.DL.data_loading as dl
 from QQuantLib.utils.utils import bitfield
 from QQuantLib.AE.ae_class import AE
-
 from QQuantLib.utils.benchmark_utils import list_of_dicts_from_jsons
-import time
 
 
 def save(save, save_name, input_pdf, save_mode):
@@ -41,6 +42,10 @@ def save(save, save_name, input_pdf, save_mode):
             )
 
 def test(**kwargs):
+    """
+    Function for loading a probability distribution in a quantum circuit
+    and return the probability of a input state using AE algorithms
+    """
 
     # Configure domain
     n_qbits = kwargs.get("n_qbits", None)
@@ -75,8 +80,8 @@ def test(**kwargs):
     ae_type = kwargs.get("ae_type")
     pdf["Value"] = p_x[target_id]
     # The post-proccessng depends on the AE used.
-    if ae_type in ["RQAE", "mRQAE", "eRQAE"]:
-        # In the RQAE based methods theestimation of the amplitude i
+    if ae_type in ["RQAE", "mRQAE", "eRQAE", "sRQAE"]:
+        # In the RQAE based methods the estimation of the amplitude is
         # provided. But in this case we codify an amplitude so
         # we need to obtain an estimation of the probability
 
@@ -120,9 +125,6 @@ def get_probability_from_amplitude(a_l, a_u):
             p_u = a_l ** 2
             return p_l, p_u
 
-
-
-
 def run_id(repetitions, id_, save_, qpu, base_name, save_folder, target, **ae_configuration):
     #Domain configuration
 
@@ -145,10 +147,8 @@ def run_id(repetitions, id_, save_, qpu, base_name, save_folder, target, **ae_co
     ae_configuration.update({"qpu": get_qpu(qpu)})
     ae_configuration.update({"target_id": target})
 
-    
     save_name = save_folder + str(id_) + "_" + ae_configuration["file"] + str(base_name) +  ".csv"
     print(save_name)
-    
     for i in range(repetitions):
         tick = time.time()
         step_pdf = test(**ae_configuration)
@@ -195,9 +195,6 @@ def run_id(repetitions, id_, save_, qpu, base_name, save_folder, target, **ae_co
 #}
 
 
-
-#
-    
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
@@ -309,9 +306,3 @@ if __name__ == "__main__":
                 args.repetitions, args.id, args.save, args.qpu,
                 args.base_name, args.folder_path, args.target,
                 **configuration)
-
-
-
-
-
-

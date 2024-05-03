@@ -63,7 +63,7 @@ def q_solve_integral(**kwargs):
 
     encoding = kwargs.get("encoding", None)
     ae_type = kwargs.get("ae_type", None)
-    if (encoding == 0) and (ae_type in ["RQAE", "eRQAE"]):
+    if (encoding == 0) and (ae_type in ["RQAE", "eRQAE", "sRQAE", "mRQAE"]):
         string_error = (
             "RQAEs methods CAN NOT BE USED with encoding protocol: "+str(encoding)
         )

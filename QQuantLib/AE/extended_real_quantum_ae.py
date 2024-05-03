@@ -351,8 +351,8 @@ class eRQAE:
 
         self.schedule_k, self.schedule_gamma = select_schedule(
             self.erqae_schedule, self.epsilon, self.gamma)
-        print(self.schedule_k)
-        print(self.schedule_gamma)
+        # print(self.schedule_k)
+        # print(self.schedule_gamma)
 
         # Creating the grover operator
         self._grover_oracle = grover(
@@ -636,39 +636,16 @@ class eRQAE:
 
         """
         epsilon = 0.5 * epsilon
-        # Bounded for the error at each step
-        theoretical_epsilon = 0.5 * np.sin(np.pi / (4.0 * (ratio + 2))) ** 2
-        # Maximum amplification
-        k_max = int(
-            np.ceil(
-                np.arcsin(np.sqrt(2 * theoretical_epsilon))
-                / np.arcsin(2 * epsilon)
-                - 0.5
-            )
-        )
-        bigk_max = 2 * k_max + 1
-        # Maximum number of iterations
-        big_t = np.log(
-            2.0
-            * ratio
-            * ratio
-            * (np.arcsin(np.sqrt(2 * theoretical_epsilon)))
-            / (np.arcsin(2 * epsilon))
-        ) / np.log(ratio)
-        # Maximum probability failure at each step
-        gamma_i = gamma / big_t
-        # This is shots for each iteration: Ni in the paper
-        n_i = int(
-            np.ceil(1 / (2 * theoretical_epsilon**2) * np.log(2 * big_t / gamma))
-        )
-        # Total number of Grover operator calls
-        n_grover = int(n_i / 2 * bigk_max * (1 + ratio / (ratio - 1)))
-        # This is the number of calls to the oracle operator (A)
-        n_oracle = 2 * n_grover + n_i
+        theoretical_epsilon = None
+        k_max = None
+        big_t = None
+        gamma_i = None
+        n_grover = None
+        n_oracle = None
 
         info = {
             "theoretical_epsilon": theoretical_epsilon, "k_max": k_max,
-            "big_t": big_t, "gamma_i": gamma_i, "n_i": n_i,
+            "big_t": big_t, "gamma_i": gamma_i,
             "n_grover": n_grover, "n_oracle": n_oracle,
         }
 
@@ -693,14 +670,14 @@ class eRQAE:
 
         """
 
-        info_dict = eRQAE.compute_info(ratio, epsilon, gamma)
+        info_dict = eRQAE.compute_info(
+            ratio=ratio, epsilon=epsilon, gamma=gamma)
 
         print("-------------------------------------------------------------")
         print("BE AWARE: In extended RQAE the bounds depend on the selected schedule")
-        print("Here the RQAE bounds are provided")
+        print("Here Not information is provided.")
         print("Maximum number of amplifications: ", info_dict["k_max"])
         print("Maximum number of rounds: ", info_dict["big_t"])
-        print("Number of shots per round: ", info_dict["n_i"])
         print("Maximum number of Grover operator calls: ", info_dict["n_grover"])
         print("Maximum number of Oracle operator calls: ", info_dict["n_oracle"])
         print("-------------------------------------------------------------")

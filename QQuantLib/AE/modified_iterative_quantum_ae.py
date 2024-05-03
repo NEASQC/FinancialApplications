@@ -214,22 +214,26 @@ class mIQAE:
 
         # Upper bound for amplification: Kmax in paper
         bigk_max = int(np.pi / (4.0 * epsilon))
-        # Maximum number of rounds: T in paper
+        # Maximum number of rounds: log3(pi/ (4 * epsilon)) in paper
         big_t = int(np.ceil(np.log2(np.pi / (4 * epsilon)) / np.log2(3)))
         # constant C in the paper
         big_c = 1.0 / ((np.sin(np.pi / 21.0) * np.sin(8.0 * np.pi /21.0)) ** 2)
-        # Total number of Grover operator calls
+        # Total number of Grover operator calls: 3/2 * C * K_max * ln(sqrt(27)/alpa)
         n_grover = int(1.5 * bigk_max * big_c * np.log(np.sqrt(27) / alpha))
-        # Total number of oracle operator calls
-        c1 = np.log(3 * bigk_max / alpha)
-        c2 = 0.5 * (big_t + 1) * big_t * np.log(3)
-        c3 = big_t * np.log(alpha)
-        n_oracle = 2.0 * n_grover + int(big_c * (c1 + c2 - c3))
+        # Total number of oracle operator calls: 2 * n_grover + N0_max
+        # We need to compute maximum number of shots for k=0
+        big_k_0 = 1
+        alpha_0 = 2 * alpha * big_k_0 / (3 * bigk_max)
+        big_n_0 = 2.0 * big_c * np.log(2.0 / alpha_0)
+        # c1 = np.log(3 * bigk_max / alpha)
+        # c2 = 0.5 * (big_t + 1) * big_t * np.log(3)
+        # c3 = big_t * np.log(alpha)
+        n_oracle = 2.0 * n_grover + big_n_0
 
 
         info = {
             "bigk_max": bigk_max, "big_t": big_t, "n_grover": n_grover,
-            "n_oracle": n_oracle
+            "n_oracle": n_oracle, "big_n_0": big_n_0
         }
 
         return info
