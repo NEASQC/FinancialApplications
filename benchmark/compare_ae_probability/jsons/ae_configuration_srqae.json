@@ -21,6 +21,6 @@
 
         "multiplexor":  [true],
         "mcz_qlm": [false],
-        "file": ["IQAE"]
+        "file": ["sRQAE"]
     }
 ]

@@ -6,15 +6,19 @@ tries to estimate the ampliutude of an input provided state.
 
 import sys
 import time
+import json
 import numpy as np
 import pandas as pd
+import itertools as it
+from collections import ChainMap
 sys.path.append("../../")
 from QQuantLib.qpu.get_qpu import get_qpu
 from QQuantLib.finance.probability_class import DensityProbability
 import QQuantLib.DL.data_loading as dl
 from QQuantLib.utils.utils import bitfield
 from QQuantLib.AE.ae_class import AE
-from QQuantLib.utils.benchmark_utils import list_of_dicts_from_jsons
+from QQuantLib.utils.benchmark_utils import create_ae_pe_solution
+from QQuantLib.utils.benchmark_utils import combination_for_list
 
 
 def save(save, save_name, input_pdf, save_mode):
@@ -41,22 +45,47 @@ def save(save, save_name, input_pdf, save_mode):
                 sep=';'
             )
 
-def test(**kwargs):
+def get_domain(**kwargs):
     """
-    Function for loading a probability distribution in a quantum circuit
-    and return the probability of a input state using AE algorithms
+    Creates the domain
     """
-
     # Configure domain
     n_qbits = kwargs.get("n_qbits", None)
     x0 = kwargs.get("x0", 1.0)
     xf = kwargs.get("xf", 3.0)
     # Configure probability
-    pc = DensityProbability(**kwargs)
-    # Creating domain
     domain = np.linspace(x0, xf, 2**n_qbits)
+    return domain, n_qbits
+
+def get_probability_density(domain, **kwargs):
+    """
+    Creates the probability denisty function array
+    """
+    # Configure probability
+    pc = DensityProbability(**kwargs)
     # Creating probability distribution
     p_x = pc.probability(domain)
+    return p_x
+
+def get_amplitude_estimation(**kwargs):
+    """
+    Function for loading a probability distribution in a quantum circuit
+    and return the probability of a input state using AE algorithms
+    """
+
+    # n_qbits = kwargs.get("n_qbits", None)
+    # x0 = kwargs.get("x0", 1.0)
+    # xf = kwargs.get("xf", 3.0)
+
+    # Configure domain
+    domain, n_qbits = get_domain(**kwargs)
+
+    # pc = DensityProbability(**kwargs)
+    # Creating probability distribution
+    # p_x = pc.probability(domain)
+
+    # Configure and create probability array
+    p_x = get_probability_density(domain, **kwargs)
     # Creating oracle
     oracle = dl.load_probability(p_x)
     # Getting the target id and the target state
@@ -128,22 +157,22 @@ def get_probability_from_amplitude(a_l, a_u):
 def run_id(repetitions, id_, save_, qpu, base_name, save_folder, target, **ae_configuration):
     #Domain configuration
 
-    domain_configuration = {
-        'x0': 0.01,
-        'xf': 6.0,
-        'n_qbits': 6,
-    }
+    # domain_configuration = {
+    #     'x0': 0.01,
+    #     'xf': 6.0,
+    #     'n_qbits': 6,
+    # }
 
-    #Probability density configuration
-    probability_configuration = {
-        'probability_type': 'Black-Scholes',
-        's_0': 2,
-        'risk_free_rate': 0.05,
-        'maturity': 1.0,
-        'volatility': 0.2,
-    }
-    ae_configuration.update(domain_configuration)
-    ae_configuration.update(probability_configuration)
+    # #Probability density configuration
+    # probability_configuration = {
+    #     'probability_type': 'Black-Scholes',
+    #     's_0': 2,
+    #     'risk_free_rate': 0.05,
+    #     'maturity': 1.0,
+    #     'volatility': 0.2,
+    # }
+    # ae_configuration.update(domain_configuration)
+    # ae_configuration.update(probability_configuration)
     ae_configuration.update({"qpu": get_qpu(qpu)})
     ae_configuration.update({"target_id": target})
 
@@ -151,7 +180,8 @@ def run_id(repetitions, id_, save_, qpu, base_name, save_folder, target, **ae_co
     print(save_name)
     for i in range(repetitions):
         tick = time.time()
-        step_pdf = test(**ae_configuration)
+        step_pdf = get_amplitude_estimation(**ae_configuration)
+        print(step_pdf)
         tack = time.time()
         elapsed = tack - tick
         step_pdf["elapsed_time"] = elapsed
@@ -263,11 +293,25 @@ if __name__ == "__main__":
         help="QPU for simulation: See function get_qpu in get_qpu module",
     )
     parser.add_argument(
-        "-json",
-        dest="json",
+        "-json_domain",
+        dest="json_domain",
         type=str,
-        default="./quick.json",
-        help="Json to use.",
+        default="jsons/domain_configuration.json",
+        help="JSON with the domain configuration",
+    )
+    parser.add_argument(
+        "-json_density",
+        dest="json_density",
+        type=str,
+        default="jsons/density_probability.json",
+        help="JSON with the probability density configuration",
+    )
+    parser.add_argument(
+        "-json_ae",
+        dest="json_ae",
+        type=str,
+        default=None,
+        help="JSON AE algorithm configuration",
     )
     parser.add_argument(
         "-folder",
@@ -285,7 +329,19 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    combination_list = list_of_dicts_from_jsons([args.json])
+    with open(args.json_domain) as json_file:
+        domain_cfg = json.load(json_file)
+    with open(args.json_density) as json_file:
+        density_cfg = json.load(json_file)
+    with open(args.json_ae) as json_file:
+        ae_cfg = json.load(json_file)
+    dp_list = combination_for_list(density_cfg)
+    do_list = combination_for_list(domain_cfg)
+    ae_solver = combination_for_list(ae_cfg)
+    pe_problem = [
+        dict(ChainMap(*list(x))) for x in it.product(dp_list, do_list)
+    ]
+    combination_list = create_ae_pe_solution(ae_solver, pe_problem)
 
     if args.print:
         if args.id is not None:

@@ -10,7 +10,7 @@
 
         "cbits_number": [null],
 
-        "epsilon": [1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5, 1.0e-6],
+        "epsilon": [1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5],
 
         "alpha": [null],
         "shots": [null],
@@ -18,13 +18,25 @@
         "gamma": [0.05],
         "q": [2.0],
         "erqae_schedule" : [
+            {"type": "exp_const", "ratio_slope_k": 2, "ratio_slope_gamma": null},
+            {"type": "exp_const", "ratio_slope_k": 5, "ratio_slope_gamma": null},
             {"type": "exp_const", "ratio_slope_k": 10, "ratio_slope_gamma": null},
             {"type": "linear_const", "ratio_slope_k": 2, "ratio_slope_gamma": null},
-            {"type": "linear_const", "ratio_slope_k": 10, "ratio_slope_gamma": null}
+            {"type": "linear_const", "ratio_slope_k": 10, "ratio_slope_gamma": null},
+            {"type": "linear_const", "ratio_slope_k": 5, "ratio_slope_gamma": null},
+            {"type": "linear_linear", "ratio_slope_k": 2, "ratio_slope_gamma": 2},
+            {"type": "linear_linear", "ratio_slope_k": 2, "ratio_slope_gamma": 5},
+            {"type": "linear_linear", "ratio_slope_k": 2, "ratio_slope_gamma": 10},
+            {"type": "exp_exp", "ratio_slope_k": 2, "ratio_slope_gamma": 2},
+            {"type": "exp_exp", "ratio_slope_k": 2, "ratio_slope_gamma": 5},
+            {"type": "exp_exp", "ratio_slope_k": 2, "ratio_slope_gamma": 10},
+            {"type": "exp_exp", "ratio_slope_k": 2, "ratio_slope_gamma": -2},
+            {"type": "exp_exp", "ratio_slope_k": 2, "ratio_slope_gamma": -5},
+            {"type": "exp_exp", "ratio_slope_k": 2, "ratio_slope_gamma": -10}
         ],
 
         "multiplexor":  [true],
         "mcz_qlm": [false],
-        "file": ["IQAE"]
+        "file": ["eRQAE"]
     }
 ]
