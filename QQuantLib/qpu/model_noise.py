@@ -151,7 +151,7 @@ def create_qpu(hw_cfg):
     from qat.qpus import NoisyQProc, LinAlg
     # Rewritter for Toffolis
     toffoli_plugin = PatternManager(collections=[EXPANSION_COLLECTION[:1]])
-    if hw_cfg["qpu"] == "noisy":
+    if hw_cfg["qpu_type"] == "noisy":
         model_noisy = noisy_hw_model(hw_cfg)
         my_qpu= NoisyQProc(
             hardware_model=model_noisy,

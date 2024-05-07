@@ -12,13 +12,13 @@ import pandas as pd
 import itertools as it
 from collections import ChainMap
 sys.path.append("../../")
-from QQuantLib.qpu.get_qpu import get_qpu
 from QQuantLib.finance.probability_class import DensityProbability
 import QQuantLib.DL.data_loading as dl
 from QQuantLib.utils.utils import bitfield
 from QQuantLib.AE.ae_class import AE
 from QQuantLib.utils.benchmark_utils import create_ae_pe_solution
 from QQuantLib.utils.benchmark_utils import combination_for_list
+from QQuantLib.qpu.select_qpu import select_qpu
 
 
 def save(save, save_name, input_pdf, save_mode):
@@ -154,7 +154,16 @@ def get_probability_from_amplitude(a_l, a_u):
             p_u = a_l ** 2
             return p_l, p_u
 
-def run_id(repetitions, id_, save_, qpu, base_name, save_folder, target, **ae_configuration):
+def run_id(
+    repetitions,
+    id_,
+    save_,
+    #qpu,
+    base_name,
+    save_folder,
+    target,
+    **ae_configuration
+):
     #Domain configuration
 
     # domain_configuration = {
@@ -173,7 +182,9 @@ def run_id(repetitions, id_, save_, qpu, base_name, save_folder, target, **ae_co
     # }
     # ae_configuration.update(domain_configuration)
     # ae_configuration.update(probability_configuration)
-    ae_configuration.update({"qpu": get_qpu(qpu)})
+
+    qpu = select_qpu(ae_configuration)
+    ae_configuration.update({"qpu": qpu})
     ae_configuration.update({"target_id": target})
 
     save_name = save_folder + str(id_) + "_" + ae_configuration["file"] + str(base_name) +  ".csv"
@@ -285,13 +296,13 @@ if __name__ == "__main__":
         help="Additional name for the generated files",
         default="",
     )
-    parser.add_argument(
-        "-qpu",
-        dest="qpu",
-        type=str,
-        default="python",
-        help="QPU for simulation: See function get_qpu in get_qpu module",
-    )
+    # parser.add_argument(
+    #     "-qpu",
+    #     dest="qpu",
+    #     type=str,
+    #     default="python",
+    #     help="QPU for simulation: See function get_qpu in get_qpu module",
+    # )
     parser.add_argument(
         "-json_domain",
         dest="json_domain",
@@ -327,6 +338,13 @@ if __name__ == "__main__":
         help="Target State. Default will be 21.",
         default=21,
     )
+    parser.add_argument(
+        "-json_qpu",
+        dest="json_qpu",
+        type=str,
+        default="jsons/qpu_ideal.json",
+        help="JSON with the qpu configuration",
+    )
     args = parser.parse_args()
 
     with open(args.json_domain) as json_file:
@@ -342,6 +360,10 @@ if __name__ == "__main__":
         dict(ChainMap(*list(x))) for x in it.product(dp_list, do_list)
     ]
     combination_list = create_ae_pe_solution(ae_solver, pe_problem)
+    with open(args.json_qpu) as json_file:
+        noisy_cfg = json.load(json_file)
+    qpu_list = combination_for_list(noisy_cfg)
+    combination_list = create_ae_pe_solution(combination_list, qpu_list)
 
     if args.print:
         if args.id is not None:
@@ -359,6 +381,6 @@ if __name__ == "__main__":
         if args.id is not None:
             configuration = combination_list[args.id]
             run_id(
-                args.repetitions, args.id, args.save, args.qpu,
+                args.repetitions, args.id, args.save, #args.qpu,
                 args.base_name, args.folder_path, args.target,
                 **configuration)

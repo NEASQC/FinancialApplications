@@ -1,7 +1,7 @@
 
 [
     {
-        "qpu_type": ["c", "python", "linalg", "mps", "qlmass_linalg", "qlmass_mps"],
+        "qpu_type": ["c"],
         "t_gate_1qb" : [null],
         "t_gate_2qbs" : [null],
         "t_readout": [null],

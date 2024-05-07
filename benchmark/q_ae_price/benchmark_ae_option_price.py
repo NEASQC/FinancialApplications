@@ -12,7 +12,7 @@ sys.path.append("../../")
 from QQuantLib.utils.benchmark_utils import create_pe_problem, combination_for_list,\
 create_ae_pe_solution
 from QQuantLib.finance.ae_price_estimation import ae_price_estimation
-from QQuantLib.qpu.get_qpu import get_qpu
+from QQuantLib.qpu.select_qpu import select_qpu
 
 
 def save(save, save_name, input_pdf, save_mode):
@@ -45,7 +45,7 @@ def run_id(
     repetitions,
     file_name="",
     folder_name="",
-    qpu=None,
+    #qpu=None,
     save_=False
 ):
     """
@@ -84,11 +84,11 @@ def run_id(
         DataFrame with all the information of the price estimation
         problem, the configuration of the ae and the obtained results
     """
-    linalg_qpu = get_qpu(qpu)
 
+    qpu = select_qpu(solve_ae_pe)
     save_name = folder_name + str(id_name) + "_" + \
         solve_ae_pe["file"] + str(file_name) +  ".csv"
-    solve_ae_pe.update({"qpu": get_qpu(qpu)})
+    solve_ae_pe.update({"qpu": qpu})
     final = []
     for i in range(repetitions):
         step_pdf = ae_price_estimation(**solve_ae_pe)
@@ -151,13 +151,13 @@ if __name__ == "__main__":
         help="Name for storing csv. Only applies for --all",
         default=None,
     )
-    parser.add_argument(
-        "-qpu",
-        dest="qpu",
-        type=str,
-        default="python",
-        help="QPU for simulation: [qlmass, python, c]",
-    )
+    # parser.add_argument(
+    #     "-qpu",
+    #     dest="qpu",
+    #     type=str,
+    #     default="python",
+    #     help="QPU for simulation: [qlmass, python, c]",
+    # )
     parser.add_argument(
         "-id",
         dest="id",
@@ -201,6 +201,13 @@ if __name__ == "__main__":
         default=None,
         help="JSON AE algorithm configuration",
     )
+    parser.add_argument(
+        "-json_qpu",
+        dest="json_qpu",
+        type=str,
+        default="jsons/qpu_ideal.json",
+        help="JSON with the qpu configuration",
+    )
     args = parser.parse_args()
     print(args)
 
@@ -223,6 +230,11 @@ if __name__ == "__main__":
     # Creates the complete configuration for AE solvers
     ae_solver = combination_for_list(ae_cfg)
     final_list = create_ae_pe_solution(ae_solver, pe_problem)
+    with open(args.json_qpu) as json_file:
+        noisy_cfg = json.load(json_file)
+    qpu_list = combination_for_list(noisy_cfg)
+    final_list = create_ae_pe_solution(final_list, qpu_list)
+
 
     if args.count:
         print(len(final_list))
@@ -241,6 +253,6 @@ if __name__ == "__main__":
                 args.repetitions,
                 file_name=args.file_name,
                 folder_name=args.folder_path,
-                qpu=args.qpu,
+                #qpu=args.qpu,
                 save_=args.save,
             )
