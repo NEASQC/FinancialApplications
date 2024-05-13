@@ -103,21 +103,21 @@ def q_solve_integral(**kwargs):
         linalg_qpu = kwargs.get("qpu", None)
         if linalg_qpu is None:
             raise ValueError("qpu is None. Please provide a valid qpu")
-        del kwargs['qpu']
+        #del kwargs['qpu']
 
-        ae_dict = deepcopy(kwargs)
-        ae_dict.update({"qpu": linalg_qpu})
+        # ae_dict = deepcopy(kwargs)
+        #ae_dict.update({"qpu": linalg_qpu})
         #Delete keys from encoding
-        for step in ["array_function", "array_probability", "encoding", "multiplexor"]:
-            ae_dict.pop(step, None)
-        ae_dict.pop("ae_type", None)
+        # for step in ["array_function", "array_probability", "encoding", "multiplexor"]:
+        #     ae_dict.pop(step, None)
+        # ae_dict.pop("ae_type", None)
         #Instantiate AE solver
         solver_ae = AE(
             oracle=encode_class.oracle,
             target=encode_class.target,
             index=encode_class.index,
-            ae_type=ae_type,
-            **ae_dict)
+            #ae_type=ae_type,
+            **kwargs)
 
         # run the amplitude estimation algorithm
         solver_ae.run()
