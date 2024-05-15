@@ -16,19 +16,27 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       #Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
+
+      -name: Instala  
+       run: |
+        python -m pip install sphinx_rtd_theme nbsphinx sphinxcontrib.bibtex sphinxcontrib.programoutput sphinxcontrib.contentui autodoc MarkupSafe==2.0.1
+      -name: Sphynx
+        run: |
+          cd doc
+          make html
           
-      - name: Sphinx Build
+      #- name: Sphinx Build
       # You may pin to the exact commit or the version.
-        uses: ammaraskar/sphinx-action@master
-        with:
-          # The folder containing your sphinx docs.
-          docs-folder: 'doc/' # default is docs/
-          # The command used to build your documentation.
-          build-command: 'sphinx-build -b html . _build ' # optional, default is make html
-          # Run before the build command, you can use this to install system level dependencies, for example with "apt-get update -y && apt-get install -y perl"
-          pre-build-command: 'python -m pip install sphinx_rtd_theme nbsphinx sphinxcontrib.bibtex sphinxcontrib.programoutput sphinxcontrib.contentui autodoc MarkupSafe==2.0.1'
-          
+      #  uses: ammaraskar/sphinx-action@master
+      #  with:
+      #    # The folder containing your sphinx docs.
+      #    docs-folder: 'doc/' # default is docs/
+      #    # The command used to build your documentation.
+      #    build-command: 'sphinx-build -b html . _build ' # optional, default is make html
+      #    # Run before the build command, you can use this to install system level dependencies, for example with "apt-get update -y && apt-get install -y perl"
+      #    pre-build-command: 'python -m pip install sphinx_rtd_theme nbsphinx sphinxcontrib.bibtex sphinxcontrib.programoutput sphinxcontrib.contentui autodoc MarkupSafe==2.0.1'
+      #    
       #- name: Upload a Build Artifact
       #  uses: actions/upload-artifact@v2
       #  with:
@@ -36,7 +44,7 @@ jobs:
       #    path: 'doc/_build/'
           
       - name: Checkout neasqc.github.io   
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           ref: main
           persist-credentials: true 
