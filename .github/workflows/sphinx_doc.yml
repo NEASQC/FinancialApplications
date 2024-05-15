@@ -27,7 +27,7 @@ jobs:
           # The command used to build your documentation.
           build-command: 'sphinx-build -b html . _build' # optional, default is make html
           # Run before the build command, you can use this to install system level dependencies, for example with "apt-get update -y && apt-get install -y perl"
-          pre-build-command: 'mkdir /tmp && python -m pip install sphinx_rtd_theme nbsphinx sphinxcontrib.bibtex sphinxcontrib.programoutput sphinxcontrib.contentui autodoc MarkupSafe==2.0.1'
+          pre-build-command: 'python -m pip install sphinx_rtd_theme nbsphinx sphinxcontrib.bibtex sphinxcontrib.programoutput sphinxcontrib.contentui autodoc MarkupSafe==2.0.1'
           
       #- name: Upload a Build Artifact
       #  uses: actions/upload-artifact@v2
