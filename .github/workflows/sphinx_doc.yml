@@ -20,7 +20,7 @@ jobs:
 
       -name: Instala  
        run: |
-        python -m pip install sphinx_rtd_theme nbsphinx sphinxcontrib.bibtex sphinxcontrib.programoutput sphinxcontrib.contentui autodoc MarkupSafe==2.0.1
+        pip install sphinx_rtd_theme nbsphinx sphinxcontrib.bibtex sphinxcontrib.programoutput sphinxcontrib.contentui autodoc MarkupSafe==2.0.1
       -name: Sphynx
         run: |
           cd doc
