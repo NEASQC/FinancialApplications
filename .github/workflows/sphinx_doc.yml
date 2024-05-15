@@ -15,9 +15,10 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Create local changes
+      - name: Creting sphinx-log file
         run: |
           mkdir -p /tmp #Replace test with repo name
+          touch /tmp/sphinx-log
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
           
