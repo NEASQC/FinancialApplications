@@ -1,11 +1,14 @@
-
 """
-This module contains a function for solving integrals using Amplitude
-Estimation techniques. The function uses the Encoding class for loading
-data into the quantum circuit by creating an oracle and the AE class for
-getting the amplitude of a selected state using AE techniques. The function
-deals with all the normalisations needed for transform this amplitude into
-the desired integral.
+This module contains the *q_solve_integral* function that allows to the
+user codify easily an integral in a quantum state, using the different
+encoding protocols from the *Encoding* class from
+**QQuantLib.DL.encoding_protocols** module, and estimating it using the
+different **AE** algorithms implemented in the **QQuantLib.AE** package.
+
+
+The *q_solve_integral* function deals with all the normalisations needed
+for transforming the estimated amplitude into the desired integral.
+
 
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 

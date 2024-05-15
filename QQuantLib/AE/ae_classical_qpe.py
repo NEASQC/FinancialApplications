@@ -1,16 +1,18 @@
 """
-This module contains a wrapper class of the PE_QFT class from
-QQuantLib/PE/phase_estimation_wqft module for adapting classical
-phase estimation algorithm to solve amplitude estimation problems.
-Following references were used:
+This module contains the CQPEAE class. Given a quantum oracle operator,
+this class estimates the amplitude of a given target state using the
+classical QPE algorithm (with QFT). This module uses the
+QQuantLib.PE.classical_qpe one.
 
-    Brassard, G., Hoyer, P., Mosca, M., & Tapp, A. (2000).
+The following references were used:
+
+    *Brassard, G., Hoyer, P., Mosca, M., & Tapp, A. (2000).
     Quantum amplitude amplification and estimation.
     AMS Contemporary Mathematics Series, 305.
-    https://arxiv.org/abs/quant-ph/0005055v1
+    https://arxiv.org/abs/quant-ph/0005055v1*
 
-    NEASQC deliverable: D5.1: Review of state-of-the-art for Pricing
-    and Computation of VaR
+    *NEASQC deliverable: D5.1: Review of state-of-the-art for Pricing
+    and Computation of VaR*
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 

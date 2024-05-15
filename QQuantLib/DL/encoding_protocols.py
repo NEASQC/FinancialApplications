@@ -1,5 +1,24 @@
 """
-This module contains a class for selecting data encoding protocols
+
+This module contains the Python class Encoding for loading input data
+(as NumPy arrays) in the amplitudes of a quantum state using
+different encoding protocols. Given a probability density and a
+function arrays discretized over n qubits the following encodings can be
+used by setting the *encoding* variable properly:
+
+    **Square encoding (encoding=0)**.
+        The procedure loads the scalar product of
+        the density and the function arrays into the **probability** of
+        a fixed state. Uses n+1 qubits. Only can load positive-defined
+        functions
+    **Square encoding with 2 additional qubits (encoding=1)**.
+        The procedure loads the scalar product of the density and the
+        function arrays into the **amplitude** of a fixed state.
+        Uses n+2 qubits. Can load negative-defined functions
+    **Direct encoding (encoding=2)**.
+        The procedure loads the scalar product of the density and the
+        function arrays into the **amplitude** of a fixed state.
+        Can load negative-defined functions
 
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
@@ -16,6 +35,24 @@ class Encoding:
     """
     Class for data encoding into the quantum circuit.
 
+    Parameters
+    ----------
+
+    array_function : numpy array
+        numpy array with the desired function for encoding into the
+        Quantum Circuit. The following conditions must be satisfied:
+        len(array_function) = 2^n and max(array_function) <= 1.0.
+    array_probability : numpy array
+        numpy array with the desired probability for encoding into
+        the Quantum Circuit. If None is provided uniform distribution
+        will be used. The following conditions must be satisfied:
+        len(array_probability)= 2^n. sum(array_probability)<= 1.0.
+        len(array_function) == len(array_probability)
+    encoding : int
+        Selecting the encode protocol: 0 for square encoding, 1 for
+        square encoding with 2 additional qubits and 2 for Direct encoding.
+    kwargs : dictionary
+
     """
     def __init__(
         self, array_function, array_probability=None, encoding=None, **kwargs
@@ -23,28 +60,6 @@ class Encoding:
         """
         Initialize class for data encoding into the quantum circuit.
 
-        Parameters
-        ----------
-
-        array_function : numpy array
-            numpy array with the desired function for encoding into the
-            Quantum Circuit:
-                * MANDATORY of length = 2^n
-                * MANDATORY: max(array_function) <= 1.0.
-        array_probability : numpy array
-            numpy array with the desired probability for encoding into
-            the Quantum Circuit:
-                * Is None is provided uniform distribution will be used
-                * MANDATORY of length = 2^n
-                * MANDATORY: sum(array_probability) <= 1.0.
-                * MANDATORY: length(array_function) == length(array_probability)
-        encoding : int
-            Selecting the encode protocol
-                * 0 : standard encoding procedure (load density as density)
-                * 1 : first encoding procedure (load density as function)
-                * 2 : second encoding procedure (double loading of a
-                density as a density)
-        kwargs : dictionary
         """
         #Inputs arrays MUST be of length 2^n
         self.n_qbits = test_bins(array_function)

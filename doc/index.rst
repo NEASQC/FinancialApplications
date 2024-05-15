@@ -15,17 +15,17 @@
         :align: center
         :alt: NEASQC Project
 
+    Documentation of the *Quantum Quantitative Finance Library* (**QQuantLib**) associated with the use case of *Financial Applications* of the Work Package **Machine Learning & Optimisation** of the NEASQC European project.
 
-    Documentation of the QLM library *Quantum Quantitative Finance Library* **QQuantLib** associated to the use case of *Financial Applications* of Work Package 5 **WP5.3** (**Machine Learning & Optimisation** use cases) of the NEASQC european project.
+    **QQuantLib** is a Python library developed using **myQLM** (**EVIDEN** quantum software stack) containing following packages:
 
-    **QQuantLib** is a python library containing following packages:
-
-    1. **QQuantLib/DL**: This is the *Data Loading* package which contains modules related to the loading of the data.
-    2. **QQuantLib/AA**: This is the *Amplitude Amplification* package which contains modules related with amplitude amplification operators.
-    3. **QQuantLib/AE**: This is the *Amplitude Estimation* package which is devoted to different amplitude amplification algorithms.
-    4. **QQuantLib/PE**: This is the *Phase Estimation*  package which contains modules for phase estimation algorithms that can be used in amplitude estimation procedure. 
-    5. **QQuantLib/finance**:  This package implements different modules related with finace applications of *Amplitude Estimation* techniqes.
-    6. **QQuantLib/utils**: This package contains auxiliar modules used for all the beforementioned pacakges.
+* :doc:`dl`: This is the *Data Loading (DL)* package which contains modules related to the loading of the data.
+* :doc:`aa`: This is the *Amplitude Amplification (AA)* package which contains modules related to amplitude amplification operators.
+* :doc:`pe`: This is the *Phase Estimation*  package which contains modules for phase estimation algorithms that can be used in amplitude estimation procedures. 
+* :doc:`ae`: This is the *Amplitude Estimation* package which is devoted to different amplitude amplification algorithms.
+* :doc:`finance`: This package implements different modules related to finance applications of *Amplitude Estimation* techniques.
+* :doc:`qpu`: This package contains a module for selecting the different **EVIDEN** *Quantum Process Units* (**QPUs**) for simulating the different circuits created by the different modules of the **QQuantLib** library.
+* :doc:`utils`: This package contains auxiliary modules used for all the beforementioned packages.
 
 
     NEASQC project has received funding from the European Union’s Horizon 2020 research and innovation programme under Grant Agreement No. 951821. https://www.neasqc.eu/
@@ -33,12 +33,46 @@
     Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
 .. toctree::
-    :maxdepth: 4
-    :hidden:
+   :maxdepth: 1
+   :hidden:
 
-    dl.rst
-    aa.rst
-    ae.rst
-    pe.rst
-    finance.rst
-    utils.rst
+   dl.rst
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   aa.rst
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   ae.rst
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   pe.rst
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   finance.rst
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   qpu.rst
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   utils.rst
+

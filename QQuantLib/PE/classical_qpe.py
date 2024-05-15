@@ -1,15 +1,15 @@
 """
-This module contains necessary functions and classes to implement
-the classical Quantum Phase Estimation with inverse of the
-Quantum Fourier Transform. Following references were used:
+This module contains the necessary functions and classes to implement
+the classical Quantum Phase Estimation with the inverse of the
+Quantum Fourier Transform. The following references were used:
 
-    Brassard, G., Hoyer, P., Mosca, M., & Tapp, A. (2000).
+    *Brassard, G., Hoyer, P., Mosca, M., & Tapp, A. (2000).
     Quantum amplitude amplification and estimation.
     AMS Contemporary Mathematics Series, 305.
-    https://arxiv.org/abs/quant-ph/0005055v1
+    https://arxiv.org/abs/quant-ph/0005055v1*
 
-    NEASQC deliverable: D5.1: Review of state-of-the-art for Pricing
-    and Computation of VaR
+    *NEASQC deliverable: D5.1: Review of state-of-the-art for Pricing
+    and Computation of VaR*
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 

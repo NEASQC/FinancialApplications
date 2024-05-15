@@ -1,10 +1,12 @@
 """
-This module contains necessary functions and classes to implement
+This module contains the RQAE class. Given a quantum oracle operator,
+this class estimates the **amplitude** of a given target state using
 Real Quantum Amplitude Estimation based on the paper:
 
-    Manzano, A., Musso, D., Leitao, A. et al.
+    *Manzano, A., Musso, D., Leitao, A.
     Real Quantum Amplitude Estimation
-    Preprint
+    EPJ Quantum Technol. 10, 2 (2023)
+    https://doi.org/10.1140/epjqt/s40507-023-00159-0*
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 

@@ -1,11 +1,12 @@
 """
-This module contains necessary functions and classes to implement
-Iterative Quantum Amplitude Estimation based on the paper:
+This module contains the IQAE class. Given a quantum oracle operator,
+this class estimates the **probability** of a given target state using
+the Iterative Quantum Amplitude Estimation algorithm based on the paper:
 
-    Grinko, D., Gacon, J., Zoufal, C. et al.
+    *Grinko, D., Gacon, J., Zoufal, C. et al.
     Iterative Quantum Amplitude Estimation
     npj Quantum Inf 7, 52 (2021).
-    https://doi.org/10.1038/s41534-021-00379-1
+    https://doi.org/10.1038/s41534-021-00379-1*
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 

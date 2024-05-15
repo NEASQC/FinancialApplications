@@ -1,5 +1,35 @@
 """
-Selector for QPU.
+This module implements the get_qpu function that allows to the user
+select a **EVIDEN QPU** for ideal simulation. The qpu variable is a
+string that should take some of the following values:
+
+
+    **qlmass_linalg**.
+        For selecting the linear algebra simulator LinAlg. This QPU
+        can be used only with QaptivaÔäó Appliance when the user sends the computations to a remote QPU. The user must have remote
+        access to a remote QLM using the Qaptiva Access (QLM as a Service)
+        library.
+    **qlmass_mps**.
+        For selecting the Matrix Product State (MPS) simulator. This QPU
+        can be used only with QaptivaÔäó Appliance when the user sends the computations to a remote QPU. The user must have remote
+        access to a remote QLM using the Qaptiva Access (QLM as a Service)
+        library.
+    **python**.
+        For selecting the linear algebra simulator PyLinalg. This a pure
+        Python algebra simulator. This QPU is provided by the myQLM
+        library. It can not be used with QaptivaÔäó Appliance.
+    **c**
+        For selecting the linear algebra simulator CLinalg. This a pure
+        C algebra simulator. This QPU is provided by the myQLM
+        library. It can not be used with QaptivaÔäó Appliance.
+    **linalg**
+        For selecting the linear algebra simulator LinAlg. This QPU
+        can be used only with QaptivaÔäó Appliance when the user is locally
+        in a QLM.
+    **mps**
+        For selecting the Matrix Product State (MPS) simulator This QPU
+        can be used only with QaptivaÔäó Appliance when the user is locally
+        in a QLM.
 """
 
 def get_qpu(qpu=None):
@@ -10,11 +40,7 @@ def get_qpu(qpu=None):
     ----------
 
     qpu : str
-        * qlmass: for trying to use QLM as a Service connection
-            to CESGA QLM
-        * python: for using PyLinalg simulator.
-        * c: for using CLinalg simulator
-        * mps: for using mps
+        string with the desired qpu
 
     Returns
     ----------

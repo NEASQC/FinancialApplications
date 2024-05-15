@@ -1,7 +1,8 @@
 """
-This module contains necessary functions and classes to implement
-a MonterCarlo Amplitude Estimation. In this case not amplification
-is used. The probability of the target stat of the oracle is measured.
+This module contains the necessary functions and classes to implement a
+Monte-Carlo Amplitude Estimation routine. Given a quantum oracle operator,
+the amplitude of a given target state is estimated by evaluating it.
+Grover-like operators are not used in this routine.
 
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero

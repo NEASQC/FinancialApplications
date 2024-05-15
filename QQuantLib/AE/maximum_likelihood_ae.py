@@ -1,11 +1,12 @@
 """
-This module contains necessary functions and classes to implement
-Maximum Likelihood Amplitude Estimation based on the paper:
+This module contains the MLAE class. Given a quantum oracle operator,
+this class estimates the **probability** of a given target state using
+the Maximum Likelihood Amplitude Estimation based on the paper:
 
-    Suzuki, Y., Uno, S., Raymond, R., Tanaka, T., Onodera, T., & Yamamoto, N.
+    *Suzuki, Y., Uno, S., Raymond, R., Tanaka, T., Onodera, T., & Yamamoto, N.
     Amplitude estimation without phase estimation
     Quantum Information Processing, 19(2), 2020
-    arXiv: quant-ph/1904.10246v2
+    arXiv: quant-ph/1904.10246v2*
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 

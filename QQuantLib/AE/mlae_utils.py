@@ -1,5 +1,5 @@
 """
-This module contains necessary functions fro MLAE class
+This module contains mandatory functions used by the MLAE class
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 

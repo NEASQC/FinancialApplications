@@ -1,12 +1,16 @@
-
 """
-This module contains necessary functions and classes to implement
-extended Real Quantum Amplitude Estimation. This algorithm is an
-extension of the RQAE paper:
+This module contains the eRQAE class. Given a quantum oracle operator,
+this class estimates the **amplitude** of a given target state using
+an extension of the RQAE where the use can guide the evolution of the
+amplification and the failure at each step of the algorithm by providing
+a schedule.
 
-    Manzano, A., Musso, D., Leitao, A. et al.
+Original RQAE papper:
+
+    *Manzano, A., Musso, D., Leitao, A.
     Real Quantum Amplitude Estimation
-    Preprint
+    EPJ Quantum Technol. 10, 2 (2023)
+    https://doi.org/10.1140/epjqt/s40507-023-00159-0*
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
@@ -81,17 +85,18 @@ def schedule_exponential_exponential(epsilon, gamma, ratio_epsilon, ratio_gamma)
 
     Parameters
     ----------
+
     epsilon: float
         Desired error for the estimation
     gamma : float
         confidence level: it will be expected that the probability
-        of getting an error higher than epsilon will be lower than alpha
+            of getting an error higher than epsilon will be lower than alpha
     ratio_epsilon : float
         amplification ratio (ratio for setting the k at each step).
-        Only positive ratios.
+            Only positive ratios.
     ratio_gamma : float
         ratio for selecting the gamma at each step of the extended RQAE
-        ratios can be positive or negative
+            ratios can be positive or negative
 
     Returns
     ----------
@@ -245,8 +250,10 @@ def schedule_linear_constant(epsilon, gamma, slope_epsilon):
 def select_schedule(erqae_schedule, epsilon, gamma):
     """
     Scheduler selector.
+
     Parameters
     ----------
+
     erqae_schedule : dict
         Dictionary with configuration for scheduler
     epsilon: float
@@ -254,6 +261,7 @@ def select_schedule(erqae_schedule, epsilon, gamma):
     gamma : float
         confidence level: it will be expected that the probability
         of getting an error higher than epsilon will be lower than alpha
+
     Returns
     ----------
 

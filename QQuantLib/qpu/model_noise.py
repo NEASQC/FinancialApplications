@@ -1,7 +1,13 @@
 """
-Noisy hardare model
+This module implements several functions for configuring a noisy
+hardware model for creating the corresponding noisy qpu.
+**BE AWARE**
+The functions of this module can be only used with the Qaptiva™ Appliance
+and when the user is locally in a QLM. The Qaptiva Access library **CAN
+NOT BE** used with these functions.
 """
 
+import numpy as np
 
 # Obtenido de ibm_brisbane: 2024/04/04
 # error_gate_1qb = 2.27e-4
@@ -14,21 +20,22 @@ Noisy hardare model
 def set_gate_times(t_gate_1qb=35, t_gate_2qbs=660, t_readout=4000):
     """
     Set the gate times for a noise model.
-    
+
     Parameters
     ----------
+
     t_gate_1qb : int
         time for 1 qubit gate length in ns
     t_gate_2qbs : int
         time for 2 qubits gate length in ns
-    t_readout : int 
+    t_readout : int
         time for readout gate in ns
-    
+
     Return
     ------
-    
+
     gate_time_dict : dict
-        dictionary with the default gates and their time length    
+        dictionary with the default gates and their time length
 
     """
     from qat.hardware import DefaultHardwareModel
@@ -39,9 +46,9 @@ def set_gate_times(t_gate_1qb=35, t_gate_2qbs=660, t_readout=4000):
     for gate, value in hw_m.gates_specification.quantum_channels.items():
         if gate not in ["measure", "reset", "logic"]:
             if isinstance(value, _CtrlParametricChannel):
-                gate_time_dict.update({gate: lambda angle: t_gate_2qbs})  
+                gate_time_dict.update({gate: lambda angle: t_gate_2qbs})
             if isinstance(value, _ParametricChannel):
-                gate_time_dict.update({gate: lambda angle: t_gate_1qb})       
+                gate_time_dict.update({gate: lambda angle: t_gate_1qb})
             if isinstance(value, QuantumChannelKraus):
                 if value.arity == 1:
                     gate_time_dict.update({gate: t_gate_1qb})
@@ -49,15 +56,15 @@ def set_gate_times(t_gate_1qb=35, t_gate_2qbs=660, t_readout=4000):
                     gate_time_dict.update({gate: t_gate_2qbs})
         else:
             if gate == "measure":
-                gate_time_dict.update({gate: t_readout})   
+                gate_time_dict.update({gate: t_readout})
     return gate_time_dict
 
 def noisy_hw_model(hw_cfg):
     """
-    My noisy hardware model: It is composed by 3 types of noise channels: 
+    My noisy hardware model: It is composed by 3 types of noise channels:
     Amplitude Damping and Dephasing channels for idle qubits
     Depolarizing channel applied after any gate.
-    
+
     Parameters
     ----------
 
@@ -72,11 +79,10 @@ def noisy_hw_model(hw_cfg):
 
     Return
     ------
-    
-    my_hw_model : Qaptiva HardwareModel  
+
+    my_hw_model : Qaptiva HardwareModel
         my HardwareModel definition
     """
-    import numpy as np
     t_gate_1qb = hw_cfg.get("t_gate_1qb", 35)
     t_gate_2qbs = hw_cfg.get("t_gate_2qbs", 660)
     t_readout = hw_cfg.get("t_readout", 4000)
@@ -113,19 +119,18 @@ def noisy_hw_model(hw_cfg):
         my_hw_model.idle_noise = idle_noise_list
     meas = hw_cfg.get("meas")
     if meas["active"]:
-        # Setting Measurement noise channel 
+        # Setting Measurement noise channel
         readout_error = meas["readout_error"]
         meas_prep = np.array([[readout_error, 0.0],[0.0, 1.0-readout_error]])
-        my_hw_model.gates_specification.meas = meas_prep    
-    
+        my_hw_model.gates_specification.meas = meas_prep
     return my_hw_model
 
 def create_qpu(hw_cfg):
     """
     Create QPU. Using an input hardware configuration this function creates
-    a QPU. It could be a noisy or a ideal qpu depending on the value of the key 
+    a QPU. It could be a noisy or a ideal qpu depending on the value of the key
     qpu of the hw_cfg dictionary. Additionally adds a plugin for rewiting the
-    Toffolis using CNOTS and local gates. 
+    Toffolis using CNOTS and local gates.
 
     Parameters
     ----------
@@ -155,40 +160,10 @@ def create_qpu(hw_cfg):
         model_noisy = noisy_hw_model(hw_cfg)
         my_qpu= NoisyQProc(
             hardware_model=model_noisy,
-            sim_method="deterministic-vectorized", 
+            sim_method="deterministic-vectorized",
             backend_simulator=LinAlg()
         )
     else:
         my_qpu = LinAlg()
     my_qpu = toffoli_plugin | toffoli_plugin | my_qpu
     return my_qpu
-
-"""
-    t1 = hw_cfg.get("t1", 231.94e3)
-    t2 = hw_cfg.get("t2", 132.71e3)
-    tphi = 1/(1/t2 - 1/(2 * t1))
-    # gates_1qb = ["H", "X", "Y", "Z", "I", "S", "T"]
-    # gates_1qb_par = ["RZ", "RX", "RY", "PH"]
-    # gates_2qb = ["CNOT", "C-H", "C-X", "C-Y", "C-Z", "C-S", "C-T"]
-    # gates_2qb_par = ["C-RX", "C-RY", "C-RZ", "C-PH"]
-    # gate_time_dict = {gate: t_gate_1qb for gate in gates_1qb}
-    # gate_time_dict.update(
-    #     {gate: lambda angle: t_gate_1qb for gate in gates_1qb_par})
-    # gate_time_dict.update(
-    #     {gate: t_gate_2qbs for gate in gates_2qb})
-    # gate_time_dict.update(
-    #     {gate: lambda angle: t_gate_2qbs for gate in gates_2qb_par})
-
-    # Hardware model for depolarizing channel
-    depol_hw = make_depolarizing_hardware_model(
-        eps1=error_gate_1qb, eps2=error_gate_2qbs
-    )
-    # Setting Gate times in hardware model
-    depol_hw.gates_specification.gate_times = gate_time_dict
-    # Setting AmplitudeDamping iddle channel
-    relaxation_noise = ParametricAmplitudeDamping(T_1=t1)
-    # Setting Dephasing iddle channel
-    dephasing_noise = ParametricPureDephasing(T_phi=tphi)
-    depol_hw.idle_noise = [relaxation_noise, dephasing_noise]
-    return depol_hw
-"""

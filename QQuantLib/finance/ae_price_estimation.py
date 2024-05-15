@@ -1,12 +1,18 @@
 """
-Function for automation of different option price estimation using
-Amplitude Estimation algorithms.
+This module implements the *ae_price_estimation* function that allows to
+the user configure a price estimation problem using financial parameters,
+encode the expected value integral to compute in a quantum state and
+estimate it using the different **AE** algorithms implemented in the
+**QQuantLib.AE** package.
 
-The function uses the DensityProbability and the PayOff classes for
-defining the option price estimation problem. Then q_solve_integral
-function is used for computing the expected value integral. The function
-deals with all the mandatory normalisations for returned the desired price
-estimation.
+This function uses the DensityProbability and the PayOff classes (from
+*finance.probability_class* and *finance.payoff_class* modules
+respectively) for defining the option price estimation problem.
+Then the q_solve_integral function (from *finance.quantum_integration*
+module) is used for computing the expected value integral.
+
+The function deals with all the mandatory normalisations for returning
+the desired price estimation.
 
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas
 """

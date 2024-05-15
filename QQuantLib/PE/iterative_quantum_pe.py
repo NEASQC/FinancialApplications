@@ -1,14 +1,14 @@
 """
-This module contains necessary functions and classes to implement
-Iterative Quantum Phase Estimation (IQPE). The implementation is based on
-following paper:
+This module contains the necessary functions and classes to implement
+Iterative Quantum Phase Estimation (IQPE).
+The implementation is based on the following paper:
 
-    Dobšíček, Miroslav and Johansson, Göran and Shumeiko, Vitaly and
+    *Dobšíček, Miroslav and Johansson, Göran and Shumeiko, Vitaly and
     Wendin, Göran*.
     Arbitrary accuracy iterative quantum phase estimation algorithm
     using a single ancillary qubit: A two-qubit benchmark.
     Physical Review A 3(76), 2007.
-    https://arxiv.org/abs/quant-ph/0610214
+    https://arxiv.org/abs/quant-ph/0610214*
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 

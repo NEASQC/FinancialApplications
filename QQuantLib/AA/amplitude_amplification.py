@@ -1,7 +1,7 @@
 """
 This module contains all functions needed for creating Grover-like
 operators mandatory for using Quantum Amplitude Amplification
-and Estimation as explained in the 2000 Brassard paper:
+and Estimation as explained in the following paper:
 
     Gilles Brassard, Peter Hoyer, Michele Mosca and Alain Tapp
     Quantum Amplitude Amplification and Estimation

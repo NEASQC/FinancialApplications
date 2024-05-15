@@ -1,5 +1,8 @@
 """
-Class definition for the PayOff
+In this module, the Python PayOff class is defined. This class allows
+to the user configure payoffs for different financial derivatives
+(like options or futures) by providing typical financial parameters
+The PayOff class uses functions from finance.classical_finance module.
 
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 """

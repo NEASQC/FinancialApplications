@@ -1,18 +1,21 @@
 """
-This module contains all the functions in order to load data into the
-quantum state.
-There are two implementations for the loading of a function:
+This module contains all the functions for creating quantum circuits that
+allow loading input data (as numpy arrays) into the amplitude of a
+quantum state.  Two different implementations can be used:
 
-    * one based on brute force
-    * one based on multiplexors.
+    **brute force based**
+        Original implementation based on the following paper:
+        *Grover, Lov and Rudolph, Terry. Creating superposition that
+        correspond to efficiently integrable probability distributions.
+        arXiv (2002). https://arxiv.org/abs/quant-ph/0208112*
+    **multiplexors based**
+        The mandatory controlled rotations by state are implementd using
+        (a non-recursive version of) the quantum Multiplexors proposed in:
+        *V.V. Shende, S.S. Bullock, and I.L. Markov. Synthesis of quantum-logic
+        circuits. IEEE Transactions on Computer-Aided Design of Integrated
+        Circuits and Systems, 25(6):1000ÔÇô1010, Jun 2006
+        arXiv:quant-ph/0406176v5*
 
-The implementation of the multiplexors is a non-recursive version of:
-
-    V.V. Shende, S.S. Bullock, and I.L. Markov.
-    Synthesis of quantum-logic circuits.
-    IEEE Transactions on Computer-Aided Design of Integrated Circuits
-    and Systems, 25(6):1000–1010, Jun 2006
-    arXiv:quant-ph/0406176v5
 
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 

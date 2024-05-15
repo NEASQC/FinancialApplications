@@ -1,6 +1,7 @@
 """
 This module contains a general class for solving AE problems
 using the algorithm classes from QQuantLib.AE library package
+
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 
 """

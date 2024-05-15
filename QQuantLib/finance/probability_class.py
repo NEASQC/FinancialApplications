@@ -1,5 +1,8 @@
 """
-Definition for DensityProbability Class.
+In this module, the Python DensityProbability class is defined.
+This class allows to the user configure the *Black-Scholes* probability
+density function (log-normal) by providing typical financial parameters
+The DensityProbability class uses functions from finance.classical_finance module.
 
 Authors: Alberto Pedro Manzano Herrero & Gonzalo Ferro
 """

@@ -1,9 +1,17 @@
 """
-This module contains necessary functions and classes to implemeneal Quantum Amplitude Estimation based on the paper:
+This module contains the sRQAE class. Given a quantum oracle operator,
+this class estimates the **amplitude** of a given target state using
+a modification of the RQAE algorithm where the user can provide the
+number of shots for the generated quantum circuits. Usually
+the experimental performance of this modification is better than the
+original RQAE one.
 
-    Manzano, A., Musso, D., Leitao, A. et al.
+Original RQAE papper:
+
+    *Manzano, A., Musso, D., Leitao, A.
     Real Quantum Amplitude Estimation
-    Preprint
+    EPJ Quantum Technol. 10, 2 (2023)
+    https://doi.org/10.1140/epjqt/s40507-023-00159-0*
 
 Author: Gonzalo Ferro Costas & Alberto Manzano Herrero
 
