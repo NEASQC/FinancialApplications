@@ -23,6 +23,7 @@ jobs:
           pip install sphinx_rtd_theme nbsphinx sphinxcontrib.bibtex 
           pip install sphinxcontrib.programoutput sphinxcontrib.contentui 
           pip install autodoc MarkupSafe==2.0.1
+          cd doc
           sphinx-build -b html . _build
           
       #- name: Sphinx Build
