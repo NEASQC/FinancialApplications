@@ -18,10 +18,10 @@ jobs:
       #Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       #- uses: actions/checkout@v2
 
-      -name: Instala  
-       run: |
+      - name: Instala  
+        run: |
         pip install sphinx_rtd_theme nbsphinx sphinxcontrib.bibtex sphinxcontrib.programoutput sphinxcontrib.contentui autodoc MarkupSafe==2.0.1
-      -name: Sphynx
+      - name: Sphynx
         run: |
           cd doc
           make html
