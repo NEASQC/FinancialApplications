@@ -17,6 +17,7 @@ jobs:
     steps:
       - name: Creting sphinx-log file
         run: |
+          pwd
           mkdir -p /tmp #Replace test with repo name
           touch /tmp/sphinx-log
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
