@@ -75,5 +75,3 @@
    :hidden:
 
    utils.rst
-
-
