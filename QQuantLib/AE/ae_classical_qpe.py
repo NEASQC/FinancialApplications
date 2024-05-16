@@ -231,9 +231,9 @@ class CQPEAE:
         end = time.time()
         self.run_time = end - start
         #Total number of oracle calls
-        self.oracle_calls = self.shots * np.sum(
-            [2 * (2 ** i) + 1 for i in range(self.auxiliar_qbits_number)]
-        )
+        self.oracle_calls = self.shots * (np.sum(
+            [2 * (2 ** i) for i in range(self.auxiliar_qbits_number)]
+        ) + 1)
         #Maximum number of oracle applications
         self.max_oracle_depth = 2 ** (int(self.auxiliar_qbits_number)-1) + 1
         self.quantum_times = self.cqpe.quantum_times
