@@ -8,6 +8,7 @@ NOT BE** used with these functions.
 """
 
 import numpy as np
+import functools
 
 # Obtenido de ibm_brisbane: 2024/04/04
 # error_gate_1qb = 2.27e-4
@@ -97,6 +98,33 @@ def noisy_hw_model(hw_cfg):
         my_hw_model = make_depolarizing_hardware_model(
             eps1=error_gate_1qb, eps2=error_gate_2qbs
         )
+        # BE AWARE: Parametric gates are not included in the
+        # the dictionary
+
+        # First: 1 qubit parametric gates will be included
+        gate_1_qubit = my_hw_model.gate_noise["H"]
+        for gate_ in ["RZ", "RX", "RY", "PH"]:
+            my_hw_model.gate_noise.update({
+                gate_: functools.partial(
+                    gate_1_qubit.func,
+                    rb_eps=gate_1_qubit.keywords["rb_eps"],
+                    nqbits=gate_1_qubit.keywords["nqbits"],
+                    method_2q=gate_1_qubit.keywords["method_2q"],
+                    depol_type=gate_1_qubit.keywords["depol_type"]
+                )
+            })
+        # Secong: 2 qubit parametric gates will be included
+        gate_2_qubits = my_hw_model.gate_noise["CNOT"]
+        for gate_ in ["C-RZ", "C-RX", "C-RY", "C-PH"]:
+            my_hw_model.gate_noise.update({
+                gate_: functools.partial(
+                    gate_2_qubits.func,
+                    rb_eps=gate_2_qubits.keywords["rb_eps"],
+                    nqbits=gate_2_qubits.keywords["nqbits"],
+                    method_2q=gate_2_qubits.keywords["method_2q"],
+                    depol_type=gate_2_qubits.keywords["depol_type"]
+                )
+            })
     else:
         from qat.hardware import DefaultHardwareModel
         my_hw_model = DefaultHardwareModel()
