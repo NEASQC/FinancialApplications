@@ -1,0 +1,1 @@
+{"n_points_train": 10, "n_points_test": 100, "feature_number": 1, "minval": -3.141592653589793, "maxval": 3.141592653589793, "distribution": "random", "name_for_saving": "./random/random", "folder_path": "./random"}
