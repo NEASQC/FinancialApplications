@@ -2,56 +2,14 @@
 Functions for creating DataSets
 """
 import json
+import sys
 import numpy as np
-import pandas as pd
+from scipy.stats import norm, multivariate_normal
+from itertools import product
+sys.path.append("../../")
+from QQuantLib.qml4var.data_utils import  empirical_cdf, bs_cdf, \
+    bs_samples, saving_datasets
 
-from scipy.stats import norm
-from scipy.special import erf
-
-def get_dataset(name_for_loading):
-    # load Datasets
-    pdf_training = pd.read_csv(
-        name_for_loading+"_training.csv", sep=";", index_col=0
-    )
-    pdf_testing = pd.read_csv(
-        name_for_loading+"_testing.csv", sep=";", index_col=0
-    )
-    feat = [col for col in pdf_training.columns if "Features" in col]
-    x_train = pdf_training[feat].values
-    y_train = pdf_training["Labels"].values
-    y_train = y_train.reshape((-1, 1))
-    x_test = pdf_testing[feat].values
-    y_test = pdf_testing["Labels"].values
-    y_test = y_test.reshape((-1, 1))
-    return x_train, y_train, x_test, y_test
-
-def empirical_distribution_function(data_points: np.array):
-    """
-    Given an array of data points create the corresponding empirical
-    distribution dunction
-    Parameters
-    ----------
-
-    data_points : numpy array
-        numpy array with data sampled
-
-    Returns
-    ------
-
-    batch_ : QLM Batch
-        QLM Batch with the jobs for computing graidents
-    """
-    n_sample = data_points.shape[0]
-    distribution = np.zeros(n_sample)
-    for m_ in range(n_sample):
-        count = 0
-        for n_ in list(range(0, m_))+list(range(m_+1, n_sample)):
-            check = np.all(data_points[m_] >= data_points[n_])
-            if check:
-                count = count+1
-
-        distribution[m_] = count/(n_sample-1)
-    return distribution
 
 def create_random_data(**kwargs):
     """
@@ -62,19 +20,24 @@ def create_random_data(**kwargs):
     kwargs : keyworg arguments:
         n_points_train : int. Number of points for training
         n_points_test : int. Number of points for testing
-        min_val : float. Minimun value for testing dataset
-        max_val : float. Maximum value for testing dataset
+        min_val : float, int or list. Minimun value for testing dataset
+        max_val : float, int or list. Maximum value for testing dataset
+        features_number : number of features
     Returns
     ------
 
-    x_train : numpy array
-        Array with the training dataset features
-    y_train : numpy array
+    train_x : numpy array
+        Array with the training dataset features:
+        shape = (n_points_train, features_number)
+    train_y : numpy array
         Array with the training dataset labels
-    x_test : numpy array
+        shape = (n_points_train, 1)
+    test_x : numpy array
         Array with the testing dataset features
-    y_test : numpy array
+        shape = (n_points_test, features_number)
+    test_y : numpy array
         Array with the testing dataset labels
+        shape = (n_points_test, 1)
     """
 
     n_points_train = kwargs.get("n_points_train", None)
@@ -82,119 +45,94 @@ def create_random_data(**kwargs):
     minval = kwargs.get("minval", None)
     maxval = kwargs.get("maxval", None)
     # Create Features
-    feature_number = kwargs.get("feature_number", 1)
-    x_train = np.random.randn(n_points_train)
-    x_test = np.linspace(minval, maxval, n_points_test)
+    feature_number = kwargs.get("features_number", 1)
+    train_x = np.random.normal(size=(n_points_train, feature_number))
+    # Build minval and maxval for properly dimension array generation
+    if type(minval) in [list, float, int]:
+        if type(maxval) in [list, float, int]:
+            if not isinstance(maxval, list) and not isinstance(minval, list):
+                minval = [minval] * feature_number
+                maxval = [maxval] * feature_number
+        else:
+            raise ValueError("maxval SHOULD BE: int, float or list")
+    else:
+        raise ValueError("minval SHOULD BE: int, float or list")
+
+    test_x = np.linspace(minval, maxval, n_points_test)
+    test_x = np.array(list(
+        product(*[test_x[:, i] for i in range(test_x.shape[1])])
+    ))
     # Create Labels
-    y_train = empirical_distribution_function(
-        np.reshape(x_train, (n_points_train, 1))) - 0.5
-    y_train = y_train.reshape(-1, 1)
-    y_test = norm.cdf(x_test) - 0.5
-    x_train = x_train.reshape((n_points_train, 1))
-    x_test = x_test.reshape((n_points_test, 1))
+    train_y = empirical_cdf(train_x) - 0.5
+    train_y = train_y.reshape((-1, 1))
+    if feature_number == 1:
+        test_y = norm.cdf(test_x) - 0.5
+    elif feature_number > 1:
+        means_ = [0] * feature_number
+        covs_ = [
+            [int(i == j) for j in range(feature_number)] \
+            for i in range(feature_number)
+        ]
+        mnorm = multivariate_normal(mean=means_, cov=covs_)
+        test_y = mnorm.cdf(test_x) - 0.5
+    test_y = test_y.reshape((-1, 1))
     # Saving datasets and info
-    saving_datasets(x_train, y_train, x_test, y_test, **kwargs)
-
-    return x_train, y_train, x_test, y_test
-
-def bs_pdf(
-        s_t: float, s_0: float = 1.0, risk_free_rate: float = 0.0,
-        volatility: float = 0.5, maturity: float = 0.5, **kwargs):
-    """
-    Black Scholes PDF
-    """
-
-    mean = (risk_free_rate - 0.5 * volatility * volatility) * maturity + np.log(s_0)
-    factor = s_t * volatility * np.sqrt(2 * np.pi * maturity)
-    exponent = -((np.log(s_t) - mean) ** 2) / (2 * volatility * volatility * maturity)
-    density = np.exp(exponent) / factor
-    return density
-
-def bs_cdf(
-        s_t: float, s_0: float = 1.0, risk_free_rate: float = 0.0,
-        volatility: float = 0.5, maturity: float = 0.5, **kwargs):
-    """
-    Black Scholes PDF
-    """
-    mean = (risk_free_rate - 0.5 * volatility * volatility) * maturity + np.log(s_0)
-    variance = volatility * volatility * maturity
-    return 0.5 * (1 + erf((np.log(s_t) - mean) / (np.sqrt(2 * variance))))
-
-def bs_samples(
-        number_samples: int, s_0: float = 1.0, risk_free_rate: float = 0.0,
-        volatility: float = 0.5, maturity: float = 0.5, **kwargs):
-    """
-    Black Scholes Samples
-    """
-
-    dW = np.random.randn(number_samples)
-    s_t = s_0 * np.exp(
-        (risk_free_rate - 0.5 * volatility * volatility) * maturity +
-        volatility * dW * np.sqrt(maturity))
-    return s_t
+    saving_datasets(train_x, train_y, test_y, test_y, **kwargs)
+    return train_x, train_y, test_x, test_y
 
 def create_bs_data(**kwargs):
     """
-    Create DataSets with Black Scholes
+    Create DataSets with Black Scholes. Only for 1 input feature
 
     Parameters
     ----------
+    kwargs : keyworg arguments. In addition to the kwargs provided to
+    create_random_data function the following arguments for configuring
+    BS CDF can be provided. BE AWARE: features_number MUST BE 1:
+        s_0 : initial value of the stock
+        risk_free_rate: risk free rate
+        volatility: volatility of the stock
+        maturity: maturity of the stock
 
-    n_points_train : int
-        number of points for training
-    n_points_test : int
-        number of points for testing
-    min_val : float
-        minimun value for testing dataset
-    max_val : float
-        maximum value for testing dataset
     Returns
     ------
 
-    x_train : numpy array
+    train_x : numpy array
         Array with the training dataset features
-    y_train : numpy array
+        shape = (n_points_train, 1)
+    train_y : numpy array
         Array with the training dataset labels
-    x_test : numpy array
+        shape = (n_points_train, 1)
+    test_x : numpy array
         Array with the testing dataset features
-    y_test : numpy array
+        shape = (n_points_test, 1)
+    test_y : numpy array
         Array with the testing dataset labels
+        shape = (n_points_test, 1)
     """
     n_points_train = kwargs.get("n_points_train", None)
     n_points_test = kwargs.get("n_points_test", None)
     minval = kwargs.get("minval", None)
     maxval = kwargs.get("maxval", None)
     # Create Features
-    feature_number = kwargs.get("feature_number", 1)
-    x_train = bs_samples(n_points_train, **kwargs)
-    x_train = x_train.reshape((n_points_train, feature_number))
-    x_test = np.linspace(minval, maxval, n_points_test)
+    feature_number = kwargs.get("features_number", 1)
+    # Build minval and maxval for properly dimension array generation
+    if type(minval) != float:
+        raise ValueError("minval SHOULD BE a float")
+    if type(maxval) != float:
+        raise ValueError("maxval SHOULD BE a float")
+    train_x = bs_samples(n_points_train, **kwargs)
+    train_x = train_x.reshape((-1, 1))
+    test_x = np.linspace(minval, maxval, n_points_test)
+    test_x = test_x.reshape((-1, 1))
     # Create Labels
-    y_train = empirical_distribution_function(
-        np.reshape(x_train,(n_points_train, feature_number))) - 0.5
-    y_test = bs_cdf(x_test, **kwargs) - 0.5
+    train_y = empirical_cdf(
+        np.reshape(train_x, (n_points_train, feature_number))) - 0.5
+    test_y = bs_cdf(test_x, **kwargs) - 0.5
+
     # Saving datasets and info
-    saving_datasets(x_train, y_train, x_test, y_test, **kwargs)
-    return x_train, y_train, x_test, y_test
-
-def saving_datasets(x_train, y_train, x_test, y_test, **kwargs):
-    """
-    Saving Data sets
-    """
-    name_for_saving = kwargs.get("name_for_saving", None)
-    if name_for_saving is not None:
-        features = ["Features_{}".format(x_) for x_ in range(x_train.shape[1])]
-        pdf_training = pd.DataFrame(x_train, columns=features)
-        pdf_training["Labels"] = y_train
-        pdf_testing = pd.DataFrame(x_test, columns=features)
-        pdf_testing["Labels"] = y_test
-        pdf_training.to_csv(
-            name_for_saving+"_training.csv", sep=";", index=True)
-        pdf_testing.to_csv(
-            name_for_saving+"_testing.csv", sep=";", index=True)
-        with open(kwargs.get("folder_path") + "/data.json", "w")  as outfile:
-            outfile.write(json.dumps(kwargs))
-
+    saving_datasets(train_x, train_y, test_x, test_y, **kwargs)
+    return train_x, train_y, test_x, test_y
 
 if __name__ == "__main__":
 
