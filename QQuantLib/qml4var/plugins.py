@@ -8,6 +8,7 @@ import numpy as np
 from qat.plugins import AbstractPlugin, Junction
 from qat.core import BatchResult, Result
 from qat.core.qpu import QPUHandler
+from QQuantLib.qml4var.architectures import compute_pdf_from_pqc
 
 class SetParametersPlugin(AbstractPlugin):
     """
@@ -21,7 +22,8 @@ class SetParametersPlugin(AbstractPlugin):
     weights : numpy array
         Array with the weights of the model
     features : numpy array
-        Array with the features for the model
+        Array with the features for the model.
+        Expected shape: (1, number of features)
     """
 
     def __init__(self, weights, features):
@@ -95,50 +97,14 @@ class ViewPlugin(AbstractPlugin):
         """
         print("Quantum Circuits from Pluging: {} \n".format(self.plugin))
         for j in batch:
-            print(j.meta_data)
+            try:
+                print(j.meta_data)
+            except AttributeError:
+                pass
             print(j.circuit.display())
         return batch
 
 
-def compute_pdf_from_pqc(batch, parameters):
-    """
-    Given a QLM Batch with a PQC representing a Multivariate
-    Cumulative Distribution Function (cdf) creates all the mandatory
-    PQCs for computing the corresponding Probability Distribution
-    Function, pdf. The returned is a QLM Batch with the jobs mandatory
-    for computing the pdf
-
-    Parameters
-    ----------
-
-    batch : QLM Batch
-        QLM batch with the Jobs to execute
-    parameters : list
-        list with the name of the features for pdf computation
-
-    Returns
-    ------
-
-    batch_ : QLM Batch
-        QLM Batch with the jobs for pdf copmputation
-    """
-    batch_ = copy.deepcopy(batch)
-    if len(batch_) != 1:
-        raise ValueError("BE AWARE: Input batch MUST HAVE only 1 job")
-
-
-    # Select the first job
-    job = [batch_[0]]
-    for feature in parameters:
-        temp_list = []
-        for step_job in job:
-            temp_list = temp_list + step_job.differentiate(feature)
-        # Overwrite the input job list with the new job list
-        job = temp_list
-
-    # Overwrite the jobs of the output Batch
-    batch_.jobs = temp_list
-    return batch_
 
 class pdfPluging(AbstractPlugin):
     """

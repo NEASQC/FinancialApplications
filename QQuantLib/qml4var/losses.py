@@ -30,15 +30,17 @@ def loss_function_qdml(
     Parameters
     ----------
     labels : numpy array
-        numpy array with the labels
+        numpy array with the labels. Shape: (-1, 1)
     predict_cdf : numpy array
-        numpy array with the predictions for the CDF
+        numpy array with the predictions for the CDF. Shape: (-1, 1)
     predict_pdf : numpy array
-        numpy array with the predictions for the PDF
+        numpy array with the predictions for the PDF. Shape: (-1, 1)
     x_quad : numpy array
         numpy array with the domain for computing the integral of the PDF
+        Shape: (-1, number of features)
     predict_quad : numpy array
         numpy array with the PDF for computing the integral of the PDF
+        Shape: (-1, 1)
     Returns
     -------
     loss_ : float
@@ -49,12 +51,37 @@ def loss_function_qdml(
     alpha_1 = loss_weights[1]
     # Loss Computation
     #Typical DL error
-    error_ = (predict_cdf - labels.reshape(predict_cdf.shape))
+    if predict_cdf.shape != labels.shape:
+        raise ValueError("predict_cdf and labels have different shape!!")
+    error_ = (predict_cdf - labels)
     loss_1 = np.mean(error_ ** 2)
+    if predict_pdf.shape != labels.shape:
+        raise ValueError("predict_pdf and labels have different shape!!")
     #print("\t loss_1 : {}".format(loss_1))
     mean = -2 * np.mean(predict_pdf)
     #print("\t mean : {}".format(mean))
-    integral = trapezoidal_rule(x_quad[:, 0], predict_quad[:, 0] * predict_quad[:, 0])
+    square_for_integral = predict_quad ** 2
+
+    if x_quad.shape[1] == 1:
+        # Typical 1-D trapezoidal integration
+        integral = np.trapz(y=square_for_integral[:, 0], x=x_quad[:, 0])
+    elif x_quad.shape[1] == 2:
+        # 2-D Trapezoidal integration
+        x_domain, y_domain = np.meshgrid(
+            np.unique(x_quad[:, 0]),
+            np.unique(x_quad[:, 1])
+        )
+        square_for_integral = square_for_integral.reshape(x_domain.shape)
+        integral = np.trapz(
+            np.trapz(y=square_for_integral, x=x_domain),
+            x=y_domain[:, 0]
+        )
+    else:
+        # MonteCarlo approach
+        integral = np.sum(square_for_integral) * np.prod(
+            x_quad.max(axis=0) - x_quad.min(axis=0)
+        ) / square_for_integral.size
+    #integral = trapezoidal_rule(x_quad[:, 0], predict_quad[:, 0] * predict_quad[:, 0])
     #print("\t integral: {}".format(integral))
     loss_ = alpha_0 * loss_1 + alpha_1 * (mean + integral)
     #print("\t loss: {}".format(loss))
@@ -91,3 +118,36 @@ def compute_loss(weights, produce_results, loss_function):
     output_dict = produce_results(weights)
     loss_ = loss_function(**output_dict)
     return loss_
+
+def numeric_gradient(weights, data_x, data_y, loss):
+    """
+    Compute the numeric gradient for some input loss function properly
+    configured
+    Parameters
+    ----------
+    weights : numpy array
+        Array with weights for PQC
+    data_x : numpy array
+        Array with dataset of the features
+    data_y : numpy array
+        Array with targets (labes) dataset
+    loss : function
+        function for computing the loss properly configured
+    """
+    gradient_i = []
+    epsilon = 1.0e-7
+    for i, weight in enumerate(weights):
+        #print(weight)
+        new_weights = copy.deepcopy(weights)
+        new_weights[i] = weight + epsilon
+        loss_plus = loss(new_weights, data_x, data_y)
+        #print(new_weights)
+        #print(loss_plus)
+        new_weights = copy.deepcopy(weights)
+        new_weights[i] = weight - epsilon
+        loss_minus = loss(new_weights, data_x, data_y)#, input_x, input_y)
+        #print(new_weights)
+        #print(loss_minus)
+        gradient_i = gradient_i + [(loss_plus-loss_minus) / (2.0 * epsilon)]
+        #print(gradient_i)
+    return gradient_i

@@ -140,7 +140,6 @@ def normalize_data(min_value, max_value, min_x=[-0.5*np.pi], max_x=[0.5*np.pi]):
     b1 = max_x - slope * max_value_
     return slope, b0
 
-
 def compute_pdf_from_pqc(batch, parameters):
     """
     Given a QLM Batch with a PQC representing a Multivariate
@@ -228,3 +227,11 @@ def compute_gradient(batch, parameters):
     # list_of_jobs.append(job)
     batch_.jobs = list_of_jobs
     return batch_
+
+def init_weights(weigths_names):
+    """
+    init weights of the PQC
+    """
+
+    init_weights = {v: np.random.uniform() for v in weigths_names}
+    return init_weights
