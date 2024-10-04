@@ -1,3 +1,8 @@
+"""
+Script for Training a PQC that works as a surrogate model for a complex
+and time consuming financial CDF.
+This training needs the computation of the CDF and the corresponding PDF
+"""
 
 import sys
 import os
@@ -5,13 +10,14 @@ import uuid
 import json
 import numpy as np
 import pandas as pd
+
 sys.path.append("../../")
+from QQuantLib.qml4var.data_utils import get_dataset
 from QQuantLib.qml4var.architectures import hardware_efficient_ansatz, \
-     z_observable, normalize_data
-from training_functions import init_weights, \
-    qdml_loss_function, numeric_gradient, mse_function
+     z_observable, normalize_data, init_weights
+from QQuantLib.qml4var.myqlm_workflows import qdml_loss_workflow, mse_workflow
+from QQuantLib.qml4var.losses import numeric_gradient
 from QQuantLib.qml4var.adam import adam_optimizer_loop
-from data_sets import get_dataset
 
 def store_info(base_folder, optimizer_dict, pqc_dict):
     """"
@@ -63,15 +69,15 @@ def new_training(**kwargs):
         data_info = json.load(json_file)
     # Normalization of the features
     base_frecuency, shift_feature = normalize_data(
-        [data_info["minval"]] * data_info["feature_number"],
-        [data_info["maxval"]] * data_info["feature_number"],
-        [-0.5*np.pi] * data_info["feature_number"],
-        [0.5*np.pi] * data_info["feature_number"],
+        [data_info["minval"]] * data_info["features_number"],
+        [data_info["maxval"]] * data_info["features_number"],
+        [-0.5*np.pi] * data_info["features_number"],
+        [0.5*np.pi] * data_info["features_number"],
     )
-    # min_values = [data_info["minval"]] * data_info["feature_number"]
-    # max_values = [data_info["maxval"]] * data_info["feature_number"]
-    # Get PQC parameter Configuration
+    # The PQC for a new training only need minimum information:
+    # number of features, layers and qubits by feature
     pqc_info = kwargs.get("pqc_info", None)
+    # Update PQC parameter Configuration
     pqc_info.update({
         "base_frecuency" : list(base_frecuency),
         "shift_feature" : list(shift_feature)
@@ -81,34 +87,38 @@ def new_training(**kwargs):
     observable = z_observable(**pqc_info)
     # Get the QPU info
     qpu_info = kwargs.get("qpu_info", None)
-    nbshots = 0
     # Get Optimizer INFO
     optimizer_info = kwargs.get("optimizer_info", None)
+    # number of shots should be provided into the optimizer_info
+    nbshots = optimizer_info["nbshots"]
+    # number of discretization points for domain should be provided into
+    # the optimizer_info
+    points = optimizer_info["points"]
     # Get Dask client if provided
     dask_client = kwargs.get("dask_client", None)
-    # creata data processing workflow function
+    # Configuration for workflows
     workflow_cfg = {
         "pqc" : pqc,
         "observable" : observable,
         "weights_names" : weights_names,
         "features_names" : features_names,
         "nbshots" : nbshots,
-        "minval" : [data_info["minval"]] * data_info["feature_number"],
-        "maxval" : [data_info["maxval"]] * data_info["feature_number"],
-        "points" : 100,
+        "minval" : [data_info["minval"]] * data_info["features_number"],
+        "maxval" : [data_info["maxval"]] * data_info["features_number"],
+        "points" : points,
         "qpu_info" : qpu_info
     }
     # Configure the loss function for gradiente computation
-    qdml_loss_function_ = lambda w_, x_, y_: qdml_loss_function(
+    qdml_loss_workflow_ = lambda w_, x_, y_: qdml_loss_workflow(
         w_, x_, y_, dask_client=dask_client, **workflow_cfg)
     # Configure the numeric gradient function
     numeric_gradient_ = lambda w_, x_, y_: numeric_gradient(
-        w_, x_, y_, qdml_loss_function_)
+        w_, x_, y_, qdml_loss_workflow_)
     # Configure the loss function for evaluation
-    training_loss = lambda w_: qdml_loss_function(
+    training_loss = lambda w_: qdml_loss_workflow(
         w_, x_train, y_train, dask_client=dask_client, **workflow_cfg)
     # Configure the MSE for evaluation in testing data
-    testing_metric = lambda w_: mse_function(
+    testing_metric = lambda w_: mse_workflow(
         w_, x_test, y_test, dask_client=dask_client, **workflow_cfg)
     # Set the Batch size and th eBatch generator
     batch_size = kwargs.get("batch_size", None)
@@ -272,4 +282,3 @@ if __name__ == "__main__":
             print("***********************************************")
             print("You should provide qpu_id for selecting a QPU")
             print("***********************************************")
-

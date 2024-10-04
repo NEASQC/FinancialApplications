@@ -1,16 +1,22 @@
-
+"""
+Script for Training a PQC that works as a surrogate model for a complex
+and time consuming financial CDF.
+This training needs the computation of the CDF and the corresponding PDF
+"""
+import sys
 import os
 import uuid
 import json
 import numpy as np
 import pandas as pd
-from data_sets import get_dataset
-from architectures import hardware_efficient_ansatz, z_observable, \
-    normalize_data
+sys.path.append("../../")
+from QQuantLib.qml4var.data_utils import get_dataset
+from QQuantLib.qml4var.architectures import hardware_efficient_ansatz, \
+     z_observable, normalize_data, init_weights
+from QQuantLib.qml4var.myqlm_workflows import mse_workflow
+from QQuantLib.qml4var.losses import numeric_gradient
+from QQuantLib.qml4var.adam import adam_optimizer_loop
 
-from training_functions import init_weights, qdml_loss_function, \
-    numeric_gradient, mse_function
-from adam import adam_optimizer_loop
 
 def store_info(base_folder, optimizer_dict, pqc_dict):
     """"
@@ -59,10 +65,10 @@ def new_training(**kwargs):
         data_info = json.load(json_file)
     # Normalization of the features
     base_frecuency, shift_feature = normalize_data(
-        [data_info["minval"]] * data_info["feature_number"],
-        [data_info["maxval"]] * data_info["feature_number"],
-        [-0.5*np.pi] * data_info["feature_number"],
-        [0.5*np.pi] * data_info["feature_number"],
+        [data_info["minval"]] * data_info["features_number"],
+        [data_info["maxval"]] * data_info["features_number"],
+        [-0.5*np.pi] * data_info["features_number"],
+        [0.5*np.pi] * data_info["features_number"],
     )
     # Get PQC parameter Configuration
     pqc_info = kwargs.get("pqc_info", None)
@@ -75,34 +81,42 @@ def new_training(**kwargs):
     observable = z_observable(**pqc_info)
     # Get the QPU info
     qpu_info = kwargs.get("qpu_info", None)
-    nbshots = 0
+    # Get Optimizer INFO
+    optimizer_info = kwargs.get("optimizer_info", None)
+    # number of shots should be provided into the optimizer_info
+    nbshots = optimizer_info["nbshots"]
+    # number of discretization points for domain should be provided into
+    # the optimizer_info
+    points = optimizer_info["points"]
+    # Get Dask client if provided
+    dask_client = kwargs.get("dask_client", None)
     # Get Optimizer INFO
     optimizer_info = kwargs.get("optimizer_info", None)
     # Get Dask client if provided
     dask_client = kwargs.get("dask_client", None)
-    # creata data processing workflow function
+    # Configuration for workflows
     workflow_cfg = {
         "pqc" : pqc,
         "observable" : observable,
         "weights_names" : weights_names,
         "features_names" : features_names,
         "nbshots" : nbshots,
-        "minval" : [data_info["minval"]] * data_info["feature_number"],
-        "maxval" : [data_info["maxval"]] * data_info["feature_number"],
-        "points" : 100,
+        "minval" : [data_info["minval"]] * data_info["features_number"],
+        "maxval" : [data_info["maxval"]] * data_info["features_number"],
+        "points" : points,
         "qpu_info" : qpu_info
     }
     # Configure the loss function for gradiente computation
-    mse_loss_ = lambda w_, x_, y_: mse_function(
+    mse_loss_ = lambda w_, x_, y_: mse_workflow(
         w_, x_, y_, dask_client=dask_client, **workflow_cfg)
     # Configure the numeric gradient function
     numeric_gradient_ = lambda w_, x_, y_: numeric_gradient(
         w_, x_, y_, mse_loss_)
     # Configure the loss function for evaluation
-    training_loss = lambda w_: mse_function(
+    training_loss = lambda w_: mse_workflow(
         w_, x_train, y_train, dask_client=dask_client, **workflow_cfg)
     # Configure the MSE for evaluation in testing data
-    testing_metric = lambda w_: mse_function(
+    testing_metric = lambda w_: mse_workflow(
         w_, x_test, y_test, dask_client=dask_client, **workflow_cfg)
     # Set the Batch size and th eBatch generator
     batch_size = kwargs.get("batch_size", None)
@@ -143,8 +157,7 @@ def new_training(**kwargs):
 
 if __name__ == "__main__":
     import argparse
-    from distributed import Client
-    from qpu.benchmark_utils import combination_for_list
+    from QQuantLib.utils.benchmark_utils import combination_for_list
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-base_folder",
@@ -187,6 +200,13 @@ if __name__ == "__main__":
         type=int,
         help="Identify which qpu to use",
         default=None,
+    )
+    parser.add_argument(
+        "-json_dask",
+        dest="json_dask",
+        type=str,
+        default=None,
+        help="JSON with the Optimizer parameters",
     )
     parser.add_argument(
         "-repetitions",
@@ -243,10 +263,11 @@ if __name__ == "__main__":
             print("***********************************************")
     if args.execution:
         if args.qpu_id is not None:
-            dask_client = None
             # Get Dask Client
-            dask_info = "/home/cesga/gferro/Codigo/dask_cluster_ft3/scheduler_info.json"
-            dask_client = Client(scheduler_file=dask_info)
+            dask_client = None
+            if args.json_dask is not None:
+                from distributed import Client
+                dask_client = Client(scheduler_file=args.json_dask)
             qpu_info = qpu_list[args.qpu_id]
             info = vars(args)
             info.update({"qpu_info": qpu_info})
