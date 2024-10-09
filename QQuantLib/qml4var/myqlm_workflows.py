@@ -8,7 +8,7 @@ from qat.core import Batch
 from QQuantLib.qpu.select_qpu import select_qpu
 from QQuantLib.qml4var.plugins import SetParametersPlugin, pdfPluging
 from QQuantLib.qml4var.architectures import compute_pdf_from_pqc
-from QQuantLib.qml4var.losses import loss_function_qdml, mse
+from QQuantLib.qml4var.losses import loss_function_qdml, mse, compute_integral
 
 def stack_execution(weights, x_sample, stack, **kwargs):
     """
@@ -63,31 +63,6 @@ def stack_execution(weights, x_sample, stack, **kwargs):
     }
     results = stack(weights, x_sample).submit(cdf_batch)
     return results
-
-def qdml_loss_function(weights, data_x, data_y, dask_client=None, **kwargs):
-    """
-    Computes the qdml loss function.
-    Parameters
-    ----------
-    Same parameters that workflow_for_qdml
-    Returns
-    -------
-    loss_ : computed loss function value for the input data.
-
-    """
-
-    # Get the mandatory array for computing loss
-    output_dict = workflow_for_qdml(
-        weights, data_x, data_y, dask_client=dask_client, **kwargs)
-
-    loss_ = loss_function_qdml(
-        output_dict.get("data_y"),
-        output_dict.get("y_predict_cdf"),
-        output_dict.get("y_predict_pdf"),
-        output_dict.get("x_integral"),
-        output_dict.get("y_predict_pdf_domain"),
-    )
-    return loss_
 
 def cdf_workflow(weights, x_sample, **kwargs):
     """
@@ -173,7 +148,7 @@ def pdf_workflow(weights, x_sample, **kwargs):
     results = results[0].value
     return results
 
-def workflow_execution(weights, data_x, workflow, dask_client=None):
+def workflow_execution_submit(weights, data_x, workflow, dask_client=None):
     """
     Given an input weights, a complete dataset of features, and a
     properly configured workflow function (like cdf_workflow or
@@ -201,7 +176,7 @@ def workflow_execution(weights, data_x, workflow, dask_client=None):
         y_data = [dask_client.submit(workflow, weights, x_, pure=False) for x_ in data_x]
     return y_data
 
-def workflow_execution_map(weights, data_x, workflow, dask_client=None):
+def workflow_execution(weights, data_x, workflow, dask_client=None):
     """
     Given an input weights, a complete dataset of features, and a
     properly configured workflow function (like cdf_workflow or
@@ -351,16 +326,22 @@ def workflow_for_qdml(weights, data_x, data_y, dask_client=None, **kwargs):
         "nbshots" : kwargs.get("nbshots"),
         "qpu_info" : kwargs.get("qpu_info")
     }
+    #Setting the workflows
 
     # for computing CDF using PQC
     cdf_workflow_ = lambda w, x: cdf_workflow(w, x, **workflow_cfg)
     # for computing PDF using PQC
     pdf_workflow_ = lambda w, x: pdf_workflow(w, x, **workflow_cfg)
+    # for computing the integral
+    pdf_workflow_square = lambda w, x: pdf_workflow(w, x, **workflow_cfg) ** 2
+
     # Getting the Domain for discretization
     minval = kwargs.get("minval")
     maxval = kwargs.get("maxval")
     points = kwargs.get("points")
+    # Build discretization for each domain dimension
     x_integral = np.linspace(minval, maxval, points)
+    # Complete domain discretization by Cartesian Product
     domain_x = np.array(list(
         product(*[x_integral[:, i] for i in range(x_integral.shape[1])])
     ))
@@ -370,35 +351,60 @@ def workflow_for_qdml(weights, data_x, data_y, dask_client=None, **kwargs):
     # Get PDF prediction for train data
     pdf_train_prediction = workflow_execution(
         weights, data_x, pdf_workflow_, dask_client=dask_client)
-    # Get PDF prediction for domain
-    pdf_domain_prediction = workflow_execution(
-        weights, domain_x, pdf_workflow_, dask_client=dask_client)
+    # Get square PDF prediction for domain
+    pdf_square_prediction = workflow_execution(
+        weights, domain_x, pdf_workflow_square, dask_client=dask_client)
+    # Compute the integral
+    integral = compute_integral(
+        pdf_square_prediction, domain_x,
+        dask_client=dask_client
+    )
 
     if dask_client is None:
         cdf_train_prediction = np.array(cdf_train_prediction)
         pdf_train_prediction = np.array(pdf_train_prediction)
-        pdf_domain_prediction = np.array(pdf_domain_prediction)
     else:
         cdf_train_prediction = np.array(dask_client.gather(cdf_train_prediction))
         pdf_train_prediction = np.array(dask_client.gather(pdf_train_prediction))
-        pdf_domain_prediction = np.array(dask_client.gather(pdf_domain_prediction))
-
+        integral = dask_client.gather(integral)
 
     cdf_train_prediction = cdf_train_prediction.reshape((-1, 1))
     pdf_train_prediction = pdf_train_prediction.reshape((-1, 1))
-    pdf_domain_prediction = pdf_domain_prediction.reshape((-1, 1))
 
     output_dict = {
         "y_predict_cdf" : cdf_train_prediction,
         "y_predict_pdf" : pdf_train_prediction,
-        "x_integral" : domain_x,
-        "y_predict_pdf_domain":pdf_domain_prediction,
+        "integral": integral,
         "data_y" : data_y
 
     }
     return output_dict
 
 def qdml_loss_workflow(weights, data_x, data_y, dask_client=None, **kwargs):
+    """
+    Workflow for computing the qdml loss function.
+    Parameters
+    ----------
+    Same parameters that workflow_for_qdml
+    Returns
+    -------
+    loss_ : computed loss function value for the input data.
+
+    """
+
+    # Get the mandatory array for computing loss
+    output_dict = workflow_for_qdml(
+        weights, data_x, data_y, dask_client=dask_client, **kwargs)
+
+    loss_ = loss_function_qdml(
+        output_dict.get("data_y"),
+        output_dict.get("y_predict_cdf"),
+        output_dict.get("y_predict_pdf"),
+        output_dict.get("integral")
+    )
+    return loss_
+
+def qdml_loss_workflow_old(weights, data_x, data_y, dask_client=None, **kwargs):
     """
     Workflow for computing the qdml loss function.
     Parameters
