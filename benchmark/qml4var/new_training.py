@@ -19,7 +19,9 @@ from QQuantLib.qml4var.myqlm_workflows import qdml_loss_workflow, mse_workflow
 from QQuantLib.qml4var.losses import numeric_gradient
 from QQuantLib.qml4var.adam import adam_optimizer_loop
 
-def store_info(base_folder, optimizer_dict, pqc_dict):
+def store_info(
+        base_folder, optimizer_dict, pqc_dict, pdf,
+        save_name="evolution.csv", save=False):
     """"
     Function for saving Initial Info
     Parameters
@@ -31,6 +33,8 @@ def store_info(base_folder, optimizer_dict, pqc_dict):
         dictionary with the info of the Optimizer
     pqc_dict : dict
         dictionary with the info of the PQC
+    pdf : pandas DataFrame
+        DataFrame where the training history will be saved
     Returns
     -------
 
@@ -39,24 +43,33 @@ def store_info(base_folder, optimizer_dict, pqc_dict):
     """
     print(optimizer_dict)
     print(pqc_dict)
-    # Create unique folder name for storing results
-    unique_directory = base_folder + str(uuid.uuid4())+"/"
-    print(unique_directory)
-    if not os.path.exists(unique_directory):
-        os.makedirs(unique_directory)
-    # Saving Optimizer info
-    with open(unique_directory + "optimizer_dict.json", "w")  as outfile:
-        outfile.write(json.dumps(optimizer_dict))
-    # Saving PQC info
-    with open(unique_directory + "pqc_dict.json", "w")  as outfile:
-        outfile.write(json.dumps(pqc_dict))
-    return unique_directory
+    if save:
+        # Create unique folder name for storing results
+        unique_directory = base_folder + str(uuid.uuid4())+"/"
+        print(unique_directory)
+        if not os.path.exists(unique_directory):
+            os.makedirs(unique_directory)
+        file_to_save = unique_directory + save_name
+        # Save the initial header
+        pdf.to_csv(file_to_save, sep=";", index=True)
+        optimizer_dict.update({"file_to_save": file_to_save})
+
+        # Saving Optimizer info
+        with open(unique_directory + "optimizer_dict.json", "w")  as outfile:
+            outfile.write(json.dumps(optimizer_dict))
+        # Saving PQC info
+        with open(unique_directory + "pqc_dict.json", "w")  as outfile:
+            outfile.write(json.dumps(pqc_dict))
+    return optimizer_dict, pqc_dict, pdf
 
 def batch_generator(X, Y, batch_size):
     return [(X[i:i+batch_size] , Y[i:i+batch_size]) for i in range(0, len(X), batch_size)]
 
 
 def new_training(**kwargs):
+    """
+    Execute a complete training
+    """
     # Get the Base folder with the data
     base_folder = kwargs.get("base_folder", None)
     # Get the Base nanme for the datasets
@@ -125,6 +138,7 @@ def new_training(**kwargs):
     if batch_size is None:
         batch_size = len(x_train)
     batch_generator_ = batch_generator(x_train, y_train, batch_size)
+    optimizer_info.update({"batch_size":batch_size})
 
     # Do the stuff
     save = True
@@ -133,16 +147,13 @@ def new_training(**kwargs):
         # Initial weights
         initial_weights = init_weights(weights_names)
         optimizer_info.update({"file_to_save": None})
+        # Create the csv to store results
+        columns = weights_names + ["t", "loss", "metric"]
+        pdf = pd.DataFrame(columns=columns)
         # Saving staff
-        if save:
-            # Create the Folder with uuid
-            store_folder = store_info(base_folder, optimizer_info, pqc_info)
-            # Create the csv to store results
-            columns = weights_names + ["t", "loss", "metric"]
-            pdf = pd.DataFrame(columns=columns)
-            file_to_save = store_folder + "evolution.csv"
-            pdf.to_csv(file_to_save, sep=";", index=True)
-            optimizer_info.update({"file_to_save": file_to_save})
+        save_name = kwargs.get("save_name", None)
+        optimizer_info, pqc_info, pdf = store_info(
+            base_folder, optimizer_info, pqc_info, pdf, save_name, save)
         # Training Time
         weights = adam_optimizer_loop(
             weights_dict=initial_weights,
@@ -154,6 +165,7 @@ def new_training(**kwargs):
             **optimizer_info
         )
         print(weights)
+    return weights
 
 
 
@@ -174,6 +186,13 @@ if __name__ == "__main__":
         type=str,
         help="Base name for csv with datasets",
         default="base_name",
+    )
+    parser.add_argument(
+        "-save_name",
+        dest="save_name",
+        type=str,
+        help="Save name for training history",
+        default="evolution.csv",
     )
     parser.add_argument(
         "-json_qpu",
@@ -219,7 +238,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-batch_size",
-        dest="repetitions",
+        dest="batch_size",
         type=int,
         help="Batch Size",
         default=None,

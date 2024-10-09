@@ -201,6 +201,36 @@ def workflow_execution(weights, data_x, workflow, dask_client=None):
         y_data = [dask_client.submit(workflow, weights, x_, pure=False) for x_ in data_x]
     return y_data
 
+def workflow_execution_map(weights, data_x, workflow, dask_client=None):
+    """
+    Given an input weights, a complete dataset of features, and a
+    properly configured workflow function (like cdf_workflow or
+    pdf_workflow) executes the workflow for all the samples of the
+    dataset. Dask cluster computation using map
+
+    Parameters
+    ----------
+    weights : np array
+        array with the weights of the PQC
+    data_x : np array
+        array with the dataset of input features
+    dask_client : dask client
+        Dask client for speed up computations
+    Returns
+    -------
+    y_data : depends on dask_client. If dask_client is None then returns
+    a list with results of the workflow for all input dataset. If a
+    dask_client is passed then returns a list of futures and a gather
+    operation should be executed for retrieving the data.
+    """
+    if dask_client is None:
+        y_data = [workflow(weights, x_) for x_ in data_x]
+    else:
+        # y_data = [dask_client.submit(workflow, weights, x_, pure=False) for x_ in data_x]
+        y_data = dask_client.map(
+            workflow, *([weights] * data_x.shape[0], data_x))
+    return y_data
+
 def workflow_for_cdf(weights, data_x, dask_client=None, **kwargs):
     """
     Workflow for proccessing the CDF for the input data_x

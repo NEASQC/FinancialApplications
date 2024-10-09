@@ -62,6 +62,7 @@ def create_random_data(**kwargs):
     test_x = np.array(list(
         product(*[test_x[:, i] for i in range(test_x.shape[1])])
     ))
+    print(test_x.shape)
     # Create Labels
     train_y = empirical_cdf(train_x) - 0.5
     train_y = train_y.reshape((-1, 1))
@@ -77,7 +78,7 @@ def create_random_data(**kwargs):
         test_y = mnorm.cdf(test_x) - 0.5
     test_y = test_y.reshape((-1, 1))
     # Saving datasets and info
-    saving_datasets(train_x, train_y, test_y, test_y, **kwargs)
+    saving_datasets(train_x, train_y, test_x, test_y, **kwargs)
     return train_x, train_y, test_x, test_y
 
 def create_bs_data(**kwargs):
