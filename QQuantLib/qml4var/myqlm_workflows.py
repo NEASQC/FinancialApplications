@@ -6,7 +6,7 @@ import numpy as np
 from itertools import product
 from qat.core import Batch
 from QQuantLib.qpu.select_qpu import select_qpu
-from QQuantLib.qml4var.plugins import SetParametersPlugin, pdfPluging
+from QQuantLib.qml4var.plugins import SetParametersPlugin, pdfPluging, MyQPU
 from QQuantLib.qml4var.architectures import compute_pdf_from_pqc
 from QQuantLib.qml4var.losses import loss_function_qdml, mse, compute_integral
 
@@ -93,7 +93,7 @@ def cdf_workflow(weights, x_sample, **kwargs):
     qpu = select_qpu(qpu_dict)
     # Build the execution stack for CDF
     stack_cdf = lambda weights_, features_: \
-        SetParametersPlugin(weights_, features_) | qpu
+        SetParametersPlugin(weights_, features_) | MyQPU(qpu)
     # Execute the stack
     workflow_cfg = {
         "pqc" : kwargs.get("pqc"),
@@ -135,7 +135,7 @@ def pdf_workflow(weights, x_sample, **kwargs):
     # Build the execution stack
     features_names = kwargs.get("features_names")
     stack_pdf = lambda weights_, features_: \
-        pdfPluging(features_names) | SetParametersPlugin(weights_, features_) | qpu
+        pdfPluging(features_names) | SetParametersPlugin(weights_, features_) | MyQPU(qpu)
     # Execute the stack
     workflow_cfg = {
         "pqc" : kwargs.get("pqc"),

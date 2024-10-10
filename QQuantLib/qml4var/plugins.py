@@ -139,6 +139,36 @@ class pdfPluging(AbstractPlugin):
         }
         return BatchResult(results=[final_result])
 
+class MyQPU(QPUHandler):
+    """
+    New QPU. Update the result with the corresponding
+    metadata of the input job
+
+    Parameters
+    ----------
+    input_qpu : QLM qpu
+        A qpu that will be the base for the new QPU
+    """
+
+    def __init__(self, input_qpu):
+        """
+        Init method
+        """
+        super().__init__()
+        self.qpu = input_qpu
+
+
+    def submit_job(self, job):
+        """
+        Given a job submit to the input_qpu and update
+        the meta_data of the QLM Result object with the
+        meta_data of the job
+        """
+        #job.circuit.display()
+        result = self.qpu.submit(job)
+        if not isinstance(result, Result):
+            result = result.join()
+        return result
 
 
 class SetWeightsPlugin(AbstractPlugin):
@@ -317,48 +347,6 @@ class ProccesResultPluging(AbstractPlugin):
         return BatchResult(results=[final_result])
 
 
-class MyQPU(QPUHandler):
-    """
-    New QPU. Update the result with the corresponding
-    metadata of the input job
-
-    Parameters
-    ----------
-    input_qpu : QLM qpu
-        A qpu that will be the base for the new QPU
-    """
-
-    def __init__(self, input_qpu):
-        """
-        Init method
-        """
-        super().__init__()
-        self.qpu = input_qpu
-
-
-    def submit_job(self, job):
-        """
-        Given a job submit to the input_qpu and update
-        the meta_data of the QLM Result object with the
-        meta_data of the job
-        """
-        #job.circuit.display()
-        result = self.qpu.submit(job)
-        if not isinstance(result, Result):
-            result = result.join()
-
-        if result.meta_data is None:
-            result.meta_data = {}
-
-        if job.meta_data["gradient_circuit"] == False:
-            result.meta_data.update({"parameter": "prediction"})
-
-        if job.meta_data["gradient_circuit"] == True:
-            result.meta_data.update({
-                "parameter": job.meta_data["parameter"]
-            })
-
-        return result
 
 class ProccesOnInputJunction(Junction):
     def __init__(self, feature_sample):
