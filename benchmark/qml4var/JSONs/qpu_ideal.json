@@ -1,0 +1,24 @@
+
+[
+    {
+        "qpu_type": ["c", "python", "linalg", "mps", "qlmass_linalg", "qlmass_mps"],
+        "t_gate_1qb" : [null],
+        "t_gate_2qbs" : [null],
+        "t_readout": [null],
+        "depol_channel" : [{
+            "active": false,
+            "error_gate_1qb" : null,
+            "error_gate_2qbs" : null
+        }],
+        "idle" : [{
+            "amplitude_damping": false,
+            "dephasing_channel": false,
+            "t1" : null,
+            "t2" : null
+        }],
+        "meas": [{
+            "active":false,
+            "readout_error": null
+        }]
+    }
+]

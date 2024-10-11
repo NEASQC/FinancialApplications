@@ -1,0 +1,12 @@
+
+{
+    "epochs" : 20,
+    "tolerance" : 1.0e-5,
+    "learning_rate" : 0.1,
+    "beta1" : 0.9,
+    "beta2" : 0.999,
+    "print_step" : 2,
+    "n_counts_tolerance" : 5,
+    "nbshots" : 0,
+    "points": 100
+}

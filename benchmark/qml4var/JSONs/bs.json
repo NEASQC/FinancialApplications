@@ -1,0 +1,13 @@
+
+{
+    "n_points_train": 250,
+    "n_points_test": 100, 
+    "features_number" : 1,
+    "minval": 0.1,
+    "maxval": 3.0,
+    "distribution" : "bs",
+    "s_0" : 1.0,
+    "risk_free_rate" : 0.0,
+    "maturity" : 0.5,
+    "volatility" : 0.5
+}
