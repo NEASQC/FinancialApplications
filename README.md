@@ -21,6 +21,7 @@ The *Quantum Quantitative Finance Library* is structured as a standard Python li
 3. **Phase Estimation (PE) package**: Located at *QQuantLib/PE*, this package includes modules for phase estimation algorithms applicable in amplitude estimation procedures.
 4. **Amplitude Estimation (AE) package**: Situated in *QQuantLib/AE*, this package focuses on implementing various amplitude estimation algorithms.
 5. **Finance package**: Housed in *QQuantLib/finance*, this package implements modules for employing amplitude estimation techniques to solve financial problems.
+6. **Quantum Machine Learning for VaR (qml4var)**: Located in  *QQuantLib/qml4var*, this package focus on implementing mandatory workflow for building and training **Parametric Quantum Circuits (PQC)** that can be used as a surrogate models for complex and time-consuming financial distributions. The trained surrogate models can be used for risk analysis and *VaR* computations.
 6. **QPU package**: Located at *QQuantLib/qpu*, this package comprises modules for selecting different EVIDEN Quantum Process Units (**QPU**s) compatible with the QQuantLib library.
 7. **Utils package**: Positioned at *QQuantLib/utils*, this package contains multiple modules with utilities utilized across other packages.
 
@@ -30,10 +31,11 @@ A series of Jupyter notebooks have been developed in the **misc/notebooks** fold
 
 ## Benchmark folder
 
-In the benchmark folder, two Python packages are presented to assess the performance of various amplitude estimation algorithms (and their configurations) and different information encoding techniques in quantum circuits developed within the library:
+In the benchmark folder, three Python packages are presented to assess the performance of various quantum algorithms:
 
 1. **compare_ae_probability**: This package enables easy configuration of different amplitude estimation algorithms and their application to a simple amplitude estimation problem (this is getting the probability of a fixed state when a probability density array is loaded into a quantum circuit).
 2. **q_ae_price**: This package simplifies the configuration of price estimation problems for different financial derivatives (call and put options, and futures) and solves them using various configurations of quantum amplitude estimation algorithms.
+3. **qml4var**: This package allows to the user trains **PQC** that can be used of surrogate models of time consuming financial distribution functions.
 
 ## Acknowledgements
 
