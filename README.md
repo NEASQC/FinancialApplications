@@ -2,7 +2,7 @@
 
 This repo is associated with the Financial Applications use case of the Machine Learning & Optimisation group of the NEASQC European project.
 Its primary focus is the development of the Python library *Quantum Quantitative Finance Library* (**QQuantLib**), which encompasses various state-of-the-art quantum algorithms and techniques tailored for the financial industry. Many of these contributions were developed within the project framework.
-The **QQuantLib** was programmed using the quantum software stack developed by Eviden myQLM.
+The **QQuantLib** was programmed using the quantum software stack myQLM developed by EVIDEN.
 
 ## Licence
 
@@ -10,7 +10,7 @@ The `LICENCE` file contains the default licence statement as specified in the pr
 
 ## Building and installing
 
-The *requirements.txt* file contains the mandatory Python libraries for using present libraries.
+The mandatory Python libraries and packages for using the **QQuantLib** can be found into the *requirements.txt* or the *environment.yml* files.
 
 ## Library organisation 
 
@@ -35,7 +35,7 @@ In the benchmark folder, three Python packages are presented to assess the perfo
 
 1. **compare_ae_probability**: This package enables easy configuration of different amplitude estimation algorithms and their application to a simple amplitude estimation problem (this is getting the probability of a fixed state when a probability density array is loaded into a quantum circuit).
 2. **q_ae_price**: This package simplifies the configuration of price estimation problems for different financial derivatives (call and put options, and futures) and solves them using various configurations of quantum amplitude estimation algorithms.
-3. **qml4var**: This package allows to the user trains **PQC** that can be used of surrogate models of time consuming financial distribution functions.
+3. **qml4var**: This package allows to the user trains **PQC** that can be used as surrogate models of time consuming financial distribution functions.
 
 ## Acknowledgements
 
