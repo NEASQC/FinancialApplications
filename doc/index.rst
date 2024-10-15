@@ -24,6 +24,7 @@
 * :doc:`pe`: This is the *Phase Estimation*  package which contains modules for phase estimation algorithms that can be used in amplitude estimation procedures. 
 * :doc:`ae`: This is the *Amplitude Estimation* package which is devoted to different amplitude amplification algorithms.
 * :doc:`finance`: This package implements different modules related to finance applications of *Amplitude Estimation* techniques.
+* :doc:`qml4var`: This package contains modules for training **PQC**s for using as surrogate models for Financial **CDF**s for VaR computations.
 * :doc:`qpu`: This package contains a module for selecting the different **EVIDEN** *Quantum Process Units* (**QPUs**) for simulating the different circuits created by the different modules of the **QQuantLib** library.
 * :doc:`utils`: This package contains auxiliary modules used for all the beforementioned packages.
 
@@ -62,6 +63,12 @@
    :hidden:
 
    finance.rst
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   qml4var.rst
 
 
 .. toctree::

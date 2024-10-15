@@ -2,6 +2,7 @@
 This module contains the different myqlm workflows mandatory for
 the different PQCs evaluations needed for a training proccess
 """
+
 import numpy as np
 from itertools import product
 from qat.core import Batch
