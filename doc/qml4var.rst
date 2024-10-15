@@ -12,7 +12,6 @@ The following modules are presented:
 * :doc:`qml4var.losses`: This module implements several loss functions.
 * :doc:`qml4var.adam`: This module implements the ADAM optimizer.
 
-
 .. toctree::
    :maxdepth: 1
    :hidden:
@@ -48,5 +47,4 @@ The following modules are presented:
    :hidden:
 
    qml4var.adam.rst
-
 
