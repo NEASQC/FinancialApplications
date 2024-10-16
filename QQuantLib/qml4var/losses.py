@@ -28,12 +28,12 @@ def compute_integral(y_array, x_array, dask_client=None):
 
     Note
     ----
-        * if x_array has shape(n, 1) then numpy trapz is used for computing integral.
-        * if x_array has shape(n, 2) and dask_client is None numpy trapz
-            is used for computing the double integral.
-        * if x_array has shape(n, 2) and dask_client is provided then MonteCarlo
-            integration is used
-        * if x_array has shape(n, > 2) MonteCarlo integration is used
+    if x_array has shape(n, 1) then numpy trapz is used for computing integral.
+    if x_array has shape(n, 2) and dask_client is None numpy trapz
+     is used for computing the double integral.
+    if x_array has shape(n, 2) and dask_client is provided then MonteCarlo
+     integration is used
+    if x_array has shape(n, > 2) MonteCarlo integration is used
     """
     if x_array.shape[1] == 1:
         if dask_client is None:
