@@ -36,6 +36,12 @@ jobs:
 
       - name: Install
         run: pip install sphinx_rtd_theme nbsphinx sphinxcontrib.bibtex sphinxcontrib.programoutput sphinxcontrib.contentui autodoc MarkupSafe==2.0.1
+
+      - name: Change folder
+        run: cd doc
+
+      - name: Build 
+        run: sphinx-build -b html . _build
           
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
