@@ -209,7 +209,8 @@ def workflow_execution(weights, data_x, workflow, dask_client=None):
 
 def workflow_for_cdf(weights, data_x, dask_client=None, **kwargs):
     """
-    Workflow for proccessing the CDF for the input data_x
+    Workflow for proccessing the CDF for the input data_x.
+
     Parameters
     ----------
     weights : numpy array
@@ -251,7 +252,8 @@ def workflow_for_cdf(weights, data_x, dask_client=None, **kwargs):
 
 def workflow_for_pdf(weights, data_x, dask_client=None, **kwargs):
     """
-    Workflow for proccessing the CDF for the input data_x
+    Workflow for proccessing the CDF for the input data_x.
+
     Parameters
     ----------
     weights : numpy array
@@ -292,7 +294,8 @@ def workflow_for_pdf(weights, data_x, dask_client=None, **kwargs):
 def workflow_for_qdml(weights, data_x, data_y, dask_client=None, **kwargs):
     """
     Workflow for proccessing the data and obtain the mandatory arrays
-    for computing the desired loss
+    for computing the desired loss.
+
     Parameters
     ----------
     weights : numpy array
@@ -384,6 +387,7 @@ def workflow_for_qdml(weights, data_x, data_y, dask_client=None, **kwargs):
 def qdml_loss_workflow(weights, data_x, data_y, dask_client=None, **kwargs):
     """
     Workflow for computing the qdml loss function.
+
     Parameters
     ----------
     Same parameters that workflow_for_qdml
@@ -408,6 +412,7 @@ def qdml_loss_workflow(weights, data_x, data_y, dask_client=None, **kwargs):
 def qdml_loss_workflow_old(weights, data_x, data_y, dask_client=None, **kwargs):
     """
     Workflow for computing the qdml loss function.
+
     Parameters
     ----------
     Same parameters that workflow_for_qdml
@@ -432,7 +437,8 @@ def qdml_loss_workflow_old(weights, data_x, data_y, dask_client=None, **kwargs):
 
 def mse_workflow(weights, data_x, data_y, dask_client=None, **kwargs):
     """
-    Computes the MSE function
+    Computes the MSE function.
+
     Parameters
     ----------
     Same parameters that workflow_for_qdml
