@@ -5,10 +5,10 @@ This package implements the mandatory modules and functions to train a **Paramet
 
 The following modules are presented:
 
-* :doc:`qml4var.data_utils`: This module contains functions for generating suitable datasets for training **PQC**s for **CDF** evaluation.
+* :doc:`qml4var.data_utils`: This module contains functions for generating suitable datasets for training **PQCs** for **CDF** evaluation.
 * :doc:`qml4var.architectures`: This module implements a hardware efficient ansatz **PQC** and define the measurement observable. 
-* :doc:`qml4var.plugins`: This module contains home made **myQLM Plugins** used for evaluating **PQC** s for a set of trainable and feature parameters.
-* :doc:`qml4var.myqlm\_workflows`: This module implements workflows for evaluating the **PQC** s.
+* :doc:`qml4var.plugins`: This module contains home made **myQLM Plugins** used for evaluating **PQCs** for a set of trainable and feature parameters.
+* :doc:`qml4var.myqlm_workflows`: This module implements workflows for evaluating the **PQCs**.
 * :doc:`qml4var.losses`: This module implements several loss functions.
 * :doc:`qml4var.adam`: This module implements the ADAM optimizer.
 
@@ -22,7 +22,7 @@ The following modules are presented:
    :maxdepth: 1
    :hidden:
 
-    qml4var.architectures.rst
+   qml4var.architectures.rst
 
 .. toctree::
    :maxdepth: 1
@@ -47,4 +47,3 @@ The following modules are presented:
    :hidden:
 
    qml4var.adam.rst
-

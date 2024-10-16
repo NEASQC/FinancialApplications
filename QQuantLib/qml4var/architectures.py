@@ -15,11 +15,15 @@ def hardware_efficient_ansatz(**kwargs):
     ----------
     kwargs : kwargs
         Input dictionary for configuring the ansatz. Mandatory keys:
-        features_number : number of features
-        n_qubits_by_feature : number of qubits used for each feature
-        n_layers : number of layers of the PQC
-        base_frecuency : slope for feature normalization
-        shift_feature : shift for feature normalization
+
+    Note
+    ----
+    Valid keywords:
+        * features_number : number of features
+        * n_qubits_by_feature : number of qubits used for each feature
+        * n_layers : number of layers of the PQC
+        * base_frecuency : slope for feature normalization
+        * shift_feature : shift for feature normalization
 
     Returns
     -------
@@ -111,7 +115,7 @@ def z_observable(**kwargs):
     observable = Observable(nqbits=n_qubits, pauli_terms=terms)
     return observable
 
-def normalize_data(min_value, max_value, min_x=[-0.5*np.pi], max_x=[0.5*np.pi]):
+def normalize_data(min_value, max_value, min_x=None, max_x=None):
     """
     Feature Normalization.
     Parameters
@@ -133,8 +137,14 @@ def normalize_data(min_value, max_value, min_x=[-0.5*np.pi], max_x=[0.5*np.pi]):
     """
     max_value_ = np.array(max_value)
     min_value_ = np.array(min_value)
-    min_x = np.array(min_x)
-    max_x = np.array(max_x)
+    if min_x is None:
+        min_x = np.array([-0.5 * np.pi])
+    else:
+        min_x = np.array(min_x)
+    if max_x is None:
+        max_x = np.array([-0.5 * np.pi])
+    else:
+        max_x = np.array(max_x)
     slope = (max_x - min_x) / (max_value_-min_value_)
     b0 = min_x - slope * min_value_
     b1 = max_x - slope * max_value_
