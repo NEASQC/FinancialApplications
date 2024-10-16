@@ -27,7 +27,7 @@ jobs:
         #     sphinx-build -b html . _build
           
       - name: Sphinx Build
-       You may pin to the exact commit or the version.
+        #You may pin to the exact commit or the version.
         uses: ammaraskar/sphinx-action@master
         with:
           # The folder containing your sphinx docs.
