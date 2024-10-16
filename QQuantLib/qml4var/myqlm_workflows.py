@@ -194,10 +194,15 @@ def workflow_execution(weights, data_x, workflow, dask_client=None):
         Dask client for speed up computations
     Returns
     -------
-    y_data : depends on dask_client. If dask_client is None then returns
-    a list with results of the workflow for all input dataset. If a
-    dask_client is passed then returns a list of futures and a gather
-    operation should be executed for retrieving the data.
+    y_data : list
+
+    Note
+    ----
+    The return of the function depends on dask_client.
+    If dask_client is None then returns a list with results
+    of the workflow for all input dataset. If a dask_client is passed
+    then returns a list of futures and a gather operation should
+    be executed for retrieving the data.
     """
     if dask_client is None:
         y_data = [workflow(weights, x_) for x_ in data_x]
