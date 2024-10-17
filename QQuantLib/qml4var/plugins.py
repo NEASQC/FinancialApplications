@@ -6,7 +6,7 @@ using myqlm
 import copy
 import numpy as np
 from qat.plugins import AbstractPlugin, Junction
-from qat.core import BatchResult, Result
+from qat.core import BatchResult, Result, Batch
 from qat.core.qpu import QPUHandler
 from QQuantLib.qml4var.architectures import compute_pdf_from_pqc
 
@@ -156,7 +156,8 @@ class MyQPU(QPUHandler):
         """
         super().__init__()
         self.qpu = input_qpu
-
+        self.apply_resource_consumption_limits = self.qpu.apply_resource_consumption_limits
+        self.estimate_resources_for_batch = self.qpu.estimate_resources_for_batch
 
     def submit_job(self, job):
         """
@@ -166,6 +167,7 @@ class MyQPU(QPUHandler):
         """
         #job.circuit.display()
         result = self.qpu.submit(job)
+        #print(result)
         if not isinstance(result, Result):
             result = result.join()
         return result
@@ -175,7 +177,7 @@ class SetWeightsPlugin(AbstractPlugin):
     """
     Pluging for setting the weights of the different PQCs.
     The Batch MUST have a meta_data with at least the keys:
-    fetures and weights
+    weights
 
     Parameters
     ----------
@@ -189,7 +191,6 @@ class SetWeightsPlugin(AbstractPlugin):
         Init method
         """
         self.weights = weights
-        #print(self.weights)
 
     def compile(self, batch, hardware_specs):
         """
@@ -214,9 +215,6 @@ class SetWeightsPlugin(AbstractPlugin):
         if "weights" not in batch_.meta_data:
             raise ValueError(
                 "The meta_data of the Batch do not have weights key")
-        if "features" not in batch_.meta_data:
-            raise ValueError(
-                "The meta_data of the Batch do not have feature key")
         # Select the weight parameter names from batch_
         weights_name = batch_.meta_data["weights"]
         weights_ = {k:v for k, v in zip(weights_name, self.weights)}
@@ -225,6 +223,73 @@ class SetWeightsPlugin(AbstractPlugin):
         for job in batch_:
             job.circuit = job.circuit(**weights_)
         return batch_
+
+class SetFeaturesPlugin(AbstractPlugin):
+    """
+    Pluging for setting the features of the different PQCs in an input batch.
+    The Batch MUST have a meta_data with at least the keys:
+    fetures
+
+    Parameters
+    ----------
+
+    features : numpy array
+        Array with the features of the model
+    """
+
+    def __init__(self, features):
+        """
+        Init method
+        """
+        self.features = features
+
+    def compile(self, batch, hardware_specs):
+        """
+        Loop over all the jobs of the input Batch and overwrite
+        the features parameter of the PQC for each element of
+        the input features.
+
+        Parameters
+        ----------
+
+        batch : QLM Batch
+            QLM Batch object with the jobs to execute
+
+        Returns
+        ------
+
+        batch_ : QLM Batch
+            QLM Batch with the jobs
+
+        """
+        # Deep Copy of the input batch object
+        if "features" not in batch.meta_data:
+            raise ValueError(
+                "The meta_data of the Batch do not have feature key")
+        # Select the weight parameter names from batch_
+        features_name = batch.meta_data["features"]
+        list_of_jobs = []
+        # Loop for each input feature
+        for feature in self.features:
+            feature_ = dict(zip(features_name, feature))
+            # For each feature the complete batch should be copy deeply
+            batch_ = copy.deepcopy(batch)
+            new_jobs = []
+            # Loop each job of the copy batch
+            for job in batch_:
+                # Fix the Features parameters
+                circuit_ = job.circuit(**feature_)
+                # The job should be rebuild
+                job_ = circuit_.to_job(nbshots=job.nbshots, observable=job.observable)
+                new_jobs.append(job_)
+            list_of_jobs = list_of_jobs + new_jobs
+        new_batch = Batch(jobs=list_of_jobs) 
+        return new_batch
+    def post_process(self, batch_result):
+        #print("Post Procces")
+        print(len(batch_result))
+        return batch_result
+
 
 class GradientPlugin(AbstractPlugin):
     """

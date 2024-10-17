@@ -55,9 +55,8 @@ def stack_execution(weights, x_sample, stack, **kwargs):
         nbshots=nbshots,
         observable=observable
     )
-    job.meta_data = {"gradient_circuit" : False}
     # Build job for CDF
-    cdf_batch = Batch([job])
+    cdf_batch = Batch(jobs=[job])
     cdf_batch.meta_data = {
         "weights" : weights_names,
         "features" : features_names,
