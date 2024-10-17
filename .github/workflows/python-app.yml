@@ -22,11 +22,14 @@ jobs:
       #    python-version: 3.12
     - name: Install dependencies
       run: |
-        conda env create  -n dask_myqlm -f environment.yml
+        wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
+        bash Mambaforge-Linux-x86_64.sh
+        mamba env create -y -n dask_myqlm -f environment.yml
         #python -m pip install --upgrade pip
         #pip install flake8 pytest
         #if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        conda activate environment.yml
+        mamba init
+        mamba activate environment.yml
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
