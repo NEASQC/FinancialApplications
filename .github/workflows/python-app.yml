@@ -22,8 +22,6 @@ jobs:
       #    python-version: 3.12
     - name: Install dependencies
       run: |
-        #wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
-        #bash Mambaforge-Linux-x86_64.sh
         conda env create -y -n dask_myqlm -f environment.yml
         #python -m pip install --upgrade pip
         #pip install flake8 pytest
@@ -31,6 +29,12 @@ jobs:
         bash
         conda init
         conda activate dask_myqlm
+    - name: Restart bash
+      run: bash
+    - name: Conda init
+      run: conda init
+    - name: Activate conda
+      run: conda activate dask_myqlm
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
