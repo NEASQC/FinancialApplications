@@ -29,8 +29,8 @@ jobs:
       #  with:
       #    python-version: 3.12
     - shell: bash -el {0}
-      #run: |
-      #  conda activate dask_myqlm || true
+      run: |
+        conda activate dask_myqlm || true
       #  python -m pip install --upgrade pip
       #  pip install flake8 pytest
       #  #if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
