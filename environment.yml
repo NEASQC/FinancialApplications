@@ -1,4 +1,4 @@
-name: myqlm_dask
+name: myqlmdask
 channels:
   - myqlm
   - conda-forge

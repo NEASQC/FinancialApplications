@@ -23,15 +23,15 @@ jobs:
         environment-file: environment.yml
         auto-update-conda: true
         auto-activate-base: false
-          #activate-environment: anaconda-client-env
+        activate-environment: myqlmdask 
       #- name: Set up Python 3.12
       #  uses: actions/setup-python@v4
       #  with:
       #    python-version: 3.12
     - shell: bash -el {0}
       run: |
-        conda info --envs
-        conda activate test
+        conda info
+        conda list
       #  python -m pip install --upgrade pip
       #  pip install flake8 pytest
       #  #if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
