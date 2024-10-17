@@ -16,17 +16,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.12
+      #- name: Set up Python 3.12
+      #  uses: actions/setup-python@v4
+      #  with:
+      #    python-version: 3.12
     - name: Install dependencies
       run: |
-        mamba env create  -n dask_myqlm -f environment.yml
+        conda env create  -n dask_myqlm -f environment.yml
         #python -m pip install --upgrade pip
         #pip install flake8 pytest
         #if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        mamba activate environment.yml
+        conda activate environment.yml
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
