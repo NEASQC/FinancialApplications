@@ -10,7 +10,7 @@ The `LICENCE` file contains the default licence statement as specified in the pr
 
 ## Building and installing
 
-The mandatory Python libraries and packages for using the **QQuantLib** can be found into the *requirements.txt* or the *environment.yml* files.
+The mandatory Python libraries and packages for using the **QQuantLib** can be found into the *environment.yml* file.
 
 ## Library organisation 
 
