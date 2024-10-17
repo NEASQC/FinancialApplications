@@ -26,7 +26,7 @@ jobs:
       #    python-version: 3.12
     - name: Install dependencies
       run: |
-        conda env create -y -n dask_myqlm -f environment.yml
+        conda env create -y -n dask_myqlm -f ./environment.yml
         conda activate dask_myqlm || true
         #python -m pip install --upgrade pip
         #pip install flake8 pytest
