@@ -62,6 +62,7 @@ dependencies:
   - exceptiongroup=1.2.2
   - executing=2.1.0
   - expat=2.6.3
+  - flake8=7.1.1
   - font-ttf-dejavu-sans-mono=2.37
   - font-ttf-inconsolata=3.000
   - font-ttf-source-code-pro=2.038
@@ -212,8 +213,10 @@ dependencies:
   - pyarrow=17.0.0
   - pyarrow-core=17.0.0
   - pyarrow-hotfix=0.6
+  - pycodestyle=2.12.1
   - pycparser=2.22
   - pydoe=0.3.8
+  - pyflakes=3.2.0
   - pygments=2.18.0
   - pylint=3.3.1
   - pyparsing=3.1.4
