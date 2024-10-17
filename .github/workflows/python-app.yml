@@ -13,28 +13,24 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
 
     steps:
-      #- uses: actions/checkout@v4
-    - name: create environment with mamba
+    - uses: actions/checkout@v4
     - uses: conda-incubator/setup-miniconda@v3
       with:
         mamba-version: "*"
         miniconda-version: "latest"
-        use-only-tar-bz2: true
         environment-file: environment.yml
         auto-update-conda: true
         auto-activate-base: true
         activate-environment: anaconda-client-env
+      #- name: Set up Python 3.12
+      #  uses: actions/setup-python@v4
+      #  with:
+      #    python-version: 3.12
+    - shell: bash -el {0}
       run: |
-        conda info
-        conda list
-
-    - name: Install with flake8
-      run: |
+        conda activate dask_myqlm || true
         python -m pip install --upgrade pip
         pip install flake8 pytest
         #if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
@@ -47,7 +43,3 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
-      #- name: Set up Python 3.12
-      #  uses: actions/setup-python@v4
-      #  with:
-      #    python-version: 3.12
