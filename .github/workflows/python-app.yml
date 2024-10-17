@@ -26,11 +26,8 @@ jobs:
         #python -m pip install --upgrade pip
         #pip install flake8 pytest
         #if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        bash
-        conda init
-        conda activate dask_myqlm
     - name: Restart bash
-      run: bash
+      run: source /home/runner/.bashrc
     - name: Conda init
       run: conda init
     - name: Activate conda
