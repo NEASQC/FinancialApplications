@@ -156,8 +156,16 @@ class MyQPU(QPUHandler):
         """
         super().__init__()
         self.qpu = input_qpu
-        self.apply_resource_consumption_limits = self.qpu.apply_resource_consumption_limits
-        self.estimate_resources_for_batch = self.qpu.estimate_resources_for_batch
+        try:
+            self.apply_resource_consumption_limits = \
+                self.qpu.apply_resource_consumption_limits
+        except AttributeError:
+            pass
+        try:
+            self.estimate_resources_for_batch = \
+                self.qpu.estimate_resources_for_batch
+        except AttributeError:
+            pass
 
     def submit_job(self, job):
         """
