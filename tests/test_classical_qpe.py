@@ -32,6 +32,7 @@ def test_pe_s_gate():
         "unitary_operator": unitary_operator,
         "auxiliar_qbits_number": auxiliar_qbits_number,
         "shots": 100,
+        "qpu": qpu
     }
     qft_pe = CQPE(**qft_pe_dict)
     qft_pe.run()
