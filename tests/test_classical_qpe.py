@@ -11,7 +11,7 @@ from QQuantLib.DL.data_loading import load_probability, load_array, load_pf
 from QQuantLib.AA.amplitude_amplification import grover
 from QQuantLib.PE.classical_qpe import CQPE
 from QQuantLib.qpu.get_qpu import get_qpu
-qpu = get_qpu("python")
+qpu = get_qpu("c")
 
 
 #### Phase Estimation Test-01: Phase of S Gate ###
@@ -62,6 +62,7 @@ def test_pe_c_t_gate():
         "unitary_operator": unitary_operator,
         "auxiliar_qbits_number": auxiliar_qbits_number,
         "shots": 100,
+        "qpu": qpu
     }
     qft_pe = CQPE(**qft_pe_dict)
     qft_pe.run()
