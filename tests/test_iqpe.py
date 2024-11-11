@@ -65,6 +65,7 @@ def test_pe_c_t_gate():
         "unitary_operator": unitary_operator,
         "auxiliar_qbits_number": auxiliar_qbits_number,
         "shots": 100,
+        "qpu": linalg_qpu,
     }
     iqpe = IQPE(**iqpe_dict)
     iqpe.iqpe()
