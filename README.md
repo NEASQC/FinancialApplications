@@ -33,8 +33,8 @@ A series of Jupyter notebooks have been developed in the **misc/notebooks** fold
 
 In the benchmark folder, three Python packages are presented to assess the performance of various quantum algorithms:
 
-1. **compare_ae_probability**: This package enables easy configuration of different amplitude estimation algorithms and their application to a simple amplitude estimation problem (this is getting the probability of a fixed state when a probability density array is loaded into a quantum circuit).
-2. **q_ae_price**: This package simplifies the configuration of price estimation problems for different financial derivatives (call and put options, and futures) and solves them using various configurations of quantum amplitude estimation algorithms.
+1. **compare_ae_probability**: This package enables easy configuration of different amplitude estimation algorithms and their application to a simple amplitude estimation problem (this is getting the probability of a fixed state when a probability density array is loaded into a quantum circuit). For comparison between AE methods please review notebook CompareAEalgorithmsOnPureProbability.ipynb.
+2. **q_ae_price**: This package simplifies the configuration of price estimation problems for different financial derivatives (call and put options, and futures) and solves them using various configurations of quantum amplitude estimation algorithms. For comparison between AE algorithms please refer to: *Compare_AE_algorithms_On_PriceEstimation.ipynb*
 3. **qml4var**: This package allows to the user trains **PQC** that can be used as surrogate models of time consuming financial distribution functions.
 
 ## Acknowledgements

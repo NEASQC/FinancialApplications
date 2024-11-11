@@ -21,6 +21,11 @@ import qat.lang.AQASM as qlm
 from QQuantLib.qpu.get_qpu import get_qpu
 from QQuantLib.utils.utils import load_qn_gate
 from QQuantLib.utils.data_extracting import get_results
+from QQuantLib.DL.data_loading import uniform_distribution
+from QQuantLib.PE.windows_pe import window_selector
+from qat.lang.AQASM.gates import ParamGate
+from qat.lang.AQASM.routines import QRoutine
+
 
 class CQPE:
     """
@@ -58,23 +63,54 @@ class CQPE:
         # Setting attributes
         # In this case we load directly the initial state
         # and the grover operator
-        self.initial_state = kwargs.get("initial_state", None)
-        self.q_gate = kwargs.get("unitary_operator", None)
+        self.kwargs = kwargs
+        self.initial_state = self.kwargs.get("initial_state", None)
+        self.q_gate = self.kwargs.get("unitary_operator", None)
         if (self.initial_state is None) or (self.q_gate is None):
             text = "initial_state and grover keys should be provided"
             raise KeyError(text)
 
         # Number Of classical bits for estimating phase
-        self.auxiliar_qbits_number = kwargs.get("auxiliar_qbits_number", 8)
+        self.auxiliar_qbits_number = self.kwargs.get("auxiliar_qbits_number", None)
+        if self.auxiliar_qbits_number is None:
+            raise ValueError("Auxiliary number of qubits not provided")
 
         # Set the QPU to use
-        self.linalg_qpu = kwargs.get("qpu", None)
+        self.linalg_qpu = self.kwargs.get("qpu", None)
         if self.linalg_qpu is None:
-            print("Not QPU was provide. PyLinalg will be used")
-            self.linalg_qpu = get_qpu("python")
+            raise ValueError("Not QPU was provided")
 
-        self.shots = kwargs.get("shots", 10)
-        self.complete = kwargs.get("complete", False)
+        self.shots = self.kwargs.get("shots", None)
+        if self.shots is None:
+            print(
+                "Be Aware: Not shots povided! \
+                Exact simulation (shots=0) will be used"
+            )
+        self.complete = self.kwargs.get("complete", False)
+
+        # Set the window function to use
+        self.window = self.kwargs.get("window", None)
+        # Change the sign in the last control
+        if self.window is None:
+            self.window_gate = uniform_distribution(self.auxiliar_qbits_number)
+            self.last_control_change = False
+        else:
+            if type(self.window) in [ParamGate, QRoutine]:
+                self.window_gate = self.window
+                self.last_control_change = self.kwargs.get(
+                    "last_control_change", None)
+                if self.last_control_change is None:
+                    raise ValueError(
+                        "If you provide a window AbstractGate \
+                        last_control_change key CAN NOT BE NONE"
+                    )
+            elif type(self.window) is str:
+                self.window_gate, self.last_control_change = window_selector(
+                    self.window, **self.kwargs
+                )
+            else:
+                raise ValueError("Window kwarg not ParamGate neither QRoutine")
+
 
         #Quantum Routine for QPE
         #Auxiliar qbits
@@ -101,15 +137,31 @@ class CQPE:
         qpe_routine.apply(self.initial_state, self.registers)
         #Creates the auxiliary qbits for phase estimation
         self.q_aux = qpe_routine.new_wires(self.auxiliar_qbits_number)
+        # Apply the window function to auxiliary qubits
+        # BE AWARE: the probability of the window function
+        # Should be loaded taking as a domain the Int_lsb!!!
+        qpe_routine.apply(self.window_gate, self.q_aux)
         #Apply controlled Operator an increasing number of times
-        for i, aux in enumerate(self.q_aux):
+        for i, aux in enumerate(self.q_aux[:-1]):
             #Apply Haddamard to all auxiliary qbits
-            qpe_routine.apply(qlm.H, aux)
+            #qpe_routine.apply(qlm.H, aux)
             #Power of the unitary operator depending of the position
             #of the auxiliary qbit.
             step_q_gate = load_qn_gate(self.q_gate, 2**i)
             #Controlled application of power of unitary operator
             qpe_routine.apply(step_q_gate.ctrl(), aux, self.registers)
+        # Las Control depends on the type of Window function applied
+        if self.last_control_change:
+            step_q_gate = load_qn_gate(
+                self.q_gate.dag(),
+                2**(self.auxiliar_qbits_number - 1)
+            )
+        else:
+            step_q_gate = load_qn_gate(
+                self.q_gate,
+                2**(self.auxiliar_qbits_number - 1)
+            )
+        qpe_routine.apply(step_q_gate.ctrl(), self.q_aux[-1], self.registers)
         #Apply the QFT
         qpe_routine.apply(qlm.qftarith.QFT(len(self.q_aux)).dag(), self.q_aux)
         self.circuit = qpe_routine
@@ -128,6 +180,7 @@ class CQPE:
         end = time.time()
         self.quantum_times.append(end-start)
         del self.result["Amplitude"]
+        # Transform to lambda. BE AWARE we need to use Int column
         self.result["lambda"] = self.result["Int"] / (2**len(self.q_aux))
 
 

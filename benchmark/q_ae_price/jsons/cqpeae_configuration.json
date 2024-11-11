@@ -1,6 +1,7 @@
 [
     {
         "ae_type": ["CQPEAE"],
+        "file": ["CQPEAE"],
 
         "schedule": [null],
         "delta": [null],
@@ -15,14 +16,17 @@
         "epsilon": [null],
 
         "alpha": [null],
-        "shots": [100],
 
         "gamma": [null],
         "q": [null],
-        "erqae_schedule" : [null],
 
+        "erqae_schedule" :[null],
+
+        "encoding" : [0],
         "multiplexor":  [true],
+
         "mcz_qlm": [false],
-        "file": ["CQPEAE"]
+        "shots": [100],
+        "number_of_tests": [null]
     }
 ]
