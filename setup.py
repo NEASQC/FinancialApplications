@@ -24,7 +24,7 @@ class PyTest(TestCommand):
 
 setup(
     name="FinancialApplications",
-    version="0.0.1",
+    version=os.getenv("TAG_NAME", "0.0.1"),
     author="Alberto Pedro Manzano Herrero & Gonzalo Ferro Costas",
     license="European Union Public License 1.2",
 
