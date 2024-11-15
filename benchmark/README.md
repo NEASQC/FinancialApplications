@@ -1,6 +1,6 @@
 # Benchmark utilities
 
-This folder contains three different packages which allow to the user execute benchmarks for testing the more important parts of the *QQuantLib*:
+This folder contains four different packages which allow to the user execute benchmarks for testing the more important parts of the *QQuantLib*:
 
 * **compare_ae_probability**: this package allows the user to test and compare the different quantum **AE** algorithms, from *QQuantLib*, easily. This can be done using the *probabiliy_estimation* module from the command line. How to use, results and more information can be found in the notebook *CompareAEalgorithmsOnPureProbability.ipynb* (located inside the folder).
 
@@ -9,6 +9,8 @@ This folder contains three different packages which allow to the user execute be
     * *benchmark_ae_option_price.py*: allows the user compute the option price using **AE** algorithms for an user defined option problem (python benchmark_ae_option_price.py -h for help) 
 
     * benchmark_ae_option_price_step_po.py: allows the user the compute the price of a derivative using different **AE** algorithms when the payoff function can take positive and negative values. In this case, the positive and negative parts of the payoff are loaded separately and two different estimations, using quantum **AE** algorithms, are obtained. These values should be post-processed to obtain the final desired value. 
+
+* **sine_integral**: this package allows the user to test the *QQuantLib.finance.quantum\_integration* module by estimating the defined integral of a sine function in two different domains. How to use, results and more information can be found in the notebook: *QAE_SineIntegration_WindowQPE.ipynb* (located inside the folder).
 
 * **qml4var**: this package allows the user to test the *QQuantLib.qml4var* package. The following different modules (that can be executed from the command line) can be found:
 
