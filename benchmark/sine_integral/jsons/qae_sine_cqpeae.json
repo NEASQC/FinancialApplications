@@ -1,28 +1,28 @@
 [
     {
-        "ae_type": ["IQAE"],
+        "ae_type": ["CQPEAE"],
 
         "schedule": [null],
         "delta": [null],
         "ns": [null],
 
-        "auxiliar_qbits_number": [null],
-        "window" : [null],
-        "kaiser_alpha" : [null],
+        "auxiliar_qbits_number": [4, 5, 6, 7, 8, 9, 10, 11],
+        "window" : [null, "Sine", "Kaise"],
+        "kaiser_alpha" : [0.1, 10, 100],
 
         "cbits_number": [null],
 
-        "epsilon": [1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5, 1.0e-6],
+        "epsilon": [null],
 
-        "alpha": [0.05],
-        "shots": [100],
+        "alpha": [null],
 
         "gamma": [null],
         "q": [null],
         "erqae_schedule" : [null],
 
         "multiplexor":  [true],
+
         "mcz_qlm": [false],
-        "file": ["IQAE"]
+        "shots": [0]
     }
 ]

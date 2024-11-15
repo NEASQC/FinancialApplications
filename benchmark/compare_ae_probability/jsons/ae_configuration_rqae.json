@@ -7,6 +7,8 @@
         "ns": [null],
 
         "auxiliar_qbits_number": [null],
+        "window" : [null],
+        "kaiser_alpha" : [null],
 
         "cbits_number": [null],
 

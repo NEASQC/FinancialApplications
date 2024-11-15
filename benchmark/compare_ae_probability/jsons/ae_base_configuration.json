@@ -1,7 +1,6 @@
 [
     {
-        "ae_type": ["RQAE"],
-        "file": ["RQAE"],
+        "ae_type": [null],
 
         "schedule": [null],
         "delta": [null],
@@ -13,20 +12,17 @@
 
         "cbits_number": [null],
 
-        "epsilon": [1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5, 1.0e-6],
+        "epsilon": [null],
 
         "alpha": [null],
+        "shots": [null],
 
-        "gamma": [0.05],
-        "q": [2],
+        "gamma": [null],
+        "q": [null],
+        "erqae_schedule" : [null],
 
-        "erqae_schedule" :[null],
-
-        "encoding" : [1, 2],
         "multiplexor":  [true],
-
         "mcz_qlm": [false],
-        "shots": [100],
-        "number_of_tests": [5]
+        "file": [null]
     }
 ]

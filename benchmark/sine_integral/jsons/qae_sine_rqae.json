@@ -1,6 +1,6 @@
 [
     {
-        "ae_type": ["eRQAE"],
+        "ae_type": ["mRQAE", "RQAE"],
 
         "schedule": [null],
         "delta": [null],
@@ -9,6 +9,56 @@
         "auxiliar_qbits_number": [null],
         "window" : [null],
         "kaiser_alpha" : [null],
+
+        "cbits_number": [null],
+
+        "epsilon": [0.001],
+
+        "alpha": [null],
+
+        "gamma": [0.05],
+        "q": [1.2],
+        "erqae_schedule" : [null],
+
+        "multiplexor":  [true],
+
+        "mcz_qlm": [false],
+        "shots": [null]
+    },
+    {
+        "ae_type": ["sRQAE"],
+
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+
+        "auxiliar_qbits_number": [null],
+        "window" : [null],
+        "kaiser_alpha" : [null],
+
+        "cbits_number": [null],
+
+        "epsilon": [0.001],
+
+        "alpha": [null],
+
+        "gamma": [0.05],
+        "q": [1.2],
+        "erqae_schedule" : [null],
+
+        "multiplexor":  [true],
+
+        "mcz_qlm": [false],
+        "shots": [10000]
+    },
+    {
+        "ae_type": ["eRQAE"],
+
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+
+        "auxiliar_qbits_number": [null],
 
         "cbits_number": [null],
 
@@ -38,7 +88,6 @@
         ],
 
         "multiplexor":  [true],
-        "mcz_qlm": [false],
-        "file": ["eRQAE"]
+        "mcz_qlm": [false]
     }
 ]
