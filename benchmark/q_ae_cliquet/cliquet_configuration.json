@@ -1,0 +1,8 @@
+[
+    {
+        "local_cap" : [0.1],
+        "local_floor" : [-0.1],
+        "global_cap" : [0.2],
+        "global_floor": [-0.2]
+    }
+]

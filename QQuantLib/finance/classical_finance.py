@@ -558,35 +558,28 @@ def bs_tree(
     s_0: float,
     risk_free_rate: float,
     volatility: float,
-    maturity: float,
-    number_samples: int,
-    time_steps: int,
+    times: np.ndarray,
     discretization: int,
     bounds: float,
     **kwargs
 ):
     r"""
     Computes the probabilities of all possible pahts from the
-    approximated solution of the Black-Scholes SDE using the
-    Euler-Maruyama discretization for a given discretization of the
+    approximated solution of the Black-Scholes SDE using
+    exact simulation for a given discretization of the
     Brownian motion.
 
     Parameters
     ----------
+
     s_0 : float
         current price of the underlying
     risk_free_rate : float
         risk free rate
     volatility : float
         the volatility
-    maturity : float
-        the maturity
-    strike : float
-        the strike
-    number_samples : int
-        number of samples
-    time steps : int
-        number of time steps
+    times : np.ndarray
+        the times of the tree
     discretization : float
         number of points to build the discrete version
         of the gaussian density
@@ -595,10 +588,13 @@ def bs_tree(
 
     Returns
     -------
-    s_t : numpy array of floats
-        array of samples from the SDE.
+    s_t : list of numpy arrays
+        Each element of the list is an array with all the posible asset
+        values discretization
+    p_t : numpy array of floats
+        array with the probabilities for all the paths
     """
-    dt = maturity / time_steps
+    time_steps = len(times) - 1
     x_ = np.linspace(-bounds, bounds, discretization)
     p_x = norm.pdf(x_)
     p_x = p_x / np.sum(p_x)
@@ -607,27 +603,91 @@ def bs_tree(
     p_t = []
     s_t.append(np.array([s_0]))
     p_t.append(np.array([1.0]))
+
     for i in range(time_steps):
+        dt = times[i+1] - times[i]
         all_possible_paths = np.array(np.zeros(discretization ** (i + 1)))
-        all_possible_probabilities = np.array(np.zeros(discretization ** (i + 1)))
+        all_possible_probabilities = np.array(
+            np.zeros(discretization ** (i + 1)))
+
         for j in range(len(s_t[i])):
             single_possible_paths = (
-                s_t[i][j]
-                + risk_free_rate * s_t[i][j] * dt
-                + volatility * s_t[i][j] * x_ * np.sqrt(dt)
+                s_t[i][j] * np.exp((risk_free_rate - 0.5 * volatility**2) *\
+                    dt + volatility * np.sqrt(dt) * x_)
             )
             single_possible_probabilities = p_t[i][j] * p_x
 
             index = j * discretization
-            all_possible_paths[index : index + discretization] = single_possible_paths
-            all_possible_probabilities[
-                index : index + discretization
-            ] = single_possible_probabilities
+            all_possible_paths[index : index + discretization] =\
+                single_possible_paths
+            all_possible_probabilities[index : index + discretization] =\
+                single_possible_probabilities
 
         s_t.append(all_possible_paths)
         p_t.append(all_possible_probabilities)
+
     return s_t, p_t
 
+def tree_to_paths(tree):
+    """
+    Convert a tree structure from bs_tree to a path format (table form)
+
+    Parameters
+    ----------
+
+    tree : list
+        list of lists with the tree structure from bs_tree
+
+    Returns
+    -------
+
+    paths : list of lists
+        table conversions of the tree structure input
+    """
+    number_times = len(tree)
+    number_paths = len(tree[number_times - 1])
+
+    paths = np.zeros((number_times, number_paths))
+
+    for i in range(number_times - 1):
+        repeat = len(tree[-1]) / len(tree[i])
+        paths[i, :] = np.repeat(tree[i], repeat)
+    paths[-1, :] = tree[-1]
+
+    return paths
+
+def cliquet_cashflows(local_cap, local_floor, global_cap, global_floor, paths):
+    """
+    Calculate the cashflows for the Cliquet option.
+
+    Parameters
+    ----------
+
+    local_cap : float
+        local cap for cliquet options
+    local_floor : float
+        local floor for cliqet options
+    global_cap : float
+        global cap for cliquet options
+    global_floor : float
+        global floor for cliqet options
+    paths : list
+        input paths for the cliquet option
+
+    Return
+    ------
+    final_return : numpy array
+        The cashflows of the option for the input paths
+    """
+
+    # Calculate period returns
+    period_returns = (paths[1:] / paths[:-1]) - 1.
+    # Apply local caps and floors
+    capped_floored_returns = np.clip(period_returns, local_floor, local_cap)
+    # Sum returns and apply global caps/floors
+    total_return = np.sum(capped_floored_returns, axis=0)
+    final_return = np.clip(total_return, global_floor, global_cap)
+    return final_return
 
 def geometric_sum(base: float, exponent: int, coeficient: float = 1.0, **kwargs):
     r"""
