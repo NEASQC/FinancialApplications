@@ -18,6 +18,7 @@ from QQuantLib.AE.shots_real_quantum_ae import sRQAE
 from QQuantLib.AE.extended_real_quantum_ae import eRQAE
 from QQuantLib.AE.modified_real_quantum_ae import mRQAE
 from QQuantLib.AE.montecarlo_ae import MCAE
+from QQuantLib.AE.bayesian_ae import BAYESQAE
 from QQuantLib.utils.utils import text_is_none
 
 class AE:
@@ -167,6 +168,13 @@ class AE:
             )
         elif self.ae_type == "MCAE":
             self.solver_ae = MCAE(
+                self.oracle,
+                target=self.target,
+                index=self.index,
+                **self.solver_dict
+            )
+        elif self.ae_type == "BAYESQAE":
+            self.solver_ae = BAYESQAE(
                 self.oracle,
                 target=self.target,
                 index=self.index,
