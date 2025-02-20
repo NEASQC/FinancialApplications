@@ -32,10 +32,10 @@ jobs:
       - name: Build Python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.x'
+          python-version: '3.11'
 
       - name: Install
-        run: pip install sphinx_rtd_theme nbsphinx==0.8.8 sphinxcontrib.bibtex sphinxcontrib.programoutput sphinxcontrib.contentui autodoc MarkupSafe==2.0.1
+        run: pip install sphinx_rtd_theme nbsphinx sphinxcontrib.bibtex sphinxcontrib.programoutput sphinxcontrib.contentui autodoc MarkupSafe==2.0.1
 
       - name: Build 
         run: |
