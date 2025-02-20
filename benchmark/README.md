@@ -19,8 +19,6 @@ This folder contains five different packages which allow to the user execute ben
     * *benchmark_cliquet_step_po.py*: computes the return of the configured Cliquet option using a properly configured *AE* algorithm when the payoff function can take positive and negative values. In this case, the positive and negative parts of the payoff are loaded separately and two different estimations, using quantum **AE** algorithms, are obtained. These values should be post-processed to obtain the final desired value.
 
 
-easily. This can be done using the *probabiliy_estimation* module from the command line. How to use, results and more information can be found in the notebook *CompareAEalgorithmsOnPureProbability.ipynb* (located inside the folder).
-
 * **qml4var**: this package allows the user to test the *QQuantLib.qml4var* package. The following different modules (that can be executed from the command line) can be found:
 
     * *data_sets*: this module allows to the user build datasets for training a **PQC**. The user can select between a random or a properly configured **Black-Scholes** (a.k.a. log-normal) distribution function. The module builds and stores the train and test datasets.
