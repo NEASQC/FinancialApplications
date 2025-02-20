@@ -30,7 +30,7 @@ jobs:
         #     pre-build-command: 'python -m pip install sphinx_rtd_theme nbsphinx sphinxcontrib.bibtex sphinxcontrib.programoutput sphinxcontrib.contentui autodoc MarkupSafe==2.0.1'
 
       - name: Build Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v3
         with:
           python-version: '3.x'
 
@@ -40,7 +40,7 @@ jobs:
       - name: Build 
         run: |
           cd doc
-          sphinx-build -E -b html . _build
+          sphinx-build -b html . _build
           
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
