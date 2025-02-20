@@ -48,13 +48,13 @@ class CQPEAE:
         dictionary that allows the configuration of the CQPEAE algorithm: \\
         Implemented keys:
 
-        qpu : QLM solver
-            solver for simulating the resulting circuits
-        shots : int
-            number of measurements
-        mcz_qlm : bool
-            for using or not QLM implementation of the multi controlled Z
-            gate
+    qpu : kwargs, QLM solver
+        solver for simulating the resulting circuits
+    shots : kwargs, int
+        number of measurements
+    mcz_qlm : kwargs, bool
+        for using or not QLM implementation of the multi controlled Z
+        gate
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):

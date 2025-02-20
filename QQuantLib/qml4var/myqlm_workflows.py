@@ -24,19 +24,19 @@ def stack_execution(weights, x_sample, stack, **kwargs):
     x_sample : np array
         input sample to provide to the PQC
     kwargs : keyword arguments
-        The following keys are mandatory
-        pqc : QLM Program
-            qlm program with the implementation of the PQC
-        observable : QLM Observable
-            qlm observable with the Observable definition of the PQC
-        weights_names : list
-            list with the names of the parameters of the PQC corresponding
-            to the weights
-        features_names : list
-            list with the names of the parameters of the PQC corresponding
-            to the input features
-        nbshots : int
-            number of shots
+
+    pqc : kwargs, QLM Program
+        qlm program with the implementation of the PQC
+    observable : kwargs, QLM Observable
+        qlm observable with the Observable definition of the PQC
+    weights_names : kwargs, list
+        list with the names of the parameters of the PQC corresponding
+        to the weights
+    features_names : kwargs, list
+        list with the names of the parameters of the PQC corresponding
+        to the input features
+    nbshots : kwargs, int
+        number of shots
     Returns
     -------
     results : QLM BatchResult
@@ -78,9 +78,10 @@ def cdf_workflow(weights, x_sample, **kwargs):
         array with the weights of the PQC
     x_sample : np array
         input sample to provide to the PQC
-    **kwargs : keyword arguments.In addition to kwargs provided to the
-    stack_execution function the following one should be provided too:
-        qpu_info : Python dictionary with the infor for configuring a QPU
+    kwargs : keyword arguments
+        same kwargs like the provided to the stack_execution function
+    qpu_info : kwargs, dictionary
+        Python dictionary with the infor for configuring a QPU
 
     Returns
     -------
@@ -121,7 +122,8 @@ def pdf_workflow(weights, x_sample, **kwargs):
         array with the weights of the PQC
     x_sample : np array
         input sample to provide to the PQC
-    kwargs : keyword arguments. See cdf_workflow documentation
+    kwargs : keyword arguments.
+        See cdf_workflow documentation
 
     Returns
     -------
@@ -223,7 +225,8 @@ def workflow_for_cdf(weights, data_x, dask_client=None, **kwargs):
         Array with dataset of the features
     dask_client : Dask client
         Dask client for speed up training. Not mandatory
-    kwargs : keyword arguments. See cdf_workflow function documentation.
+    kwargs : keyword arguments.
+        See cdf_workflow function documentation.
 
     Returns
     -------
@@ -266,7 +269,9 @@ def workflow_for_pdf(weights, data_x, dask_client=None, **kwargs):
         Array with dataset of the features
     dask_client : Dask client
         Dask client for speed up training. Not mandatory
-    kwargs : keyword arguments. See pdf_workflow function documentation.
+    kwargs : keyword arguments.
+        See pdf_workflow function documentation.
+
     Returns
     -------
     output_dict : dict
@@ -310,11 +315,15 @@ def workflow_for_qdml(weights, data_x, data_y, dask_client=None, **kwargs):
         Array with targets (labes) dataset. Shape: (-1, 1)
     dask_client : Dask client
         Dask client for speed up training. Not mandatory
-    **kwargs : keyword arguments.In addition to kwargs provided to the
-    cdf_workflow function the following ones should be provided too:
-        minval : list with the minimum values for the domain of all the features.
-        maxval : list with the maximum values for the domain of all the features.
-        points : number of points for a feature domain discretization
+    kwargs : keyword arguments.
+        See the cdf_workflow function. The following ones can be provided
+    minval : kwargs, list
+        Minimum values for the domain of all the features.
+    maxval : kwargs, list
+        Maximum values for the domain of all the features.
+    points : kwargs,int
+        Number of points for a feature domain discretization
+
     Returns
     -------
     output_dict : dict
@@ -395,6 +404,7 @@ def qdml_loss_workflow(weights, data_x, data_y, dask_client=None, **kwargs):
     Parameters
     ----------
     Same parameters that workflow_for_qdml
+
     Returns
     -------
     loss_ : computed loss function value for the input data.
@@ -420,6 +430,7 @@ def qdml_loss_workflow_old(weights, data_x, data_y, dask_client=None, **kwargs):
     Parameters
     ----------
     Same parameters that workflow_for_qdml
+
     Returns
     -------
     loss_ : computed loss function value for the input data.
@@ -446,6 +457,7 @@ def mse_workflow(weights, data_x, data_y, dask_client=None, **kwargs):
     Parameters
     ----------
     Same parameters that workflow_for_qdml
+
     Returns
     -------
     mse__ : computed mse function value for the input data.

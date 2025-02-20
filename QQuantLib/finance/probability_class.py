@@ -27,14 +27,14 @@ class DensityProbability:
         Dictionary for configuring the asset and the probability \\
         used for simulating its behaviour.Implemented keys:
 
-        s_0 : float
-            initial value of the asset
-        risk_free_rate : float
-            risk free ratio
-        maturity : float
-            time where the probability wants to be calculated.
-        volatiliy : float
-            volatility of the asset.
+    s_0 : kwargs, float
+        initial value of the asset
+    risk_free_rate : kwargs, float
+        risk free ratio
+    maturity : kwargs, float
+        time where the probability wants to be calculated.
+    volatiliy : kwargs, float
+        volatility of the asset.
     """
 
     def __init__(self, probability_type: str, **kwargs):
@@ -67,14 +67,14 @@ class DensityProbability:
             with necessary information for configuring the probability \\
             density
 
-            s_0 : float
-                initial value of the asset
-            risk_free_rate : float
-                risk free ratio
-            maturity : float
-                time where the probability wants to be calculated
-            volatiliy : float
-                volatility of the asset
+        s_0 : kwargs, float
+            initial value of the asset
+        risk_free_rate : kwargs, float
+            risk free ratio
+        maturity : kwargs, float
+            time where the probability wants to be calculated
+        volatiliy : kwargs, float
+            volatility of the asset
 
         """
 
@@ -114,14 +114,14 @@ class DensityProbability:
             with necessary information for configuring the probability \\
             density.
 
-            s_0 : float
-                initial value of the asset
-            risk_free_rate : float
-                risk free ratio
-            maturity : float
-                time where the probability wants to be calculated
-            volatiliy : float
-                volatility of the asset
+        s_0 : kwargs, float
+            initial value of the asset
+        risk_free_rate : kwargs, float
+            risk free ratio
+        maturity : kwargs, float
+            time where the probability wants to be calculated
+        volatiliy : kwargs, float
+            volatility of the asset
         """
 
         if probability_type == "Black-Scholes":

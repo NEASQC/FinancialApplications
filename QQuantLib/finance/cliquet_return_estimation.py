@@ -22,6 +22,44 @@ def ae_cliquet_estimation(**kwargs):
     """
     Configures a cliquet option return estimation problem and solving it
     using AE integration techniques
+
+    Parameters
+    ----------
+
+    n_qbits : kwargs, int
+        Number of qubits for domain discretization
+    s_0 : kwargs, float
+        Value of the asset at initial time step
+    risk_free_rate : kwargs, float
+        Risk free rate for discounting the expected value of the payoff
+    volatility : kwargs, float
+        Volatility of the asset
+    reset_dates : kwargs, list
+        List with the reset dates to asset evaluation
+    bounds : kwargs, float
+        Bound for truncating the probability density
+    local_cap : kwargs, float
+        For upper truncation of the return at each reset date
+    local_floor : kwargs, float
+        For lower truncation of the return at each reset date
+    global_cap : kwargs, float
+        For upper truncation of the final return
+    global_floor : kwargs, float
+        For lower truncation of the final return
+
+    Note
+    ----
+    
+    Other kwargs input dictionary keys will be related with the encoding \\
+    of the integral into the quantum circuit \\
+    (see QQuantLib.DL.encoding_protocols) and for the configuration \\
+    of the AE algorithm used (see QQuantLib.AE.ae_class)
+
+    Returns
+    _______
+
+    pdf : Pandas DataFrame
+        DataFrame with the configuration of the AE problem and the solution
     """
 
     ae_problem = kwargs

@@ -15,15 +15,16 @@ def hardware_efficient_ansatz(**kwargs):
     ----------
     kwargs : kwargs
         Input dictionary for configuring the ansatz. Mandatory keys:
-
-    Note
-    ----
-    Valid keywords:
-        * features_number : number of features
-        * n_qubits_by_feature : number of qubits used for each feature
-        * n_layers : number of layers of the PQC
-        * base_frecuency : slope for feature normalization
-        * shift_feature : shift for feature normalization
+    features_number : kwargs, int
+        Number of features
+    n_qubits_by_feature : kwargs, int
+        Number of qubits used for each feature
+    n_layers : kwargs, int
+        Number of layers of the PQC
+    base_frecuency : kwargs, float
+        Slope for feature normalization
+    shift_feature : kwargs, float
+        Shift for feature normalization
 
     Returns
     -------
@@ -101,6 +102,10 @@ def z_observable(**kwargs):
     ----------
     kwargs : kwargs
         Input dictionary for configuring the ansatz
+    features_number : kwargs, int
+        Number of input features
+    n_qubits_by_feature : kwargs, int
+        Number of qubits for encoding each feature
 
     Returns
     -------
