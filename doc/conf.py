@@ -22,6 +22,8 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'nbsphinx',
               'sphinxcontrib.programoutput', 'sphinxcontrib.contentui']
 autodoc_mock_imports = ["cirq", "numpy", "qat", "scipy", "pandas"]
 
+autoapi_keep_files = True
+
 napoleon_google_docstring = True
 
 # Add any paths that contain templates here, relative to this directory.
