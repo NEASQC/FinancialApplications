@@ -30,7 +30,7 @@ templates_path = ['_templates']
 nbsphinx_allow_errors = True
 #sys.path.append(os.path.abspath('./sphinx_helpers/'))
 
-bibtex_bibfiles = ["./biblio.bib", "./biblio_sp.bib"]
+#bibtex_bibfiles = ["./biblio.bib", "./biblio_sp.bib"]
 
 # Subscript to add the toctree helpers in the path and use them
 
