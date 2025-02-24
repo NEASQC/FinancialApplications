@@ -37,6 +37,9 @@
         "warm_shots": [10],
         "bayes_shots": [1],
         "control_bayes_shots" : [1],
+        "save_smc_prob" : [200],
+        "print_info" : [200],
+        "max_iterations" : [200],
 
         "encoding" : [0, 2],
         "multiplexor":  [true],

@@ -99,6 +99,7 @@ def sine_integral(n_qbits, interval, ae_dictionary):
     absolute_error = np.abs(estimator_s["ae"] - exact_integral)
     relative_error = absolute_error / exact_integral
     oracle_calls = solver_object.oracle_calls
+    max_oracle_depth = solver_object.max_oracle_depth
 
     end_time = time.time()
     elapsed_time = end_time - start_time
@@ -143,6 +144,7 @@ def sine_integral(n_qbits, interval, ae_dictionary):
     pdf["absolute_riemann_error"] = np.abs(
         pdf["riemann_sum"] - pdf["exact_integral"])
     pdf["oracle_calls"] = oracle_calls
+    pdf["max_oracle_depth"] = max_oracle_depth
     pdf["elapsed_time"] = elapsed_time
     pdf["run_time"] = solver_object.run_time
     pdf["quantum_time"] = solver_object.quantum_time
