@@ -152,8 +152,10 @@ def window_selector(window_type, **kwargs):
         String with the desired Window function
     kwargs : keyword arguments
         Keyword arguments for configuring window functions. Mandatory:
-        auxiliar_qbits_number. For Kaiser window it is mandatory to
-        provide kaiser_alpha
+    auxiliar_qbits_number : kwargs, int
+        Number of auxilary qubits for QFT
+    kaiser_alpha : kwargs, float
+        alpha for the Kaiser window 
 
     Return
     ----------

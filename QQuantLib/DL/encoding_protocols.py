@@ -52,6 +52,9 @@ class Encoding:
         Selecting the encode protocol: 0 for square encoding, 1 for
         square encoding with 2 additional qubits and 2 for Direct encoding.
     kwargs : dictionary
+        keyword arguments for setting internal configurations
+    multiplexor : kwargs, boolean
+        Use multiplexor algorithm for probability loading
 
     """
     def __init__(

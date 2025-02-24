@@ -187,7 +187,8 @@ def run_id(
     qpu=None,
     save_=False,
     folder_path=None,
-    id_=None
+    id_=None,
+    file_add=""
     ):
 
     ae_config.update({"qpu":select_qpu(ae_config)})
@@ -200,7 +201,7 @@ def run_id(
 
     ae_type = ae_config["ae_type"]
     base_name = ae_type + "_n_qbits_" + str(n_qbits) + \
-        "_interval_" + str(interval) + "_id_" + str(id_) + ".csv"
+        "_interval_" + str(interval) + "_id_" + str(id_) + file_add + ".csv"
     file_name = folder_path + "/" + base_name
 
     list_of_pdfs = []
@@ -272,6 +273,13 @@ if __name__ == "__main__":
         help="JSON with the qpu configuration",
     )
     parser.add_argument(
+        "-file_add",
+        dest="file_add",
+        type=str,
+        default="",
+        help="Add a string to the file name to save.",
+    )
+    parser.add_argument(
         "-folder",
         dest="folder_path",
         type=str,
@@ -339,5 +347,6 @@ if __name__ == "__main__":
                 folder_path=args.folder_path,
                 #qpu=args.qpu,
                 save_=args.save,
-                id_=args.id
+                id_=args.id,
+                file_add=args.file_add
             ))

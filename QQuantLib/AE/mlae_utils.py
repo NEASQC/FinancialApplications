@@ -52,8 +52,8 @@ def likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
 def log_likelihood(theta: float, m_k: int, n_k: int, h_k: int) -> float:
     r"""
     Calculates log of the likelihood from Suzuki paper.
-    Notes
 
+    Notes
     -----
     .. math::
         \log{l_k(\theta|h_k)} = 2h_k\log\big[\sin\left((2m_k+1) \

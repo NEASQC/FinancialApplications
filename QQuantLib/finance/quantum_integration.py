@@ -30,21 +30,17 @@ def q_solve_integral(**kwargs):
     Parameters
     ----------
 
-    kwars : dictionary
-        Dictionary for configuring the integration to compute and the \\
-        AE technique used for getting the solution.
-
-        array_function : numpy array
-            numpy array with the desired function for encoding into the \\
-            Quantum Circuit.
-        encoding : int
-            Selecting the encode protocol
-        array_probability : numpy array
-            numpy array with the desired probability for encoding into the \\
-            Quantum Circuit. It can be None (uniform distribution will be used)
-        ae_type : string
-            string with the desired AE algorithm: MLAE, CQPEAE, IQPEAE, \\
-            IQAE, RQAE
+    array_function : kwargs, numpy array
+        numpy array with the desired function for encoding into the \\
+        Quantum Circuit.
+    encoding : kwargs, int
+        Selecting the encode protocol
+    array_probability : kwargs, numpy array
+        numpy array with the desired probability for encoding into the \\
+        Quantum Circuit. It can be None (uniform distribution will be used)
+    ae_type : kwargs, string
+        string with the desired AE algorithm: MLAE, CQPEAE, IQPEAE, \\
+        IQAE, RQAE
 
     Note
     ----

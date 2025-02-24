@@ -39,20 +39,20 @@ class CQPE:
         dictionary that allows the configuration of the CQPE algorithm: \\
         Implemented keys:
 
-        initial_state : QLM Program
-            QLM Program with the initial Psi state over the
-            Grover-like operator will be applied
-            Only used if oracle is None
-        unitary_operator : QLM gate or routine
-            Grover-like operator which autovalues want to be calculated
-            Only used if oracle is None
-        cbits_number : int
-            number of classical bits for phase estimation
-        qpu : QLM solver
-            solver for simulating the resulting circuits
-        shots : int
-            number of shots for quantum job. If 0 exact probabilities
-            will be computed.
+    initial_state : kwargs, QLM Program
+        QLM Program with the initial Psi state over the
+        Grover-like operator will be applied
+        Only used if oracle is None
+    unitary_operator : kwargs, QLM gate or routine
+        Grover-like operator which autovalues want to be calculated
+        Only used if oracle is None
+    cbits_number : kwargs, int
+        number of classical bits for phase estimation
+    qpu : kwargs, QLM solver
+        solver for simulating the resulting circuits
+    shots : kwargs, int
+        number of shots for quantum job. If 0 exact probabilities
+        will be computed.
     """
 
     def __init__(self, **kwargs):

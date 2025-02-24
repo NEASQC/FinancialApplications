@@ -75,17 +75,26 @@ def adam_optimizer_loop(
         function for generating batches of the trainin data.
     initial_time : int
         Initial time step
-    **kwargs : keyword arguments
+    kwargs : keyword arguments
         arguments for configuring optimizer. For ADAM:
-        store_folder : folder for saving results. If None not saving
-        epochs : maximum number of iterations
-        tolerance : tolerance to achieve
-        n_counts_tolerance : number of times the tolerance should be
-        achieved in consecutive iterations
-        print_step : print_step for printing evolution of training
-        learning_rate : learning_rate for ADAM
-        beta1 : beta1 for ADAM
-        beta2 : beta2 for ADAM
+
+    store_folder : kwargs, str
+        Folder for saving results. If None not saving
+    epochs : kwargs, int
+        Maximum number of iterations
+    tolerance : kwargs, float
+        Tolerance to achieve
+    n_counts_tolerance : kwargs, int
+        Number of times the tolerance should be achieved in consecutive
+        iterations
+    print_step : kwargs, int
+        Print_step for printing evolution of training
+    learning_rate : kwargs,float
+        Learning_rate for ADAM
+    beta1 : kwargs, float
+        beta1 for ADAM
+    beta2 : kwargs, float
+        beta2 for ADAM
     """
     # Get Weights
     weights = list(weights_dict.values())

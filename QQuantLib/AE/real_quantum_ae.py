@@ -39,21 +39,20 @@ class RQAE:
         qubits which mark the register to do the amplitude
         estimation
 
-    kwars : dictionary
-        dictionary that allows the configuration of the IQAE algorithm: \\
-        Implemented keys:
+    kwargs : dictionary
+        dictionary that allows the configuration of the IQAE algorithm
 
-        qpu : QLM solver
-            solver for simulating the resulting circuits
-        q : int
-            amplification ratio
-        epsilon : int
-            precision
-        gamma : float
-            accuracy
-        mcz_qlm : bool
-            for using or not QLM implementation of the multi controlled Z
-            gate
+    qpu : kwargs, QLM solver
+        solver for simulating the resulting circuits
+    q : kwargs, int
+        amplification ratio
+    epsilon : kwargs, int
+        precision
+    gamma : kwargs, float
+        accuracy
+    mcz_qlm : kwargs, bool
+        for using or not QLM implementation of the multi controlled Z
+        gate
     """
 
     def __init__(self, oracle: qlm.QRoutine, target: list, index: list, **kwargs):

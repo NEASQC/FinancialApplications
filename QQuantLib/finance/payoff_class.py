@@ -20,15 +20,13 @@ class PayOff:
     ----------
 
     kwargs: dictionary
-        Dictionary for selecting and configuring the derivative option. \\ç
-        Implemented keys:
-
-        * strike: float
-            strike of the option.
-        * coupon: float
-            only valid for Digital Options
-        * pay_off : string
-           type of pay_off function to load
+        Dictionary for selecting and configuring the derivative option.
+    strike: kwargs, float
+        strike of the option.
+    coupon: kwargs, float
+       only valid for Digital Options
+    pay_off : kwargs, string
+      type of pay_off function to load
     """
 
     def __init__(self, **kwargs):
