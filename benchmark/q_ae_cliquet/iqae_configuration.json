@@ -1,0 +1,32 @@
+[
+    {
+        "ae_type": ["IQAE"],
+        "file": ["IQAE"],
+
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+
+        "auxiliar_qbits_number": [null],
+        "window" : [null],
+        "kaiser_alpha" : [null],
+
+        "cbits_number": [null],
+
+        "epsilon": [1.0e-2],
+
+        "alpha": [0.05],
+
+        "gamma": [null],
+        "q": [null],
+
+        "erqae_schedule" :[null],
+
+        "encoding" : [2],
+        "multiplexor":  [true],
+
+        "mcz_qlm": [false],
+        "shots": [100],
+        "number_of_tests": [10]
+    }
+]
