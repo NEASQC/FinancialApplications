@@ -11,6 +11,7 @@ The **Amplitude Estimation (AE)** package comprises modules that implement diffe
 * :doc:`ae.mlae_utils`: This module contains functions used for the: *QQuantLib.AE..maximum_likelihood_ae* module.
 * :doc:`ae.iterative_quantum_ae`: This module contains the Python class IQAE that implements the Iterative Quantum Amplitude Estimation algorithm.
 * :doc:`ae.miterative_quantum_ae`: This module contains the Python class mIQAE that implements a modification of the Iterative Quantum Amplitude Estimation algorithm that increases the performance over the IQAE.
+* :doc:`ae.bayesian_ae`: This module contains the Python class BAYESQAE that implements the Bayesian Quantum Amplitude Estimation algorithm. 
 * :doc:`ae.real_quantum_ae`: This module contains the Python class RQAE that implements the Real Quantum Amplitude Estimation algorithm. This algorithm estimates the **amplitude** of the given target state instead of its probability.
 * :doc:`ae.mreal_quantum_ae`: This module contains the Python class mRQAE that implements a modification of the Real Quantum Amplitude Estimation algorithm that increases theoretical performance over the RQAE. This algorithm estimates the **amplitude** of the given target state instead of its probability.
 * :doc:`ae.sreal_quantum_ae`: This module contains the Python class sRQAE that implements a modification of the Real Quantum Amplitude Estimation algorithm where the user can provide the number of shots the generated quantum circuits should be measured. This algorithm estimates the **amplitude** of the given target state instead of its probability.
@@ -59,6 +60,12 @@ The **Amplitude Estimation (AE)** package comprises modules that implement diffe
    :hidden:
 
    ae.miterative_quantum_ae.rst 
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   ae.bayesian_ae.rst 
 
 .. toctree::
    :maxdepth: 1
