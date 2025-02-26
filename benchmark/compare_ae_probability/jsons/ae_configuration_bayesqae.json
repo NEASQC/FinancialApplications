@@ -1,0 +1,46 @@
+[
+    {
+        "ae_type": ["BAYESQAE"],
+
+        "schedule": [null],
+        "delta": [null],
+        "ns": [null],
+
+        "auxiliar_qbits_number": [null],
+        "window" : [null],
+        "kaiser_alpha" : [null],
+
+        "cbits_number": [null],
+
+        "epsilon": [1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5, 1.0e-6],
+
+        "alpha": [0.05],
+
+        "gamma": [null],
+        "q": [null],
+        "erqae_schedule" : [null],
+
+        "particles" : [2000],
+        "threshold" : [0.5],
+        "kernel" : ["LW", "Metro"],
+        "alpha_lw" : [0.9],
+        "c" : [2.38],
+        "k_0": [2],
+        "T" : [3],
+        "R" : [3],    
+        "n_evals" : [50],         
+        "shots": [1],
+        "warm_shots": [10],
+        "bayes_shots": [1],
+        "control_bayes_shots" : [1],
+        "save_smc_prob" : [200],
+        "print_info" : [200],
+        "max_iterations" : [200],
+
+        "multiplexor":  [true],
+        "mcz_qlm": [false],
+        "file": ["BAYESQAE"]
+
+    }
+]
+

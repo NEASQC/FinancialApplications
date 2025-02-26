@@ -125,6 +125,7 @@ def get_amplitude_estimation(**kwargs):
         result = ae_obj.ae_pdf
     pdf = pd.concat([pdf, result], axis=1)
     pdf["oracle_calls"] = ae_obj.oracle_calls
+    pdf["max_oracle_depth"] = ae_obj.max_oracle_depth
     pdf["schedule_pdf"] = [ae_obj.schedule_pdf.to_dict()]
     pdf["measured_epsilon"] = (pdf["ae_u"] - pdf["ae_l"]) / 2.0
     pdf["absolute_error"] = np.abs(pdf["ae"] - pdf["Value"])
