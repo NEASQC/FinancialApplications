@@ -56,8 +56,8 @@ jobs:
           fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
           repository: NEASQC/neasqc.github.io
           path: "neasqc"
-          token: ${{ secrets.ACTION_TOKEN }}
-          
+          #token: ${{ secrets.ACTION_TOKEN }}
+          token: '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'
       - name: Create local changes
         run: |
           mkdir -p neasqc/FinancialApplications #Replace test with repo name
